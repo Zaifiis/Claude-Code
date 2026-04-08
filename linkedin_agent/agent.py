@@ -13,21 +13,20 @@ import json
 import os
 import glob
 import smtplib
+import subprocess
 import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from pathlib import Path
 from dotenv import load_dotenv
-import anthropic
 
 # ── Config ──────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).parent
 load_dotenv(BASE_DIR / ".env")
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-GMAIL_USER        = os.getenv("GMAIL_USER")          # your Gmail address
-GMAIL_APP_PASS    = os.getenv("GMAIL_APP_PASSWORD")   # 16-char App Password
-NOTIFY_EMAIL      = os.getenv("NOTIFY_EMAIL")         # where to send the outline
+GMAIL_USER   = os.getenv("GMAIL_USER")         # your Gmail address
+GMAIL_APP_PASS = os.getenv("GMAIL_APP_PASSWORD") # 16-char App Password
+NOTIFY_EMAIL = os.getenv("NOTIFY_EMAIL")        # where to send the outline
 
 CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects"
 TRACKER_FILE        = BASE_DIR / "series_tracker.json"
@@ -116,16 +115,25 @@ def read_today_conversations() -> str:
     return "\n\n".join(messages)
 
 
-# ── Claude API call ──────────────────────────────────────────────────────────
+# ── Claude CLI call ───────────────────────────────────────────────────────────
+def ask_claude(prompt: str) -> str:
+    """Run the claude CLI and return its output. No API key needed."""
+    result = subprocess.run(
+        ["claude", "-p", prompt],
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"claude CLI error: {result.stderr.strip()}")
+    return result.stdout.strip()
+
+
 def generate_linkedin_outline(chat_text: str, day_number: int, series_name: str) -> str:
-    """Call Claude to produce a LinkedIn post outline from today's chat."""
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    """Generate LinkedIn post outline from today's chat using claude CLI."""
+    prompt = f"""You are a LinkedIn content strategist helping a founder build a personal brand around their AI agency journey. Write punchy, story-driven outlines that feel authentic — not corporate fluff.
 
-    system_prompt = """You are a LinkedIn content strategist helping a founder build
-a personal brand around their AI agency journey. You write punchy, story-driven
-outlines that feel authentic — not corporate fluff."""
-
-    user_prompt = f"""Here are my Claude conversations from today:
+Here are my Claude conversations from today:
 
 ---
 {chat_text[:12000]}
@@ -133,11 +141,10 @@ outlines that feel authentic — not corporate fluff."""
 
 Based on what I worked on today, create a LinkedIn post outline for:
 
-**Day {day_number} of {series_name}**
+Day {day_number} of {series_name}
 
 Format the outline like this:
 
----
 ## Day {day_number} of {series_name}
 
 **Hook** (1-2 lines that stop the scroll):
@@ -159,38 +166,21 @@ Format the outline like this:
 
 **Tone Notes:**
 [brief note on the right tone/angle for this post]
----
 
 Keep it real. Use first-person. Avoid buzzwords. Make the hook genuinely interesting."""
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1024,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_prompt}],
-    )
-
-    return response.content[0].text
+    return ask_claude(prompt)
 
 
 def generate_no_chat_outline(day_number: int, series_name: str) -> str:
     """Fallback outline when no chat data is found for today."""
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=512,
-        messages=[{
-            "role": "user",
-            "content": (
-                f"Create a short LinkedIn post outline for Day {day_number} of {series_name}. "
-                "No specific activity data is available today. Write a reflection-style post "
-                "about consistency, showing up every day, and the agency-building journey. "
-                "Use the same format: Hook, The Story (bullets), The Insight, CTA, Hashtags."
-            )
-        }],
+    prompt = (
+        f"Create a short LinkedIn post outline for Day {day_number} of {series_name}. "
+        "No specific activity data is available today. Write a reflection-style post "
+        "about consistency, showing up every day, and the agency-building journey. "
+        "Use the same format: Hook, The Story (bullets), The Insight, CTA, Hashtags."
     )
-    return response.content[0].text
+    return ask_claude(prompt)
 
 
 # ── Email sender ─────────────────────────────────────────────────────────────
@@ -234,7 +224,6 @@ def main():
 
     # Validate config
     missing = [k for k, v in {
-        "ANTHROPIC_API_KEY": ANTHROPIC_API_KEY,
         "GMAIL_USER": GMAIL_USER,
         "GMAIL_APP_PASSWORD": GMAIL_APP_PASS,
         "NOTIFY_EMAIL": NOTIFY_EMAIL,
