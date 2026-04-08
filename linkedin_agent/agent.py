@@ -5,8 +5,9 @@ LinkedIn Series Agent
 Reads today's Claude Code conversations, generates a LinkedIn post outline
 for the "Growing My Agency" (or auto-detected) day series, and emails it.
 
-Run manually:  python3 agent.py
-Scheduled:     via cron at 4 PM daily (see setup_cron.sh)
+Run manually:  python agent.py          (or double-click run.bat on Windows)
+Scheduled:     setup_task.bat          (Windows Task Scheduler at 4 PM)
+               setup_cron.sh          (Linux/Mac cron at 4 PM)
 """
 
 import json
