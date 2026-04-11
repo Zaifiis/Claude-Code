@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Apex Agency — Strategic digital solutions that drive growth, build brands, and deliver results." />
+  <title>Apex Agency — Digital Excellence</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <header class="header" id="header">
+    <nav class="nav container">
+      <a href="#home" class="nav__logo">
+        <span class="logo-mark">A</span>
+        <span class="logo-text">Apex<span class="logo-accent">Agency</span></span>
+      </a>
+
+      <ul class="nav__links" id="navLinks">
+        <li><a href="#services" class="nav__link">Services</a></li>
+        <li><a href="#about" class="nav__link">About</a></li>
+        <li><a href="#work" class="nav__link">Work</a></li>
+        <li><a href="#testimonials" class="nav__link">Testimonials</a></li>
+        <li><a href="#contact" class="nav__link nav__link--cta">Get Started</a></li>
+      </ul>
+
+      <button class="nav__toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="home">
+      <div class="hero__bg">
+        <div class="hero__grid"></div>
+        <div class="hero__blob hero__blob--1"></div>
+        <div class="hero__blob hero__blob--2"></div>
+      </div>
+      <div class="container hero__content">
+        <div class="hero__badge reveal">
+          <span class="badge__dot"></span>
+          Award-Winning Digital Agency
+        </div>
+        <h1 class="hero__heading reveal">
+          We Build Brands<br />
+          <span class="text-gradient">That Dominate</span>
+        </h1>
+        <p class="hero__sub reveal">
+          Strategy. Design. Development. Marketing. We deliver end-to-end digital
+          solutions that transform businesses and drive measurable growth.
+        </p>
+        <div class="hero__actions reveal">
+          <a href="#contact" class="btn btn--primary">
+            Start Your Project
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#work" class="btn btn--ghost">View Our Work</a>
+        </div>
+        <div class="hero__stats reveal">
+          <div class="stat">
+            <span class="stat__number" data-target="150">0</span><span class="stat__suffix">+</span>
+            <span class="stat__label">Projects Delivered</span>
+          </div>
+          <div class="stat__divider"></div>
+          <div class="stat">
+            <span class="stat__number" data-target="98">0</span><span class="stat__suffix">%</span>
+            <span class="stat__label">Client Satisfaction</span>
+          </div>
+          <div class="stat__divider"></div>
+          <div class="stat">
+            <span class="stat__number" data-target="8">0</span><span class="stat__suffix">+</span>
+            <span class="stat__label">Years of Excellence</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero__scroll-indicator">
+        <span>Scroll</span>
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- ===== LOGOS / TRUSTED BY ===== -->
+    <section class="logos">
+      <div class="container">
+        <p class="logos__label">Trusted by industry leaders</p>
+        <div class="logos__track">
+          <div class="logos__list">
+            <span class="logo-item">Nexatech</span>
+            <span class="logo-item">Veridian</span>
+            <span class="logo-item">Luminary Co.</span>
+            <span class="logo-item">Stratos</span>
+            <span class="logo-item">Orbis Group</span>
+            <span class="logo-item">Meridian</span>
+            <span class="logo-item">Nexatech</span>
+            <span class="logo-item">Veridian</span>
+            <span class="logo-item">Luminary Co.</span>
+            <span class="logo-item">Stratos</span>
+            <span class="logo-item">Orbis Group</span>
+            <span class="logo-item">Meridian</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SERVICES ===== -->
+    <section class="services section" id="services">
+      <div class="container">
+        <div class="section__header reveal">
+          <span class="section__eyebrow">What We Do</span>
+          <h2 class="section__title">Full-Spectrum Digital Services</h2>
+          <p class="section__desc">From strategy to execution, we cover every dimension of your digital presence.</p>
+        </div>
+
+        <div class="services__grid">
+          <div class="service-card reveal">
+            <div class="service-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+              </svg>
+            </div>
+            <h3>Web Design & Development</h3>
+            <p>Pixel-perfect, performant websites built with modern technologies that convert visitors into customers.</p>
+            <a href="#contact" class="service-card__link">Learn more →</a>
+          </div>
+
+          <div class="service-card reveal">
+            <div class="service-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+              </svg>
+            </div>
+            <h3>Brand Identity</h3>
+            <p>Strategic brand systems — logos, typography, colour, voice — that forge lasting emotional connections.</p>
+            <a href="#contact" class="service-card__link">Learn more →</a>
+          </div>
+
+          <div class="service-card reveal">
+            <div class="service-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+            </div>
+            <h3>Digital Marketing</h3>
+            <p>Data-driven SEO, paid media, and content strategies that put your brand in front of the right audience.</p>
+            <a href="#contact" class="service-card__link">Learn more →</a>
+          </div>
+
+          <div class="service-card reveal">
+            <div class="service-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <h3>Product Strategy</h3>
+            <p>User research, competitive analysis, and roadmap planning that transform ideas into market-winning products.</p>
+            <a href="#contact" class="service-card__link">Learn more →</a>
+          </div>
+
+          <div class="service-card reveal">
+            <div class="service-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h3>Social Media Management</h3>
+            <p>Engaging content, community management, and paid social campaigns that grow your audience authentically.</p>
+            <a href="#contact" class="service-card__link">Learn more →</a>
+          </div>
+
+          <div class="service-card reveal">
+            <div class="service-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <h3>Analytics & Insights</h3>
+            <p>Custom dashboards, conversion optimisation, and actionable insights that keep your growth on track.</p>
+            <a href="#contact" class="service-card__link">Learn more →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ABOUT ===== -->
+    <section class="about section" id="about">
+      <div class="container about__inner">
+        <div class="about__visual reveal">
+          <div class="about__img-wrap">
+            <div class="about__img about__img--main">
+              <div class="img-placeholder">
+                <svg viewBox="0 0 200 200" fill="none">
+                  <rect width="200" height="200" rx="16" fill="#1e293b"/>
+                  <circle cx="100" cy="80" r="35" fill="#334155"/>
+                  <path d="M40 160 Q100 120 160 160" fill="#334155"/>
+                </svg>
+                <span>Our Team</span>
+              </div>
+            </div>
+            <div class="about__img about__img--accent">
+              <div class="img-placeholder img-placeholder--sm">
+                <svg viewBox="0 0 120 120" fill="none">
+                  <rect width="120" height="120" rx="12" fill="#0f172a"/>
+                  <rect x="20" y="40" width="80" height="8" rx="4" fill="#334155"/>
+                  <rect x="20" y="56" width="60" height="8" rx="4" fill="#334155"/>
+                  <rect x="20" y="72" width="70" height="8" rx="4" fill="#334155"/>
+                </svg>
+                <span>Strategy First</span>
+              </div>
+            </div>
+            <div class="about__badge-float">
+              <span class="badge-num">8+</span>
+              <span class="badge-text">Years<br/>Experience</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="about__content reveal">
+          <span class="section__eyebrow">About Us</span>
+          <h2 class="section__title">We Don't Just Deliver — We Partner</h2>
+          <p class="about__text">
+            Apex Agency was founded on a simple belief: great digital work should drive real business outcomes.
+            We're a team of strategists, designers, developers, and marketers who are obsessed with results.
+          </p>
+          <p class="about__text">
+            Every project begins with deep discovery. We learn your business, your market, and your goals
+            before we ever open a design tool or write a line of code.
+          </p>
+          <ul class="about__pillars">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Strategy-led, not trend-chasing
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Transparent process from kickoff to launch
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Performance-focused at every stage
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Long-term partnerships, not one-offs
+            </li>
+          </ul>
+          <a href="#contact" class="btn btn--primary">Work With Us</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PROCESS ===== -->
+    <section class="process section">
+      <div class="container">
+        <div class="section__header reveal">
+          <span class="section__eyebrow">How We Work</span>
+          <h2 class="section__title">Our Proven Process</h2>
+        </div>
+        <div class="process__steps">
+          <div class="process__step reveal">
+            <div class="step__num">01</div>
+            <h3>Discover</h3>
+            <p>Deep-dive workshops to understand your goals, audience, and competitive landscape.</p>
+          </div>
+          <div class="process__connector"></div>
+          <div class="process__step reveal">
+            <div class="step__num">02</div>
+            <h3>Strategise</h3>
+            <p>Build a tailored roadmap — messaging, architecture, channels, and KPIs.</p>
+          </div>
+          <div class="process__connector"></div>
+          <div class="process__step reveal">
+            <div class="step__num">03</div>
+            <h3>Create</h3>
+            <p>Iterative design and development with weekly check-ins and rapid feedback loops.</p>
+          </div>
+          <div class="process__connector"></div>
+          <div class="process__step reveal">
+            <div class="step__num">04</div>
+            <h3>Launch & Grow</h3>
+            <p>Meticulous QA, a smooth launch, then ongoing optimisation to maximise ROI.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PORTFOLIO ===== -->
+    <section class="work section" id="work">
+      <div class="container">
+        <div class="section__header reveal">
+          <span class="section__eyebrow">Case Studies</span>
+          <h2 class="section__title">Selected Work</h2>
+          <p class="section__desc">Real results for real businesses.</p>
+        </div>
+
+        <div class="work__grid">
+          <article class="work-card work-card--large reveal">
+            <div class="work-card__img work-card__img--1">
+              <div class="work-card__overlay">
+                <span class="work-card__tag">Branding + Web</span>
+                <h3>Veridian Fintech</h3>
+                <p>Complete rebrand and product site that drove 240% increase in qualified leads.</p>
+                <a href="#contact" class="work-card__link">View Case Study →</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="work-card reveal">
+            <div class="work-card__img work-card__img--2">
+              <div class="work-card__overlay">
+                <span class="work-card__tag">E-Commerce</span>
+                <h3>Luminary Lifestyle</h3>
+                <p>Shopify build delivering 3× revenue growth in 6 months.</p>
+                <a href="#contact" class="work-card__link">View Case Study →</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="work-card reveal">
+            <div class="work-card__img work-card__img--3">
+              <div class="work-card__overlay">
+                <span class="work-card__tag">Digital Marketing</span>
+                <h3>Stratos SaaS</h3>
+                <p>SEO + PPC strategy that reduced CAC by 55% in 90 days.</p>
+                <a href="#contact" class="work-card__link">View Case Study →</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="work-card work-card--wide reveal">
+            <div class="work-card__img work-card__img--4">
+              <div class="work-card__overlay">
+                <span class="work-card__tag">Strategy + Brand</span>
+                <h3>Nexatech Platform</h3>
+                <p>End-to-end brand architecture for a B2B SaaS platform entering 4 new markets.</p>
+                <a href="#contact" class="work-card__link">View Case Study →</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TESTIMONIALS ===== -->
+    <section class="testimonials section" id="testimonials">
+      <div class="container">
+        <div class="section__header reveal">
+          <span class="section__eyebrow">Testimonials</span>
+          <h2 class="section__title">Words From Our Clients</h2>
+        </div>
+        <div class="testimonials__grid">
+
+          <div class="testimonial-card reveal">
+            <div class="testimonial-card__stars">★★★★★</div>
+            <blockquote>
+              "Apex Agency transformed our online presence. The new site converts at 4× our old one. They're not just an agency — they're a genuine growth partner."
+            </blockquote>
+            <div class="testimonial-card__author">
+              <div class="author-avatar">SC</div>
+              <div>
+                <strong>Sarah Chen</strong>
+                <span>CEO, Veridian Fintech</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card reveal">
+            <div class="testimonial-card__stars">★★★★★</div>
+            <blockquote>
+              "The team's strategic depth is remarkable. They asked questions no other agency bothered to ask, then delivered work that proved they actually listened."
+            </blockquote>
+            <div class="testimonial-card__author">
+              <div class="author-avatar">MR</div>
+              <div>
+                <strong>Marcus Reid</strong>
+                <span>CMO, Stratos SaaS</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card reveal">
+            <div class="testimonial-card__stars">★★★★★</div>
+            <blockquote>
+              "From our first meeting to launch day, everything was seamless. Our rebrand landed perfectly and our team is proud to share it. Truly exceptional work."
+            </blockquote>
+            <div class="testimonial-card__author">
+              <div class="author-avatar">AL</div>
+              <div>
+                <strong>Aisha Lowe</strong>
+                <span>Founder, Luminary Lifestyle</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CTA BANNER ===== -->
+    <section class="cta-banner section">
+      <div class="container">
+        <div class="cta-banner__inner reveal">
+          <div class="cta-banner__content">
+            <h2>Ready to Build Something Remarkable?</h2>
+            <p>Book a free 30-minute strategy call. No pitch, no pressure — just honest advice.</p>
+          </div>
+          <a href="#contact" class="btn btn--white">
+            Book a Free Call
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section class="contact section" id="contact">
+      <div class="container contact__inner">
+        <div class="contact__info reveal">
+          <span class="section__eyebrow">Contact</span>
+          <h2 class="section__title">Let's Talk</h2>
+          <p>Have a project in mind? Fill in the form and we'll get back to you within one business day.</p>
+
+          <ul class="contact__details">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.03 1.19 2 2 0 012 .01h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14v2.92z"/>
+              </svg>
+              <span>+1 (555) 000-0000</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <span>hello@apexagency.com</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span>123 Innovation Drive, New York, NY 10001</span>
+            </li>
+          </ul>
+
+          <div class="contact__social">
+            <a href="#" aria-label="LinkedIn" class="social-link">in</a>
+            <a href="#" aria-label="Twitter" class="social-link">𝕏</a>
+            <a href="#" aria-label="Instagram" class="social-link">ig</a>
+            <a href="#" aria-label="Dribbble" class="social-link">dr</a>
+          </div>
+        </div>
+
+        <form class="contact__form reveal" id="contactForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" name="firstName" placeholder="Jane" required />
+            </div>
+            <div class="form-group">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" name="lastName" placeholder="Doe" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="jane@company.com" required />
+          </div>
+          <div class="form-group">
+            <label for="company">Company</label>
+            <input type="text" id="company" name="company" placeholder="Your Company" />
+          </div>
+          <div class="form-group">
+            <label for="service">Service You're Interested In</label>
+            <select id="service" name="service">
+              <option value="">Select a service...</option>
+              <option>Web Design & Development</option>
+              <option>Brand Identity</option>
+              <option>Digital Marketing</option>
+              <option>Product Strategy</option>
+              <option>Social Media Management</option>
+              <option>Analytics & Insights</option>
+              <option>Full-Service Partnership</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message">Tell Us About Your Project</label>
+            <textarea id="message" name="message" rows="5" placeholder="Describe your project, goals, timeline, and budget..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn--primary btn--full">
+            Send Message
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <p class="form__note">We respect your privacy. No spam, ever.</p>
+          <div class="form__success" id="formSuccess">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 12 15 16 9.5"/></svg>
+            Message sent! We'll be in touch within one business day.
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <a href="#home" class="nav__logo">
+          <span class="logo-mark">A</span>
+          <span class="logo-text">Apex<span class="logo-accent">Agency</span></span>
+        </a>
+        <p>Building brands and digital products that make a lasting impact.</p>
+      </div>
+
+      <div class="footer__links">
+        <div class="footer__col">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="#services">Web Development</a></li>
+            <li><a href="#services">Brand Identity</a></li>
+            <li><a href="#services">Digital Marketing</a></li>
+            <li><a href="#services">Product Strategy</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#work">Our Work</a></li>
+            <li><a href="#testimonials">Testimonials</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Connect</h4>
+          <ul>
+            <li><a href="#">LinkedIn</a></li>
+            <li><a href="#">Twitter / X</a></li>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">Dribbble</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <div class="container">
+        <p>&copy; 2026 Apex Agency. All rights reserved.</p>
+        <div class="footer__legal">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
