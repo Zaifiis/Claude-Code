@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outreach</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">Outreach</div>
+    <nav>
+      <button class="nav-btn active" data-tab="dashboard">Dashboard</button>
+      <button class="nav-btn" data-tab="prospects">Prospects</button>
+      <button class="nav-btn" data-tab="queue">Queue</button>
+      <button class="nav-btn" data-tab="sequences">Sequences</button>
+      <button class="nav-btn" data-tab="settings">Settings</button>
+    </nav>
+  </aside>
+
+  <main class="content">
+
+    <!-- ── DASHBOARD ───────────────────────────────────────────────── -->
+    <section id="tab-dashboard" class="tab active">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <button class="btn-primary" id="btn-send-all-dash">Send Today's Queue</button>
+      </div>
+
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total Prospects</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-queue">—</div><div class="stat-label">In Queue Today</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-sent">—</div><div class="stat-label">Sent Today</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-replied">—</div><div class="stat-label">Replied</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-interested">—</div><div class="stat-label">Interested</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-completed">—</div><div class="stat-label">Completed</div></div>
+      </div>
+
+      <div class="section-header"><h2>Recent Activity</h2></div>
+      <div class="table-wrap">
+        <table id="activity-table">
+          <thead><tr>
+            <th>Time</th><th>Name</th><th>Email</th><th>Company</th><th>Step</th><th>Subject</th><th>Status</th>
+          </tr></thead>
+          <tbody id="activity-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── PROSPECTS ───────────────────────────────────────────────── -->
+    <section id="tab-prospects" class="tab">
+      <div class="page-header">
+        <h1>Prospects</h1>
+        <button class="btn-primary" id="btn-open-import">Import CSV</button>
+      </div>
+
+      <div class="filter-bar">
+        <select id="filter-status">
+          <option value="">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="replied">Replied</option>
+          <option value="interested">Interested</option>
+          <option value="unsubscribed">Unsubscribed</option>
+          <option value="bounced">Bounced</option>
+          <option value="completed">Completed</option>
+        </select>
+        <select id="filter-niche">
+          <option value="">All Niches</option>
+          <option value="medspa">Medspa</option>
+          <option value="solar">Solar</option>
+          <option value="general">General</option>
+        </select>
+        <button class="btn-secondary" id="btn-filter-apply">Filter</button>
+      </div>
+
+      <div class="table-wrap">
+        <table id="prospects-table">
+          <thead><tr>
+            <th>Name</th><th>Email</th><th>Company</th><th>Niche</th>
+            <th>Sequence</th><th>Step</th><th>Status</th><th>Next Send</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="prospects-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── QUEUE ──────────────────────────────────────────────────── -->
+    <section id="tab-queue" class="tab">
+      <div class="page-header">
+        <h1>Today's Queue</h1>
+        <button class="btn-primary" id="btn-send-all-queue">Send All</button>
+      </div>
+      <div class="daily-limit-bar">
+        <span id="daily-progress-text">0 / 25 sent today</span>
+        <div class="progress-track"><div class="progress-fill" id="daily-progress-fill" style="width:0%"></div></div>
+      </div>
+      <div class="table-wrap">
+        <table id="queue-table">
+          <thead><tr>
+            <th>Name</th><th>Email</th><th>Company</th><th>Sequence</th><th>Step</th><th>Subject</th><th>Action</th>
+          </tr></thead>
+          <tbody id="queue-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── SEQUENCES ───────────────────────────────────────────────── -->
+    <section id="tab-sequences" class="tab">
+      <div class="page-header"><h1>Sequences</h1></div>
+      <div id="sequences-list"></div>
+    </section>
+
+    <!-- ── SETTINGS ──────────────────────────────────────────────────── -->
+    <section id="tab-settings" class="tab">
+      <div class="page-header"><h1>Settings</h1></div>
+      <div class="form-card">
+        <h2>SMTP Configuration</h2>
+        <div class="form-row">
+          <label>SMTP Host</label>
+          <input type="text" id="smtp-host" placeholder="smtp.hostinger.com" />
+        </div>
+        <div class="form-row">
+          <label>SMTP Port</label>
+          <input type="number" id="smtp-port" placeholder="465" />
+        </div>
+        <div class="form-row">
+          <label>Username (email)</label>
+          <input type="email" id="smtp-user" placeholder="you@yourdomain.com" />
+        </div>
+        <div class="form-row">
+          <label>Password</label>
+          <input type="password" id="smtp-pass" placeholder="••••••••" />
+        </div>
+        <div class="form-row">
+          <label>From Name</label>
+          <input type="text" id="from-name" placeholder="Your Name" />
+        </div>
+        <div class="form-row">
+          <label>From Email</label>
+          <input type="email" id="from-email" placeholder="you@yourdomain.com" />
+        </div>
+        <div class="form-row">
+          <label>Daily Send Limit</label>
+          <input type="number" id="daily-limit" placeholder="25" min="1" max="200" />
+          <small>Keep at 25 or below while in warmup phase</small>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" id="btn-save-settings">Save Settings</button>
+          <button class="btn-secondary" id="btn-test-smtp">Test Connection</button>
+        </div>
+        <div id="settings-msg" class="msg"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── IMPORT MODAL ───────────────────────────────────────────────── -->
+  <div class="modal-overlay hidden" id="import-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Import Prospects</h2>
+        <button class="modal-close" id="btn-close-import">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">CSV must have an <strong>email</strong> column. Optional: first_name, last_name, company, niche.</p>
+        <div class="form-row">
+          <label>CSV File</label>
+          <input type="file" id="csv-file" accept=".csv" />
+        </div>
+        <div class="form-row">
+          <label>Assign Sequence</label>
+          <select id="import-sequence">
+            <option value="">— select sequence —</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Default Niche (if not in CSV)</label>
+          <select id="import-niche">
+            <option value="general">General Appointment-Based</option>
+            <option value="medspa">Medspa</option>
+            <option value="solar">Solar</option>
+          </select>
+        </div>
+        <div id="import-msg" class="msg"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-cancel-import">Cancel</button>
+        <button class="btn-primary" id="btn-do-import">Import</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
