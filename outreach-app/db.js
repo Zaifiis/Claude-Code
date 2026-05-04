@@ -1,85 +1,66 @@
-const Database = require('better-sqlite3');
+const fs   = require('fs');
 const path = require('path');
 
-const db = new Database(path.join(__dirname, 'outreach.db'));
+const DATA_FILE = path.join(__dirname, 'outreach.json');
+let _data = null;
+
+// ── Core I/O ─────────────────────────────────────────────────────────────────
+
+function load() {
+  if (_data) return _data;
+  if (fs.existsSync(DATA_FILE)) {
+    try { _data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch(e) { _data = null; }
+  }
+  if (!_data) {
+    _data = {
+      settings:       {},
+      sequences:      [],
+      sequence_steps: [],
+      prospects:      [],
+      sent_emails:    [],
+      _ids:           { sequences: 0, sequence_steps: 0, prospects: 0, sent_emails: 0 }
+    };
+  }
+  return _data;
+}
+
+function save() {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(load(), null, 2));
+}
+
+function nextId(table) {
+  const d = load();
+  d._ids[table] = (d._ids[table] || 0) + 1;
+  return d._ids[table];
+}
+
+function nowIso() { return new Date().toISOString(); }
+
+// ── Init / Seed ───────────────────────────────────────────────────────────────
 
 function init() {
-  db.exec(`
-    PRAGMA journal_mode = WAL;
+  const d = load();
+  if (d.sequences.length === 0) { seedSequences(); save(); }
+}
 
-    CREATE TABLE IF NOT EXISTS settings (
-      key   TEXT PRIMARY KEY,
-      value TEXT
-    );
+function addSeq(name, niche, description) {
+  const d = load();
+  const id = nextId('sequences');
+  d.sequences.push({ id, name, niche, description });
+  return id;
+}
 
-    CREATE TABLE IF NOT EXISTS sequences (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      name        TEXT NOT NULL,
-      niche       TEXT,
-      description TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS sequence_steps (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      sequence_id INTEGER NOT NULL,
-      step_number INTEGER NOT NULL,
-      delay_days  INTEGER NOT NULL DEFAULT 0,
-      subject     TEXT NOT NULL,
-      body        TEXT NOT NULL,
-      FOREIGN KEY (sequence_id) REFERENCES sequences(id)
-    );
-
-    CREATE TABLE IF NOT EXISTS prospects (
-      id           INTEGER PRIMARY KEY AUTOINCREMENT,
-      first_name   TEXT,
-      last_name    TEXT,
-      email        TEXT UNIQUE NOT NULL,
-      company      TEXT,
-      niche        TEXT,
-      status       TEXT NOT NULL DEFAULT 'active',
-      sequence_id  INTEGER,
-      current_step INTEGER NOT NULL DEFAULT 0,
-      enrolled_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
-      next_send_at DATETIME,
-      last_sent_at DATETIME,
-      notes        TEXT,
-      FOREIGN KEY (sequence_id) REFERENCES sequences(id)
-    );
-
-    CREATE TABLE IF NOT EXISTS sent_emails (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      prospect_id INTEGER NOT NULL,
-      step_number INTEGER NOT NULL,
-      subject     TEXT,
-      body        TEXT,
-      sent_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
-      status      TEXT NOT NULL DEFAULT 'sent',
-      FOREIGN KEY (prospect_id) REFERENCES prospects(id)
-    );
-  `);
-
-  const count = db.prepare('SELECT COUNT(*) as c FROM sequences').get();
-  if (count.c === 0) seedSequences();
+function addStep(sequence_id, step_number, delay_days, subject, body) {
+  const d = load();
+  const id = nextId('sequence_steps');
+  d.sequence_steps.push({ id, sequence_id, step_number, delay_days, subject, body });
 }
 
 function seedSequences() {
-  const insertSeq = db.prepare(
-    'INSERT INTO sequences (name, niche, description) VALUES (?, ?, ?)'
-  );
-  const insertStep = db.prepare(
-    'INSERT INTO sequence_steps (sequence_id, step_number, delay_days, subject, body) VALUES (?, ?, ?, ?, ?)'
-  );
+  // ── MEDSPA ──────────────────────────────────────────────────────────────────
+  const msId = addSeq('Medspa Outreach', 'medspa', 'For medical spas, aesthetics clinics, and beauty practices');
 
-  const seed = db.transaction(() => {
-    // ── MEDSPA ──────────────────────────────────────────────────────────────
-    const medspa = insertSeq.run(
-      'Medspa Outreach',
-      'medspa',
-      'For medical spas, aesthetics clinics, and beauty practices'
-    );
-    const msId = medspa.lastInsertRowid;
-
-    insertStep.run(msId, 1, 0, 'quick question, {first_name}',
+  addStep(msId, 1, 0, 'quick question, {first_name}',
 `Hi {first_name},
 
 Noticed {company} — most medspas I talk to are losing 30-40% of their leads just from slow follow-up. A potential client fills out a form, waits 2 days for a reply, and books somewhere else.
@@ -90,7 +71,7 @@ Worth 15 minutes to see if it makes sense for {company}?
 
 [Your name]`);
 
-    insertStep.run(msId, 2, 3, '{company} — appointment follow-up',
+  addStep(msId, 2, 3, '{company} — appointment follow-up',
 `Hi {first_name},
 
 Just following up on my last note.
@@ -101,7 +82,7 @@ Happy to share exactly what we built if that's relevant to {company}.
 
 [Your name]`);
 
-    insertStep.run(msId, 3, 7, 'the 2-minute rule for medspa leads',
+  addStep(msId, 3, 7, 'the 2-minute rule for medspa leads',
 `Hi {first_name},
 
 Quick insight: leads that get a response within 2 minutes are 21x more likely to book than those that wait an hour.
@@ -112,7 +93,7 @@ Would that be useful for {company}?
 
 [Your name]`);
 
-    insertStep.run(msId, 4, 12, 'case study — 23% more appointments',
+  addStep(msId, 4, 12, 'case study — 23% more appointments',
 `Hi {first_name},
 
 Thought this might be worth sharing: a medspa we worked with increased booked appointments by 23% in the first month just by automating three things — inquiry response, appointment reminders, and no-show follow-up.
@@ -123,7 +104,7 @@ Is that the kind of problem you're working on at {company}?
 
 [Your name]`);
 
-    insertStep.run(msId, 5, 21, 'last note — {company}',
+  addStep(msId, 5, 21, 'last note — {company}',
 `Hi {first_name},
 
 I've reached out a few times without hearing back — going to assume the timing isn't right.
@@ -134,15 +115,10 @@ Best of luck with {company}.
 
 [Your name]`);
 
-    // ── SOLAR ────────────────────────────────────────────────────────────────
-    const solar = insertSeq.run(
-      'Solar Outreach',
-      'solar',
-      'For solar installation companies and energy consultants'
-    );
-    const solId = solar.lastInsertRowid;
+  // ── SOLAR ────────────────────────────────────────────────────────────────────
+  const solId = addSeq('Solar Outreach', 'solar', 'For solar installation companies and energy consultants');
 
-    insertStep.run(solId, 1, 0, 'quick question, {first_name}',
+  addStep(solId, 1, 0, 'quick question, {first_name}',
 `Hi {first_name},
 
 Most solar companies I talk to are spending 15+ hours/week manually following up with quote requests and scheduling site visits — and losing a third of those leads to slower response times.
@@ -153,7 +129,7 @@ Worth 15 minutes to explore this for {company}?
 
 [Your name]`);
 
-    insertStep.run(solId, 2, 3, '{company} — lead follow-up',
+  addStep(solId, 2, 3, '{company} — lead follow-up',
 `Hi {first_name},
 
 Following up on my last note.
@@ -164,7 +140,7 @@ Happy to walk you through how we did it if relevant to {company}.
 
 [Your name]`);
 
-    insertStep.run(solId, 3, 7, 'how fast does {company} follow up on leads?',
+  addStep(solId, 3, 7, 'how fast does {company} follow up on leads?',
 `Hi {first_name},
 
 Speed-to-lead is the single biggest factor in solar sales conversion. Companies that respond within 5 minutes convert 8x more leads than those that wait an hour.
@@ -175,7 +151,7 @@ Would that solve a real problem for {company}?
 
 [Your name]`);
 
-    insertStep.run(solId, 4, 12, 'solar automation case study',
+  addStep(solId, 4, 12, 'solar automation case study',
 `Hi {first_name},
 
 Thought this might be worth sharing: a solar company we helped was manually following up with 50-60 leads per week. Their close rate was around 12%. After automating lead response and scheduling:
@@ -188,7 +164,7 @@ Worth a quick call to see if something similar makes sense for {company}?
 
 [Your name]`);
 
-    insertStep.run(solId, 5, 21, 'closing your file, {first_name}',
+  addStep(solId, 5, 21, 'closing your file, {first_name}',
 `Hi {first_name},
 
 I've sent a few notes over the past few weeks without hearing back — going to assume the timing isn't right.
@@ -199,15 +175,10 @@ Best of luck with {company}.
 
 [Your name]`);
 
-    // ── GENERAL APPOINTMENT-BASED ────────────────────────────────────────────
-    const general = insertSeq.run(
-      'General Appointment-Based',
-      'general',
-      'For any local business that books appointments (HVAC, legal, dental, etc.)'
-    );
-    const genId = general.lastInsertRowid;
+  // ── GENERAL ───────────────────────────────────────────────────────────────────
+  const genId = addSeq('General Appointment-Based', 'general', 'For any local business that books appointments (HVAC, legal, dental, etc.)');
 
-    insertStep.run(genId, 1, 0, 'quick question, {first_name}',
+  addStep(genId, 1, 0, 'quick question, {first_name}',
 `Hi {first_name},
 
 Most appointment-based businesses I work with are losing 25-35% of their leads from slow follow-up and manual scheduling.
@@ -218,7 +189,7 @@ Worth 15 minutes to see if this makes sense for {company}?
 
 [Your name]`);
 
-    insertStep.run(genId, 2, 3, '{company} + appointment automation',
+  addStep(genId, 2, 3, '{company} + appointment automation',
 `Hi {first_name},
 
 Just following up on my last note.
@@ -229,7 +200,7 @@ Happy to share exactly what we built.
 
 [Your name]`);
 
-    insertStep.run(genId, 3, 7, 'are you losing leads after hours?',
+  addStep(genId, 3, 7, 'are you losing leads after hours?',
 `Hi {first_name},
 
 Most businesses only respond to inquiries during office hours. But 40% of appointment requests come in evenings and weekends.
@@ -240,7 +211,7 @@ Would that be valuable for {company}?
 
 [Your name]`);
 
-    insertStep.run(genId, 4, 12, 'what slow follow-up is costing {company}',
+  addStep(genId, 4, 12, 'what slow follow-up is costing {company}',
 `Hi {first_name},
 
 Quick math: if {company} gets 50 leads/month and converts 20% — that's 10 clients. If faster, automated follow-up lifts conversion to 28%, that's 4 more clients per month. At an average client value of even $500, that's $2,000/month in additional revenue from the same leads.
@@ -249,7 +220,7 @@ That's what automation delivers for most of our clients. Worth a conversation?
 
 [Your name]`);
 
-    insertStep.run(genId, 5, 21, 'last note — {first_name}',
+  addStep(genId, 5, 21, 'last note — {first_name}',
 `Hi {first_name},
 
 I've reached out a few times — going to assume the timing isn't right.
@@ -259,163 +230,159 @@ Closing your file for now. If automating your appointment booking or lead follow
 Best of luck with {company}.
 
 [Your name]`);
-  });
-
-  seed();
 }
 
-// ── Query helpers ────────────────────────────────────────────────────────────
+// ── Settings ──────────────────────────────────────────────────────────────────
 
-function getSetting(key) {
-  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
-  return row ? row.value : null;
-}
+function getSetting(key)        { return load().settings[key] ?? null; }
+function setSetting(key, value) { load().settings[key] = value; save(); }
+function getSettings()          { return { ...load().settings }; }
 
-function setSetting(key, value) {
-  db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, value);
-}
-
-function getSettings() {
-  const rows = db.prepare('SELECT key, value FROM settings').all();
-  return Object.fromEntries(rows.map(r => [r.key, r.value]));
-}
+// ── Sequences ─────────────────────────────────────────────────────────────────
 
 function getSequences() {
-  const seqs = db.prepare('SELECT * FROM sequences ORDER BY id').all();
-  const steps = db.prepare('SELECT * FROM sequence_steps ORDER BY sequence_id, step_number').all();
-  return seqs.map(s => ({
+  const d = load();
+  return d.sequences.map(s => ({
     ...s,
-    steps: steps.filter(st => st.sequence_id === s.id)
+    steps: d.sequence_steps.filter(st => st.sequence_id === s.id).sort((a,b) => a.step_number - b.step_number)
   }));
 }
 
 function getSequenceById(id) {
-  const seq = db.prepare('SELECT * FROM sequences WHERE id = ?').get(id);
+  const d = load();
+  const seq = d.sequences.find(s => s.id === Number(id));
   if (!seq) return null;
-  seq.steps = db.prepare('SELECT * FROM sequence_steps WHERE sequence_id = ? ORDER BY step_number').all(id);
-  return seq;
+  return {
+    ...seq,
+    steps: d.sequence_steps.filter(st => st.sequence_id === seq.id).sort((a,b) => a.step_number - b.step_number)
+  };
 }
 
 function updateSequenceSteps(sequenceId, steps) {
-  const update = db.prepare(
-    'UPDATE sequence_steps SET subject = ?, body = ? WHERE sequence_id = ? AND step_number = ?'
-  );
-  const tx = db.transaction(() => {
-    for (const step of steps) {
-      update.run(step.subject, step.body, sequenceId, step.step_number);
-    }
-  });
-  tx();
+  const d = load();
+  for (const step of steps) {
+    const s = d.sequence_steps.find(st => st.sequence_id === Number(sequenceId) && st.step_number === step.step_number);
+    if (s) { s.subject = step.subject; s.body = step.body; }
+  }
+  save();
 }
 
+// ── Prospects ─────────────────────────────────────────────────────────────────
+
 function getProspects(filters = {}) {
-  let query = 'SELECT * FROM prospects WHERE 1=1';
-  const params = [];
-  if (filters.status) { query += ' AND status = ?'; params.push(filters.status); }
-  if (filters.niche)  { query += ' AND niche = ?';  params.push(filters.niche);  }
-  query += ' ORDER BY enrolled_at DESC';
-  return db.prepare(query).all(...params);
+  const d = load();
+  return d.prospects
+    .filter(p => (!filters.status || p.status === filters.status) && (!filters.niche || p.niche === filters.niche))
+    .sort((a,b) => b.enrolled_at?.localeCompare(a.enrolled_at || '') || 0);
 }
 
 function getProspectById(id) {
-  return db.prepare('SELECT * FROM prospects WHERE id = ?').get(id);
+  return load().prospects.find(p => p.id === Number(id)) || null;
 }
 
 function insertProspect(p) {
-  return db.prepare(`
-    INSERT OR IGNORE INTO prospects
-      (first_name, last_name, email, company, niche, sequence_id, enrolled_at, next_send_at)
-    VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `).run(p.first_name, p.last_name, p.email, p.company, p.niche, p.sequence_id);
+  const d = load();
+  const exists = d.prospects.find(x => x.email.toLowerCase() === p.email.toLowerCase());
+  if (exists) return { changes: 0 };
+  const now = nowIso();
+  d.prospects.push({
+    id:           nextId('prospects'),
+    first_name:   p.first_name  || '',
+    last_name:    p.last_name   || '',
+    email:        p.email,
+    company:      p.company     || '',
+    niche:        p.niche       || 'general',
+    status:       'active',
+    sequence_id:  p.sequence_id ? Number(p.sequence_id) : null,
+    current_step: 0,
+    enrolled_at:  now,
+    next_send_at: now,
+    last_sent_at: null,
+    notes:        ''
+  });
+  save();
+  return { changes: 1 };
 }
 
 function updateProspect(id, fields) {
-  const allowed = ['status', 'current_step', 'next_send_at', 'last_sent_at', 'notes', 'sequence_id'];
-  const updates = Object.keys(fields).filter(k => allowed.includes(k));
-  if (!updates.length) return;
-  const sql = `UPDATE prospects SET ${updates.map(k => k + ' = ?').join(', ')} WHERE id = ?`;
-  db.prepare(sql).run(...updates.map(k => fields[k]), id);
+  const d = load();
+  const p = d.prospects.find(x => x.id === Number(id));
+  if (!p) return;
+  const allowed = ['status','current_step','next_send_at','last_sent_at','notes','sequence_id'];
+  for (const k of allowed) { if (fields[k] !== undefined) p[k] = fields[k]; }
+  save();
 }
 
 function deleteProspect(id) {
-  db.prepare('DELETE FROM sent_emails WHERE prospect_id = ?').run(id);
-  db.prepare('DELETE FROM prospects WHERE id = ?').run(id);
+  const d = load();
+  d.sent_emails = d.sent_emails.filter(e => e.prospect_id !== Number(id));
+  d.prospects   = d.prospects.filter(p => p.id !== Number(id));
+  save();
 }
 
-function getQueue() {
-  return db.prepare(`
-    SELECT p.*, s.name as sequence_name
-    FROM prospects p
-    LEFT JOIN sequences s ON p.sequence_id = s.id
-    WHERE p.status = 'active'
-      AND p.next_send_at <= datetime('now')
-      AND p.current_step < (
-        SELECT MAX(step_number) FROM sequence_steps WHERE sequence_id = p.sequence_id
-      )
-    ORDER BY p.next_send_at ASC
-  `).all();
-}
+// ── Queue ─────────────────────────────────────────────────────────────────────
 
 function getQueueWithStep() {
-  return db.prepare(`
-    SELECT p.*, s.name as sequence_name,
-      ss.subject as next_subject, ss.body as next_body,
-      (p.current_step + 1) as next_step_number
-    FROM prospects p
-    LEFT JOIN sequences s ON p.sequence_id = s.id
-    LEFT JOIN sequence_steps ss
-      ON ss.sequence_id = p.sequence_id AND ss.step_number = (p.current_step + 1)
-    WHERE p.status = 'active'
-      AND p.next_send_at <= datetime('now')
-      AND ss.id IS NOT NULL
-    ORDER BY p.next_send_at ASC
-  `).all();
+  const d    = load();
+  const now  = nowIso();
+  return d.prospects
+    .filter(p => p.status === 'active' && p.next_send_at && p.next_send_at <= now)
+    .map(p => {
+      const nextStepNum = p.current_step + 1;
+      const step = d.sequence_steps.find(s => s.sequence_id === p.sequence_id && s.step_number === nextStepNum);
+      if (!step) return null;
+      const seq = d.sequences.find(s => s.id === p.sequence_id);
+      return { ...p, sequence_name: seq?.name || '', next_subject: step.subject, next_body: step.body, next_step_number: nextStepNum };
+    })
+    .filter(Boolean)
+    .sort((a,b) => a.next_send_at.localeCompare(b.next_send_at));
 }
+
+// ── Sent Emails ───────────────────────────────────────────────────────────────
 
 function getSentTodayCount() {
-  return db.prepare(`
-    SELECT COUNT(*) as c FROM sent_emails
-    WHERE DATE(sent_at) = DATE('now') AND status = 'sent'
-  `).get().c;
+  const today = nowIso().slice(0, 10);
+  return load().sent_emails.filter(e => e.sent_at?.startsWith(today) && e.status === 'sent').length;
 }
 
-function logSentEmail(prospectId, stepNumber, subject, body, status = 'sent') {
-  db.prepare(`
-    INSERT INTO sent_emails (prospect_id, step_number, subject, body, status)
-    VALUES (?, ?, ?, ?, ?)
-  `).run(prospectId, stepNumber, subject, body, status);
+function logSentEmail(prospect_id, step_number, subject, body, status = 'sent') {
+  const d = load();
+  d.sent_emails.push({ id: nextId('sent_emails'), prospect_id: Number(prospect_id), step_number, subject, body, sent_at: nowIso(), status });
+  save();
 }
 
 function getRecentActivity(limit = 15) {
-  return db.prepare(`
-    SELECT se.*, p.first_name, p.last_name, p.email, p.company
-    FROM sent_emails se
-    JOIN prospects p ON p.id = se.prospect_id
-    ORDER BY se.sent_at DESC
-    LIMIT ?
-  `).all(limit);
+  const d = load();
+  return d.sent_emails
+    .slice(-limit * 3)
+    .reverse()
+    .slice(0, limit)
+    .map(e => {
+      const p = d.prospects.find(x => x.id === e.prospect_id) || {};
+      return { ...e, first_name: p.first_name || '', last_name: p.last_name || '', email: p.email || '', company: p.company || '' };
+    });
 }
 
+// ── Stats ─────────────────────────────────────────────────────────────────────
+
 function getStats() {
-  const total      = db.prepare("SELECT COUNT(*) as c FROM prospects").get().c;
-  const active     = db.prepare("SELECT COUNT(*) as c FROM prospects WHERE status='active'").get().c;
-  const replied    = db.prepare("SELECT COUNT(*) as c FROM prospects WHERE status='replied'").get().c;
-  const interested = db.prepare("SELECT COUNT(*) as c FROM prospects WHERE status='interested'").get().c;
-  const completed  = db.prepare("SELECT COUNT(*) as c FROM prospects WHERE status='completed'").get().c;
+  const d        = load();
+  const ps       = d.prospects;
+  const total      = ps.length;
+  const active     = ps.filter(p => p.status === 'active').length;
+  const replied    = ps.filter(p => p.status === 'replied').length;
+  const interested = ps.filter(p => p.status === 'interested').length;
+  const completed  = ps.filter(p => p.status === 'completed').length;
   const sentToday  = getSentTodayCount();
-  const inQueue    = db.prepare(`
-    SELECT COUNT(*) as c FROM prospects p
-    JOIN sequence_steps ss ON ss.sequence_id = p.sequence_id AND ss.step_number = (p.current_step + 1)
-    WHERE p.status = 'active' AND p.next_send_at <= datetime('now')
-  `).get().c;
+  const inQueue    = getQueueWithStep().length;
   return { total, active, replied, interested, completed, sentToday, inQueue };
 }
 
 module.exports = {
-  db, init,
+  init,
   getSetting, setSetting, getSettings,
   getSequences, getSequenceById, updateSequenceSteps,
   getProspects, getProspectById, insertProspect, updateProspect, deleteProspect,
-  getQueue, getQueueWithStep,
+  getQueueWithStep,
   getSentTodayCount, logSentEmail, getRecentActivity, getStats
 };
