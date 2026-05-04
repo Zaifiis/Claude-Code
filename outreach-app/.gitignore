@@ -1,5 +1,6 @@
 node_modules/
 outreach.db
+outreach.json
 .env
 *.db-shm
 *.db-wal
