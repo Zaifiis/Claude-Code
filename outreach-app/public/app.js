@@ -69,6 +69,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     if (tab === 'prospects')  loadProspects();
     if (tab === 'queue')      loadQueue();
     if (tab === 'sequences')  loadSequences();
+    if (tab === 'warmup')     loadWarmup();
     if (tab === 'settings')   loadSettings();
   });
 });
@@ -406,6 +407,169 @@ document.getElementById('btn-test-smtp').addEventListener('click', async () => {
   btn.disabled = false;
   btn.textContent = 'Test Connection';
 });
+
+// ── Warmup ────────────────────────────────────────────────────────────────────
+
+async function loadWarmup() {
+  const stats = await api('GET', '/api/warmup/stats');
+
+  document.getElementById('wu-stat-total').textContent      = stats.total;
+  document.getElementById('wu-stat-active').textContent     = stats.active;
+  document.getElementById('wu-stat-sent-today').textContent = stats.sentToday;
+  document.getElementById('wu-stat-total-sent').textContent = stats.totalSent;
+  document.getElementById('wu-stat-replies').textContent    = stats.totalReplied;
+  document.getElementById('wu-daily-limit').value           = stats.dailyPerAccount || 3;
+
+  const badge  = document.getElementById('warmup-status-badge');
+  const toggle = document.getElementById('btn-warmup-toggle');
+  if (stats.enabled) {
+    badge.style.display = 'inline-block';
+    badge.textContent   = 'Running';
+    toggle.textContent  = 'Pause Warmup';
+    toggle.className    = 'btn-secondary';
+  } else {
+    badge.style.display = 'none';
+    toggle.textContent  = 'Enable Warmup';
+    toggle.className    = 'btn-secondary';
+  }
+
+  // Accounts table
+  const accounts = await api('GET', '/api/warmup/accounts');
+  const tbody    = document.getElementById('warmup-accounts-tbody');
+  if (!accounts.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No accounts yet. Add accounts to start warming up.</td></tr>';
+  } else {
+    tbody.innerHTML = accounts.map(a => `
+      <tr>
+        <td>${esc(a.email)}</td>
+        <td class="dim">${esc(a.smtp_host)}</td>
+        <td>${badge_wu(a.status)}</td>
+        <td>${getWarmupSentToday(a.id, stats)}</td>
+        <td>
+          <div class="action-btns">
+            ${a.status === 'active'
+              ? `<button class="btn-sm" onclick="toggleWarmupAccount(${a.id},'paused')">Pause</button>`
+              : `<button class="btn-sm" onclick="toggleWarmupAccount(${a.id},'active')">Resume</button>`}
+            <button class="btn-danger" onclick="deleteWarmupAccount(${a.id})">Del</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  // Activity log
+  const logTbody = document.getElementById('warmup-log-tbody');
+  if (!stats.recentLogs?.length) {
+    logTbody.innerHTML = '<tr><td colspan="5" class="empty-state">No warmup emails sent yet</td></tr>';
+  } else {
+    logTbody.innerHTML = stats.recentLogs.map(l => `
+      <tr>
+        <td class="dim">${fmtDate(l.sent_at)}</td>
+        <td>${esc(l.from_email)}</td>
+        <td>${esc(l.to_email)}</td>
+        <td>${esc(l.subject)}</td>
+        <td>${l.replied ? '<span style="color:var(--green)">✓</span>' : '—'}</td>
+      </tr>`).join('');
+  }
+}
+
+function badge_wu(status) {
+  const cls = status === 'active' ? 'badge-active' : 'badge-unsubscribed';
+  return `<span class="badge ${cls}">${status}</span>`;
+}
+
+function getWarmupSentToday(id, stats) {
+  if (!stats.recentLogs) return '—';
+  const today = new Date().toISOString().slice(0, 10);
+  const count = (stats.recentLogs || []).filter(l => l.from_id === id && l.sent_at?.startsWith(today)).length;
+  return count;
+}
+
+document.getElementById('btn-warmup-toggle').addEventListener('click', async () => {
+  const result = await api('POST', '/api/warmup/toggle');
+  showToast(result.enabled ? 'Warmup enabled — runs every hour' : 'Warmup paused', result.enabled ? 'success' : 'info');
+  loadWarmup();
+});
+
+document.getElementById('btn-warmup-run-now').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-warmup-run-now');
+  btn.disabled = true;
+  btn.textContent = 'Running…';
+  const result = await api('POST', '/api/warmup/run');
+  btn.disabled = false;
+  btn.textContent = 'Run Now';
+  if (result.ok) {
+    showToast(`Warmup cycle done — sent ${result.sent} emails`, 'success');
+  } else {
+    showToast(result.error || result.message || 'Done', 'info');
+  }
+  loadWarmup();
+});
+
+document.getElementById('btn-wu-save-settings').addEventListener('click', async () => {
+  const daily = document.getElementById('wu-daily-limit').value;
+  await api('POST', '/api/warmup/settings', { daily_per_account: daily });
+  showToast('Warmup settings saved', 'success');
+});
+
+// Add account modal
+document.getElementById('btn-add-warmup-account').addEventListener('click', () => {
+  document.getElementById('wu-smtp-host').value = 'smtp.hostinger.com';
+  document.getElementById('wu-smtp-port').value = '465';
+  document.getElementById('wu-imap-host').value = 'imap.hostinger.com';
+  document.getElementById('wu-imap-port').value = '993';
+  document.getElementById('warmup-modal-msg').className = 'msg';
+  document.getElementById('warmup-modal').classList.remove('hidden');
+});
+
+['btn-close-warmup-modal','btn-cancel-warmup-modal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', () => {
+    document.getElementById('warmup-modal').classList.add('hidden');
+  });
+});
+
+document.getElementById('btn-save-warmup-account').addEventListener('click', async () => {
+  const msg  = document.getElementById('warmup-modal-msg');
+  const body = {
+    email:     document.getElementById('wu-email').value.trim(),
+    smtp_pass: document.getElementById('wu-pass').value,
+    smtp_host: document.getElementById('wu-smtp-host').value.trim(),
+    smtp_port: document.getElementById('wu-smtp-port').value.trim(),
+    imap_host: document.getElementById('wu-imap-host').value.trim(),
+    imap_port: document.getElementById('wu-imap-port').value.trim(),
+  };
+  if (!body.email || !body.smtp_pass) {
+    msg.textContent = 'Email and password are required.';
+    msg.className = 'msg error';
+    return;
+  }
+  const result = await api('POST', '/api/warmup/accounts', body);
+  if (result.ok) {
+    msg.textContent = 'Account added!';
+    msg.className = 'msg success';
+    setTimeout(() => {
+      document.getElementById('warmup-modal').classList.add('hidden');
+      document.getElementById('wu-email').value = '';
+      document.getElementById('wu-pass').value  = '';
+      loadWarmup();
+    }, 800);
+  } else {
+    msg.textContent = result.error || 'Failed to add account.';
+    msg.className = 'msg error';
+  }
+});
+
+window.toggleWarmupAccount = async (id, status) => {
+  await api('PUT', '/api/warmup/accounts/' + id, { status });
+  showToast(`Account ${status}`, 'info');
+  loadWarmup();
+};
+
+window.deleteWarmupAccount = async (id) => {
+  if (!confirm('Remove this account from the warmup pool?')) return;
+  await api('DELETE', '/api/warmup/accounts/' + id);
+  showToast('Account removed', 'info');
+  loadWarmup();
+};
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadDashboard();

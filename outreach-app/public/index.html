@@ -14,6 +14,7 @@
       <button class="nav-btn" data-tab="prospects">Prospects</button>
       <button class="nav-btn" data-tab="queue">Queue</button>
       <button class="nav-btn" data-tab="sequences">Sequences</button>
+      <button class="nav-btn" data-tab="warmup">Warmup</button>
       <button class="nav-btn" data-tab="settings">Settings</button>
     </nav>
   </aside>
@@ -152,7 +153,98 @@
       </div>
     </section>
 
+    <!-- ── WARMUP ─────────────────────────────────────────────────────── -->
+    <section id="tab-warmup" class="tab">
+      <div class="page-header">
+        <h1>Email Warmup</h1>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span id="warmup-status-badge" class="badge badge-active" style="display:none">Running</span>
+          <button class="btn-secondary" id="btn-warmup-toggle">Enable Warmup</button>
+          <button class="btn-primary"   id="btn-warmup-run-now">Run Now</button>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="warmup-stats-grid">
+        <div class="stat-card"><div class="stat-num" id="wu-stat-total">—</div><div class="stat-label">Accounts in Pool</div></div>
+        <div class="stat-card"><div class="stat-num" id="wu-stat-active">—</div><div class="stat-label">Active</div></div>
+        <div class="stat-card"><div class="stat-num" id="wu-stat-sent-today">—</div><div class="stat-label">Sent Today</div></div>
+        <div class="stat-card"><div class="stat-num" id="wu-stat-total-sent">—</div><div class="stat-label">Total Sent</div></div>
+        <div class="stat-card"><div class="stat-num" id="wu-stat-replies">—</div><div class="stat-label">Total Replies</div></div>
+      </div>
+
+      <div style="display:flex;gap:24px;margin-bottom:24px;align-items:flex-end;flex-wrap:wrap">
+        <div class="form-row" style="margin:0">
+          <label>Emails per account per day</label>
+          <input type="number" id="wu-daily-limit" placeholder="3" min="1" max="50" style="width:100px" />
+        </div>
+        <button class="btn-secondary" id="btn-wu-save-settings">Save</button>
+      </div>
+
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Warmup Pool</h2>
+        <button class="btn-primary" id="btn-add-warmup-account">+ Add Account</button>
+      </div>
+      <div class="table-wrap" style="margin-bottom:24px">
+        <table id="warmup-accounts-table">
+          <thead><tr>
+            <th>Email</th><th>SMTP Host</th><th>Status</th><th>Sent Today</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="warmup-accounts-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="section-header"><h2>Recent Warmup Activity</h2></div>
+      <div class="table-wrap">
+        <table id="warmup-log-table">
+          <thead><tr><th>Time</th><th>From</th><th>To</th><th>Subject</th><th>Replied</th></tr></thead>
+          <tbody id="warmup-log-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
   </main>
+
+  <!-- ── ADD WARMUP ACCOUNT MODAL ──────────────────────────────────── -->
+  <div class="modal-overlay hidden" id="warmup-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Add Warmup Account</h2>
+        <button class="modal-close" id="btn-close-warmup-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">Add an email account to the warmup pool. The system will automatically send and receive warmup emails between all accounts.</p>
+        <div class="form-row">
+          <label>Email Address</label>
+          <input type="email" id="wu-email" placeholder="warmup1@yourdomain.com" />
+        </div>
+        <div class="form-row">
+          <label>Password</label>
+          <input type="password" id="wu-pass" placeholder="email password" />
+        </div>
+        <div class="form-row">
+          <label>SMTP Host</label>
+          <input type="text" id="wu-smtp-host" placeholder="smtp.hostinger.com" />
+        </div>
+        <div class="form-row">
+          <label>SMTP Port</label>
+          <input type="number" id="wu-smtp-port" placeholder="465" />
+        </div>
+        <div class="form-row">
+          <label>IMAP Host</label>
+          <input type="text" id="wu-imap-host" placeholder="imap.hostinger.com" />
+        </div>
+        <div class="form-row">
+          <label>IMAP Port</label>
+          <input type="number" id="wu-imap-port" placeholder="993" />
+        </div>
+        <div id="warmup-modal-msg" class="msg"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-cancel-warmup-modal">Cancel</button>
+        <button class="btn-primary"   id="btn-save-warmup-account">Add Account</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ── IMPORT MODAL ───────────────────────────────────────────────── -->
   <div class="modal-overlay hidden" id="import-modal">

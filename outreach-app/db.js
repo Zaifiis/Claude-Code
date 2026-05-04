@@ -17,8 +17,10 @@ function load() {
       sequences:      [],
       sequence_steps: [],
       prospects:      [],
-      sent_emails:    [],
-      _ids:           { sequences: 0, sequence_steps: 0, prospects: 0, sent_emails: 0 }
+      sent_emails:      [],
+      warmup_accounts:  [],
+      warmup_logs:      [],
+      _ids:             { sequences: 0, sequence_steps: 0, prospects: 0, sent_emails: 0, warmup_accounts: 0, warmup_logs: 0 }
     };
   }
   return _data;
@@ -378,11 +380,100 @@ function getStats() {
   return { total, active, replied, interested, completed, sentToday, inQueue };
 }
 
+// ── Warmup Accounts ───────────────────────────────────────────────────────────
+
+function getWarmupAccounts() {
+  return load().warmup_accounts;
+}
+
+function getActiveWarmupAccounts() {
+  return load().warmup_accounts.filter(a => a.status === 'active');
+}
+
+function addWarmupAccount(a) {
+  const d = load();
+  const exists = d.warmup_accounts.find(x => x.email.toLowerCase() === a.email.toLowerCase());
+  if (exists) return null;
+  const account = {
+    id:        nextId('warmup_accounts'),
+    email:     a.email,
+    smtp_host: a.smtp_host || 'smtp.hostinger.com',
+    smtp_port: a.smtp_port || '465',
+    smtp_pass: a.smtp_pass,
+    imap_host: a.imap_host || 'imap.hostinger.com',
+    imap_port: a.imap_port || '993',
+    status:    'active',
+    added_at:  nowIso()
+  };
+  d.warmup_accounts.push(account);
+  save();
+  return account;
+}
+
+function updateWarmupAccount(id, fields) {
+  const d = load();
+  const a = d.warmup_accounts.find(x => x.id === Number(id));
+  if (!a) return;
+  const allowed = ['status', 'smtp_pass', 'smtp_host', 'smtp_port', 'imap_host', 'imap_port'];
+  for (const k of allowed) { if (fields[k] !== undefined) a[k] = fields[k]; }
+  save();
+}
+
+function deleteWarmupAccount(id) {
+  const d = load();
+  d.warmup_accounts = d.warmup_accounts.filter(a => a.id !== Number(id));
+  d.warmup_logs     = d.warmup_logs.filter(l => l.from_id !== Number(id) && l.to_id !== Number(id));
+  save();
+}
+
+function logWarmupSend(from_id, to_id, subject) {
+  const d = load();
+  d.warmup_logs.push({
+    id: nextId('warmup_logs'),
+    from_id: Number(from_id),
+    to_id:   Number(to_id),
+    subject,
+    sent_at: nowIso(),
+    replied: false
+  });
+  save();
+}
+
+function markWarmupReplied(logId) {
+  const d = load();
+  const l = d.warmup_logs.find(x => x.id === Number(logId));
+  if (l) { l.replied = true; save(); }
+}
+
+function getWarmupSentToday(account_id) {
+  const today = nowIso().slice(0, 10);
+  return load().warmup_logs.filter(l => l.from_id === Number(account_id) && l.sent_at?.startsWith(today)).length;
+}
+
+function getWarmupStats() {
+  const d     = load();
+  const today = nowIso().slice(0, 10);
+  const total       = d.warmup_accounts.length;
+  const active      = d.warmup_accounts.filter(a => a.status === 'active').length;
+  const sentToday   = d.warmup_logs.filter(l => l.sent_at?.startsWith(today)).length;
+  const totalSent   = d.warmup_logs.length;
+  const totalReplied = d.warmup_logs.filter(l => l.replied).length;
+  const recentLogs  = d.warmup_logs.slice(-20).reverse().map(l => {
+    const from = d.warmup_accounts.find(a => a.id === l.from_id);
+    const to   = d.warmup_accounts.find(a => a.id === l.to_id);
+    return { ...l, from_email: from?.email || '', to_email: to?.email || '' };
+  });
+  return { total, active, sentToday, totalSent, totalReplied, recentLogs };
+}
+
 module.exports = {
   init,
   getSetting, setSetting, getSettings,
   getSequences, getSequenceById, updateSequenceSteps,
   getProspects, getProspectById, insertProspect, updateProspect, deleteProspect,
   getQueueWithStep,
-  getSentTodayCount, logSentEmail, getRecentActivity, getStats
+  getSentTodayCount, logSentEmail, getRecentActivity, getStats,
+  getWarmupAccounts, getActiveWarmupAccounts, addWarmupAccount,
+  updateWarmupAccount, deleteWarmupAccount,
+  logWarmupSend, markWarmupReplied, getWarmupSentToday, getWarmupStats
 };

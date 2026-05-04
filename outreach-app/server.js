@@ -5,8 +5,10 @@ const { parse } = require('csv-parse/sync');
 const path     = require('path');
 const db       = require('./db');
 const { sendEmail, testConnection } = require('./mailer');
+const { runWarmupCycle, startScheduler } = require('./warmup');
 
 db.init();
+startScheduler();
 
 const app    = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -236,6 +238,57 @@ app.post('/api/queue/send-all', async (req, res) => {
 // ── ACTIVITY ──────────────────────────────────────────────────────────────────
 app.get('/api/activity', (req, res) => {
   res.json(db.getRecentActivity(20));
+});
+
+// ── WARMUP ────────────────────────────────────────────────────────────────────
+app.get('/api/warmup/accounts', (req, res) => {
+  res.json(db.getWarmupAccounts());
+});
+
+app.post('/api/warmup/accounts', (req, res) => {
+  const { email, smtp_pass, smtp_host, smtp_port, imap_host, imap_port } = req.body;
+  if (!email || !smtp_pass) return res.status(400).json({ error: 'email and smtp_pass are required' });
+  const account = db.addWarmupAccount({ email, smtp_pass, smtp_host, smtp_port, imap_host, imap_port });
+  if (!account) return res.status(409).json({ error: 'Account already exists' });
+  res.json({ ok: true, account });
+});
+
+app.put('/api/warmup/accounts/:id', (req, res) => {
+  db.updateWarmupAccount(req.params.id, req.body);
+  res.json({ ok: true });
+});
+
+app.delete('/api/warmup/accounts/:id', (req, res) => {
+  db.deleteWarmupAccount(req.params.id);
+  res.json({ ok: true });
+});
+
+app.get('/api/warmup/stats', (req, res) => {
+  const stats = db.getWarmupStats();
+  const enabled = db.getSetting('warmup_enabled') === 'true';
+  const dailyPerAccount = parseInt(db.getSetting('warmup_daily_per_account') || '3', 10);
+  res.json({ ...stats, enabled, dailyPerAccount });
+});
+
+app.post('/api/warmup/toggle', (req, res) => {
+  const current = db.getSetting('warmup_enabled') === 'true';
+  db.setSetting('warmup_enabled', (!current).toString());
+  res.json({ ok: true, enabled: !current });
+});
+
+app.post('/api/warmup/run', async (req, res) => {
+  try {
+    const result = await runWarmupCycle();
+    res.json({ ok: true, ...result });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/warmup/settings', (req, res) => {
+  const { daily_per_account } = req.body;
+  if (daily_per_account) db.setSetting('warmup_daily_per_account', String(daily_per_account));
+  res.json({ ok: true });
 });
 
 // ── START ─────────────────────────────────────────────────────────────────────
