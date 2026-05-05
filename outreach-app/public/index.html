@@ -25,7 +25,10 @@
     <section id="tab-dashboard" class="tab active">
       <div class="page-header">
         <h1>Dashboard</h1>
-        <button class="btn-primary" id="btn-send-all-dash">Send Today's Queue</button>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn-secondary" id="btn-check-replies-dash">Check Replies</button>
+          <button class="btn-primary" id="btn-send-all-dash">Send Today's Queue</button>
+        </div>
       </div>
 
       <div class="stats-grid" id="stats-grid">
@@ -151,6 +154,29 @@
         </div>
         <div id="settings-msg" class="msg"></div>
       </div>
+
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;margin-top:32px">
+        <h2>Sending Accounts</h2>
+        <button class="btn-primary" id="btn-add-sender">+ Add Sender</button>
+      </div>
+      <p class="hint" style="margin-bottom:12px">Add multiple sending accounts for rotation. The system picks the account with fewest sends today on each email.</p>
+      <div class="table-wrap" style="margin-bottom:16px">
+        <table id="senders-table">
+          <thead><tr>
+            <th>Email</th><th>From Name</th><th>SMTP Host</th><th>Status</th><th>Sent Today</th><th>Total Sent</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="senders-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;margin-top:32px">
+        <h2>Reply Detection</h2>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span id="last-reply-check" class="dim" style="font-size:13px"></span>
+          <button class="btn-secondary" id="btn-check-replies">Check Replies Now</button>
+        </div>
+      </div>
+      <p class="hint" style="margin-bottom:12px">Automatically checks IMAP inboxes every 30 minutes. Prospects who reply are marked "Replied" and removed from the queue.</p>
     </section>
 
     <!-- ── WARMUP ─────────────────────────────────────────────────────── -->
@@ -242,6 +268,52 @@
       <div class="modal-footer">
         <button class="btn-secondary" id="btn-cancel-warmup-modal">Cancel</button>
         <button class="btn-primary"   id="btn-save-warmup-account">Add Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADD SENDER MODAL ─────────────────────────────────────────────── -->
+  <div class="modal-overlay hidden" id="sender-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Add Sending Account</h2>
+        <button class="modal-close" id="btn-close-sender-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">Add an SMTP account for outreach rotation. Accounts will be used round-robin based on fewest sends today.</p>
+        <div class="form-row">
+          <label>Email Address</label>
+          <input type="email" id="sndr-email" placeholder="outreach@yourdomain.com" />
+        </div>
+        <div class="form-row">
+          <label>From Name</label>
+          <input type="text" id="sndr-from-name" placeholder="Your Name" />
+        </div>
+        <div class="form-row">
+          <label>Password</label>
+          <input type="password" id="sndr-pass" placeholder="email password" />
+        </div>
+        <div class="form-row">
+          <label>SMTP Host</label>
+          <input type="text" id="sndr-smtp-host" placeholder="smtp.hostinger.com" />
+        </div>
+        <div class="form-row">
+          <label>SMTP Port</label>
+          <input type="number" id="sndr-smtp-port" placeholder="465" />
+        </div>
+        <div class="form-row">
+          <label>IMAP Host</label>
+          <input type="text" id="sndr-imap-host" placeholder="imap.hostinger.com" />
+        </div>
+        <div class="form-row">
+          <label>IMAP Port</label>
+          <input type="number" id="sndr-imap-port" placeholder="993" />
+        </div>
+        <div id="sender-modal-msg" class="msg"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-cancel-sender-modal">Cancel</button>
+        <button class="btn-primary"   id="btn-save-sender">Add Sender</button>
       </div>
     </div>
   </div>

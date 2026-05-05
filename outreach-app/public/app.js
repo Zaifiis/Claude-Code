@@ -357,6 +357,8 @@ async function loadSettings() {
   document.getElementById('from-name').value  = s.from_name  || '';
   document.getElementById('from-email').value = s.from_email || '';
   document.getElementById('daily-limit').value = s.daily_limit || '25';
+  loadSenders();
+  loadReplyStatus();
 }
 
 document.getElementById('btn-save-settings').addEventListener('click', async () => {
@@ -570,6 +572,124 @@ window.deleteWarmupAccount = async (id) => {
   showToast('Account removed', 'info');
   loadWarmup();
 };
+
+// ── Senders ───────────────────────────────────────────────────────────────────
+
+async function loadSenders() {
+  const senders = await api('GET', '/api/senders');
+  const tbody   = document.getElementById('senders-tbody');
+  if (!senders.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No sending accounts yet. Add one above or configure SMTP in settings as a fallback.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = senders.map(s => `
+    <tr>
+      <td>${esc(s.email)}</td>
+      <td>${esc(s.from_name) || '—'}</td>
+      <td class="dim">${esc(s.smtp_host) || 'smtp.hostinger.com'}</td>
+      <td>${badge_wu(s.status)}</td>
+      <td>${s.sentToday}</td>
+      <td>${s.totalSent}</td>
+      <td>
+        <div class="action-btns">
+          ${s.status === 'active'
+            ? `<button class="btn-sm" onclick="toggleSender(${s.id},'paused')">Pause</button>`
+            : `<button class="btn-sm" onclick="toggleSender(${s.id},'active')">Resume</button>`}
+          <button class="btn-danger" onclick="deleteSender(${s.id})">Del</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+window.toggleSender = async (id, status) => {
+  await api('PUT', '/api/senders/' + id, { status });
+  showToast(`Sender ${status}`, 'info');
+  loadSenders();
+};
+
+window.deleteSender = async (id) => {
+  if (!confirm('Remove this sending account?')) return;
+  await api('DELETE', '/api/senders/' + id);
+  showToast('Sender removed', 'info');
+  loadSenders();
+};
+
+document.getElementById('btn-add-sender').addEventListener('click', () => {
+  document.getElementById('sndr-smtp-host').value = 'smtp.hostinger.com';
+  document.getElementById('sndr-smtp-port').value = '465';
+  document.getElementById('sndr-imap-host').value = 'imap.hostinger.com';
+  document.getElementById('sndr-imap-port').value = '993';
+  document.getElementById('sender-modal-msg').className = 'msg';
+  document.getElementById('sender-modal').classList.remove('hidden');
+});
+
+['btn-close-sender-modal', 'btn-cancel-sender-modal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', () => {
+    document.getElementById('sender-modal').classList.add('hidden');
+  });
+});
+
+document.getElementById('btn-save-sender').addEventListener('click', async () => {
+  const msg  = document.getElementById('sender-modal-msg');
+  const body = {
+    email:     document.getElementById('sndr-email').value.trim(),
+    from_name: document.getElementById('sndr-from-name').value.trim(),
+    smtp_pass: document.getElementById('sndr-pass').value,
+    smtp_host: document.getElementById('sndr-smtp-host').value.trim(),
+    smtp_port: document.getElementById('sndr-smtp-port').value.trim(),
+    imap_host: document.getElementById('sndr-imap-host').value.trim(),
+    imap_port: document.getElementById('sndr-imap-port').value.trim(),
+  };
+  if (!body.email || !body.smtp_pass) {
+    msg.textContent = 'Email and password are required.';
+    msg.className = 'msg error';
+    return;
+  }
+  const result = await api('POST', '/api/senders', body);
+  if (result.ok) {
+    msg.textContent = 'Sender added!';
+    msg.className = 'msg success';
+    setTimeout(() => {
+      document.getElementById('sender-modal').classList.add('hidden');
+      document.getElementById('sndr-email').value     = '';
+      document.getElementById('sndr-from-name').value = '';
+      document.getElementById('sndr-pass').value      = '';
+      loadSenders();
+    }, 800);
+  } else {
+    msg.textContent = result.error || 'Failed to add sender.';
+    msg.className = 'msg error';
+  }
+});
+
+// ── Reply Check ───────────────────────────────────────────────────────────────
+
+async function loadReplyStatus() {
+  const result = await api('GET', '/api/replies/status');
+  const el = document.getElementById('last-reply-check');
+  if (el) el.textContent = result.lastCheck ? 'Last checked: ' + fmtDate(result.lastCheck) : 'Never checked';
+}
+
+async function runReplyCheck(btnEl) {
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Checking…'; }
+  const result = await api('POST', '/api/replies/check');
+  if (btnEl) { btnEl.disabled = false; btnEl.textContent = btnEl.id === 'btn-check-replies' ? 'Check Replies Now' : 'Check Replies'; }
+  if (result.error && !result.repliesFound) {
+    showToast('Reply check: ' + result.error, 'error');
+  } else {
+    showToast(`Reply check done — ${result.repliesFound} new repl${result.repliesFound === 1 ? 'y' : 'ies'} found`, 'success');
+    loadDashboard();
+  }
+}
+
+document.getElementById('btn-check-replies-dash').addEventListener('click', function() {
+  runReplyCheck(this);
+});
+
+document.getElementById('btn-check-replies').addEventListener('click', function() {
+  runReplyCheck(this);
+  loadReplyStatus();
+});
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadDashboard();
