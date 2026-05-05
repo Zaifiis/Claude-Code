@@ -20,7 +20,8 @@ function load() {
       sent_emails:      [],
       warmup_accounts:  [],
       warmup_logs:      [],
-      _ids:             { sequences: 0, sequence_steps: 0, prospects: 0, sent_emails: 0, warmup_accounts: 0, warmup_logs: 0 }
+      senders:          [],
+      _ids:             { sequences: 0, sequence_steps: 0, prospects: 0, sent_emails: 0, warmup_accounts: 0, warmup_logs: 0, senders: 0 }
     };
   }
   return _data;
@@ -347,9 +348,9 @@ function getSentTodayCount() {
   return load().sent_emails.filter(e => e.sent_at?.startsWith(today) && e.status === 'sent').length;
 }
 
-function logSentEmail(prospect_id, step_number, subject, body, status = 'sent') {
+function logSentEmail(prospect_id, step_number, subject, body, status = 'sent', sender_email = '') {
   const d = load();
-  d.sent_emails.push({ id: nextId('sent_emails'), prospect_id: Number(prospect_id), step_number, subject, body, sent_at: nowIso(), status });
+  d.sent_emails.push({ id: nextId('sent_emails'), prospect_id: Number(prospect_id), step_number, subject, body, sent_at: nowIso(), status, sender_email });
   save();
 }
 
@@ -466,6 +467,77 @@ function getWarmupStats() {
   return { total, active, sentToday, totalSent, totalReplied, recentLogs };
 }
 
+// ── Senders (multi-sender rotation) ──────────────────────────────────────────
+
+function getSenders() {
+  return load().senders || [];
+}
+
+function getActiveSenders() {
+  return (load().senders || []).filter(s => s.status === 'active');
+}
+
+function addSender(s) {
+  const d = load();
+  if (!d.senders) d.senders = [];
+  const exists = d.senders.find(x => x.email.toLowerCase() === s.email.toLowerCase());
+  if (exists) return null;
+  const sender = {
+    id:        nextId('senders'),
+    email:     s.email,
+    from_name: s.from_name || '',
+    smtp_host: s.smtp_host || 'smtp.hostinger.com',
+    smtp_port: s.smtp_port || '465',
+    smtp_pass: s.smtp_pass,
+    imap_host: s.imap_host || 'imap.hostinger.com',
+    imap_port: s.imap_port || '993',
+    status:    'active',
+    added_at:  nowIso()
+  };
+  d.senders.push(sender);
+  save();
+  return sender;
+}
+
+function updateSender(id, fields) {
+  const d = load();
+  const s = (d.senders || []).find(x => x.id === Number(id));
+  if (!s) return;
+  const allowed = ['status', 'from_name', 'smtp_pass', 'smtp_host', 'smtp_port', 'imap_host', 'imap_port'];
+  for (const k of allowed) { if (fields[k] !== undefined) s[k] = fields[k]; }
+  save();
+}
+
+function deleteSender(id) {
+  const d = load();
+  d.senders = (d.senders || []).filter(s => s.id !== Number(id));
+  save();
+}
+
+// Round-robin: pick the active sender with fewest sends today
+function getNextSender() {
+  const senders = getActiveSenders();
+  if (!senders.length) return null;
+  const today = nowIso().slice(0, 10);
+  const d = load();
+  return senders
+    .map(s => ({
+      ...s,
+      sentToday: d.sent_emails.filter(e => e.sender_email === s.email && e.sent_at?.startsWith(today) && e.status === 'sent').length
+    }))
+    .sort((a, b) => a.sentToday - b.sentToday)[0];
+}
+
+function getSenderStats() {
+  const today = nowIso().slice(0, 10);
+  const d = load();
+  return (d.senders || []).map(s => ({
+    ...s,
+    sentToday: d.sent_emails.filter(e => e.sender_email === s.email && e.sent_at?.startsWith(today) && e.status === 'sent').length,
+    sentTotal: d.sent_emails.filter(e => e.sender_email === s.email && e.status === 'sent').length
+  }));
+}
+
 module.exports = {
   init,
   getSetting, setSetting, getSettings,
@@ -475,5 +547,7 @@ module.exports = {
   getSentTodayCount, logSentEmail, getRecentActivity, getStats,
   getWarmupAccounts, getActiveWarmupAccounts, addWarmupAccount,
   updateWarmupAccount, deleteWarmupAccount,
-  logWarmupSend, markWarmupReplied, getWarmupSentToday, getWarmupStats
+  logWarmupSend, markWarmupReplied, getWarmupSentToday, getWarmupStats,
+  getSenders, getActiveSenders, addSender, updateSender, deleteSender,
+  getNextSender, getSenderStats
 };

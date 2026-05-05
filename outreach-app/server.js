@@ -4,11 +4,16 @@ const multer   = require('multer');
 const { parse } = require('csv-parse/sync');
 const path     = require('path');
 const db       = require('./db');
-const { sendEmail, testConnection } = require('./mailer');
+const { sendEmailWithRotation, checkReplies, testConnection } = require('./mailer');
 const { runWarmupCycle, startScheduler } = require('./warmup');
 
 db.init();
 startScheduler();
+
+// Auto reply-check every 30 minutes
+setInterval(async () => {
+  try { await checkReplies(); } catch(e) { console.error('[ReplyCheck] Error:', e.message); }
+}, 30 * 60 * 1000);
 
 const app    = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -155,13 +160,13 @@ app.post('/api/queue/send/:prospectId', async (req, res) => {
   }
 
   try {
-    const { resolvedSubject, resolvedBody } = await sendEmail({
+    const { resolvedSubject, resolvedBody, senderEmail } = await sendEmailWithRotation({
       prospect,
       subject: step.subject,
       body:    step.body
     });
 
-    db.logSentEmail(prospect.id, step.step_number, resolvedSubject, resolvedBody, 'sent');
+    db.logSentEmail(prospect.id, step.step_number, resolvedSubject, resolvedBody, 'sent', senderEmail);
 
     const nextStep = seq.steps.find(s => s.step_number === nextStepNum + 1);
     const updates  = {
@@ -203,12 +208,12 @@ app.post('/api/queue/send-all', async (req, res) => {
 
   for (const item of toSend) {
     try {
-      const { resolvedSubject, resolvedBody } = await sendEmail({
+      const { resolvedSubject, resolvedBody, senderEmail } = await sendEmailWithRotation({
         prospect: item,
         subject:  item.next_subject,
         body:     item.next_body
       });
-      db.logSentEmail(item.id, item.next_step_number, resolvedSubject, resolvedBody, 'sent');
+      db.logSentEmail(item.id, item.next_step_number, resolvedSubject, resolvedBody, 'sent', senderEmail);
 
       const seq      = db.getSequenceById(item.sequence_id);
       const curStep  = seq.steps.find(s => s.step_number === item.next_step_number);
@@ -289,6 +294,44 @@ app.post('/api/warmup/settings', (req, res) => {
   const { daily_per_account } = req.body;
   if (daily_per_account) db.setSetting('warmup_daily_per_account', String(daily_per_account));
   res.json({ ok: true });
+});
+
+// ── SENDERS ───────────────────────────────────────────────────────────────────
+app.get('/api/senders', (req, res) => {
+  res.json(db.getSenderStats());
+});
+
+app.post('/api/senders', (req, res) => {
+  const { email, smtp_pass, from_name, smtp_host, smtp_port, imap_host, imap_port } = req.body;
+  if (!email || !smtp_pass) return res.status(400).json({ error: 'email and smtp_pass required' });
+  const sender = db.addSender({ email, smtp_pass, from_name, smtp_host, smtp_port, imap_host, imap_port });
+  if (!sender) return res.status(409).json({ error: 'Sender already exists' });
+  res.json({ ok: true, sender });
+});
+
+app.put('/api/senders/:id', (req, res) => {
+  db.updateSender(req.params.id, req.body);
+  res.json({ ok: true });
+});
+
+app.delete('/api/senders/:id', (req, res) => {
+  db.deleteSender(req.params.id);
+  res.json({ ok: true });
+});
+
+// ── REPLY CHECK ───────────────────────────────────────────────────────────────
+app.post('/api/replies/check', async (req, res) => {
+  try {
+    const result = await checkReplies();
+    res.json({ ok: true, ...result });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/replies/status', (req, res) => {
+  const lastCheck = db.getSetting('last_reply_check');
+  res.json({ lastCheck });
 });
 
 // ── START ─────────────────────────────────────────────────────────────────────
