@@ -8,693 +8,652 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    :root {
-      --fb-blue: #1877f2;
-      --fb-dark: #0c3975;
-      --accent: #00c6ff;
-    }
     body { font-family: 'Segoe UI', system-ui, sans-serif; }
-    .gradient-header {
-      background: linear-gradient(135deg, #1877f2 0%, #0c3975 50%, #1a1a2e 100%);
-    }
-    .glass-card {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .ad-card {
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .ad-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 40px rgba(24,119,242,0.15);
-    }
-    .badge-running {
-      background: linear-gradient(135deg, #11998e, #38ef7d);
-    }
-    .badge-new {
-      background: linear-gradient(135deg, #f093fb, #f5576c);
-    }
-    .trend-bar {
-      transition: width 0.8s ease;
-    }
-    .spinner {
-      border: 3px solid rgba(24,119,242,0.2);
-      border-top-color: #1877f2;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .tab-active {
-      border-bottom: 3px solid #1877f2;
-      color: #1877f2;
-      font-weight: 600;
-    }
-    .keyword-pill {
-      background: linear-gradient(135deg, rgba(24,119,242,0.15), rgba(0,198,255,0.1));
-      border: 1px solid rgba(24,119,242,0.3);
-    }
-    .stat-card {
-      background: linear-gradient(135deg, rgba(24,119,242,0.1), rgba(12,57,117,0.05));
-      border: 1px solid rgba(24,119,242,0.2);
-    }
-    .pulse-dot {
-      width: 8px; height: 8px;
-      background: #38ef7d;
-      border-radius: 50%;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.3); }
-    }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
-    ::-webkit-scrollbar-thumb { background: #1877f2; border-radius: 3px; }
+    .gradient-header { background: linear-gradient(135deg, #1877f2 0%, #0c3975 50%, #1a1a2e 100%); }
+    .ad-card { transition: transform .2s, box-shadow .2s; }
+    .ad-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(24,119,242,.15); }
+    .badge-hot { background: linear-gradient(135deg,#11998e,#38ef7d); }
+    .badge-new { background: linear-gradient(135deg,#f093fb,#f5576c); }
+    .spinner { border:3px solid rgba(24,119,242,.2); border-top-color:#1877f2; border-radius:50%; width:44px; height:44px; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .tab-active { border-bottom:3px solid #1877f2; color:#1877f2; font-weight:600; }
+    .keyword-pill { background:linear-gradient(135deg,rgba(24,119,242,.12),rgba(0,198,255,.08)); border:1px solid rgba(24,119,242,.25); }
+    .stat-card { background:linear-gradient(135deg,rgba(24,119,242,.08),rgba(12,57,117,.04)); border:1px solid rgba(24,119,242,.18); }
+    .pulse { width:8px;height:8px;background:#38ef7d;border-radius:50%;display:inline-block;animation:pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+    ::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-thumb{background:#1877f2;border-radius:3px}
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
 <!-- Header -->
-<header class="gradient-header text-white py-6 px-4 shadow-xl">
-  <div class="max-w-7xl mx-auto">
-    <div class="flex items-center justify-between flex-wrap gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur">
-          <i class="fab fa-facebook text-2xl text-white"></i>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold tracking-tight">Pakistan Ads Research</h1>
-          <p class="text-blue-200 text-sm flex items-center gap-2">
-            <span class="pulse-dot inline-block"></span>
-            Trending products · Long-running ads · Facebook Ads Library
-          </p>
-        </div>
+<header class="gradient-header text-white py-5 px-4 shadow-xl">
+  <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 bg-white/10 rounded-2xl flex items-center justify-center">
+        <i class="fab fa-facebook text-2xl"></i>
       </div>
-      <div class="flex items-center gap-2 text-sm bg-white/10 rounded-xl px-4 py-2 backdrop-blur">
-        <i class="fas fa-map-marker-alt text-blue-300"></i>
-        <span>Pakistan <span class="text-blue-300">· PK</span></span>
+      <div>
+        <h1 class="text-xl font-bold">Pakistan Ads Research</h1>
+        <p class="text-blue-200 text-xs flex items-center gap-2">
+          <span class="pulse"></span> Trending products · Long-running ads · Facebook Ads Library
+        </p>
       </div>
+    </div>
+    <div class="text-sm bg-white/10 rounded-xl px-4 py-2">
+      <i class="fas fa-map-marker-alt text-blue-300 mr-1"></i>Pakistan · PK
     </div>
   </div>
 </header>
 
-<!-- Main Content -->
-<div class="max-w-7xl mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-4 py-6">
 
-  <!-- Config Card -->
-  <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
-    <div class="flex items-center gap-2 mb-5">
+  <!-- Config -->
+  <div class="bg-white rounded-2xl shadow-md p-5 mb-5 border border-gray-100">
+    <div class="flex items-center gap-2 mb-4">
       <i class="fas fa-key text-blue-600"></i>
-      <h2 class="font-semibold text-gray-800">Configuration</h2>
-      <span class="ml-auto text-xs text-gray-400 flex items-center gap-1">
-        <i class="fas fa-shield-alt text-green-500"></i> Token stored locally only
-      </span>
+      <h2 class="font-semibold text-gray-800">Setup</h2>
+      <span class="ml-auto text-xs text-gray-400"><i class="fas fa-shield-alt text-green-500 mr-1"></i>Token never leaves your browser</span>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Facebook Access Token <span class="text-red-500">*</span>
-        </label>
-        <div class="relative">
-          <input id="accessToken" type="password"
-            placeholder="Paste your Facebook Access Token here..."
-            class="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-          />
-          <button onclick="toggleToken()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-            <i class="fas fa-eye" id="tokenEyeIcon"></i>
-          </button>
-        </div>
-        <p class="text-xs text-gray-400 mt-1">
-          Get from <a href="https://developers.facebook.com/tools/explorer/" target="_blank" class="text-blue-500 hover:underline">Facebook Graph API Explorer</a>
-        </p>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Backend API URL</label>
-        <input id="apiUrl" type="text" value="http://localhost:5000"
-          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+    <div class="mb-3">
+      <label class="block text-sm font-medium text-gray-700 mb-1">
+        Facebook Access Token <span class="text-red-500">*</span>
+      </label>
+      <div class="relative">
+        <input id="accessToken" type="password"
+          placeholder="Paste your Facebook Access Token here..."
+          class="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
         />
-        <p class="text-xs text-gray-400 mt-1">Python Flask backend address</p>
+        <button onclick="toggleToken()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+          <i class="fas fa-eye" id="eyeIcon"></i>
+        </button>
       </div>
+      <p class="text-xs text-gray-400 mt-1">
+        Get from <a href="https://developers.facebook.com/tools/explorer/" target="_blank" class="text-blue-500 hover:underline">Facebook Graph API Explorer</a>
+        — add <code class="bg-gray-100 px-1 rounded">ads_read</code> permission
+      </p>
     </div>
 
-    <!-- Search Controls -->
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-4 pt-4 border-t border-gray-100">
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 pt-3 border-t border-gray-100">
       <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          <i class="fas fa-search mr-1 text-blue-500"></i>Search Keywords
-        </label>
-        <input id="searchTerms" type="text"
-          placeholder="e.g. skincare, shoes, gadgets..."
-          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+        <label class="block text-xs font-medium text-gray-600 mb-1"><i class="fas fa-search mr-1 text-blue-400"></i>Keywords</label>
+        <input id="searchTerms" type="text" placeholder="e.g. skincare, shoes, gadgets..."
+          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
         />
       </div>
-
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          <i class="fas fa-tag mr-1 text-blue-500"></i>Ad Type
-        </label>
-        <select id="adType" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
-          <option value="ALL">All Types</option>
-          <option value="POLITICAL_AND_ISSUE_ADS">Political</option>
-          <option value="HOUSING_ADS">Housing</option>
-          <option value="EMPLOYMENT_ADS">Employment</option>
-          <option value="CREDIT_ADS">Credit</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          <i class="fas fa-list-ol mr-1 text-blue-500"></i>Max Results
-        </label>
-        <select id="limit" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+        <label class="block text-xs font-medium text-gray-600 mb-1"><i class="fas fa-list-ol mr-1 text-blue-400"></i>Results</label>
+        <select id="limit" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
           <option value="25">25 ads</option>
           <option value="50" selected>50 ads</option>
           <option value="100">100 ads</option>
-          <option value="200">200 ads</option>
         </select>
       </div>
-
       <div class="flex flex-col justify-end">
-        <label class="flex items-center gap-2 text-sm text-gray-700 mb-2 cursor-pointer select-none">
-          <input type="checkbox" id="filterLongRunning" class="w-4 h-4 accent-blue-600" />
-          <span>Only 2+ months</span>
+        <label class="flex items-center gap-2 text-xs text-gray-600 mb-2 cursor-pointer">
+          <input type="checkbox" id="filterLong" class="accent-blue-600 w-4 h-4" />
+          Only 2+ months
         </label>
         <button onclick="searchAds()"
-          class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-200">
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl text-sm flex items-center justify-center gap-2 shadow shadow-blue-200 transition-all">
           <i class="fas fa-search"></i> Search
         </button>
       </div>
+      <div class="flex flex-col justify-end">
+        <button onclick="loadAllCategories()"
+          class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-xl text-sm flex items-center justify-center gap-2 shadow shadow-orange-200 transition-all mt-auto">
+          <i class="fas fa-fire"></i> Top Trends
+        </button>
+      </div>
     </div>
 
-    <!-- Quick category buttons -->
-    <div class="mt-4 flex flex-wrap gap-2">
-      <span class="text-xs text-gray-500 self-center mr-1">Quick search:</span>
-      <button onclick="quickSearch('skincare beauty cream')" class="text-xs px-3 py-1.5 rounded-full bg-pink-50 text-pink-700 border border-pink-200 hover:bg-pink-100 transition-colors">Beauty</button>
-      <button onclick="quickSearch('clothes fashion wear')" class="text-xs px-3 py-1.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors">Fashion</button>
-      <button onclick="quickSearch('mobile phone gadget')" class="text-xs px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors">Electronics</button>
-      <button onclick="quickSearch('weight loss health supplement')" class="text-xs px-3 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors">Health</button>
-      <button onclick="quickSearch('food delivery restaurant')" class="text-xs px-3 py-1.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 transition-colors">Food</button>
-      <button onclick="quickSearch('property house apartment')" class="text-xs px-3 py-1.5 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 transition-colors">Real Estate</button>
-      <button onclick="quickSearch('online course learning')" class="text-xs px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-colors">Education</button>
+    <!-- Quick search pills -->
+    <div class="mt-3 flex flex-wrap gap-2">
+      <span class="text-xs text-gray-400 self-center">Quick:</span>
+      <button onclick="quick('skincare beauty cream')"       class="text-xs px-3 py-1 rounded-full bg-pink-50   text-pink-700   border border-pink-200   hover:bg-pink-100 transition">Beauty</button>
+      <button onclick="quick('clothes fashion wear')"         class="text-xs px-3 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition">Fashion</button>
+      <button onclick="quick('mobile phone gadget')"          class="text-xs px-3 py-1 rounded-full bg-blue-50   text-blue-700   border border-blue-200   hover:bg-blue-100 transition">Electronics</button>
+      <button onclick="quick('weight loss supplement health')"class="text-xs px-3 py-1 rounded-full bg-green-50  text-green-700  border border-green-200  hover:bg-green-100 transition">Health</button>
+      <button onclick="quick('food delivery restaurant')"     class="text-xs px-3 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 transition">Food</button>
+      <button onclick="quick('property house apartment')"     class="text-xs px-3 py-1 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 transition">Real Estate</button>
+      <button onclick="quick('online course learning skill')" class="text-xs px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition">Education</button>
+      <button onclick="quick('earning money online work')"    class="text-xs px-3 py-1 rounded-full bg-teal-50   text-teal-700   border border-teal-200   hover:bg-teal-100 transition">Make Money</button>
     </div>
   </div>
 
-  <!-- Error Banner -->
-  <div id="errorBanner" class="hidden mb-4 bg-red-50 border border-red-200 rounded-xl px-5 py-4 flex items-start gap-3">
-    <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+  <!-- Error -->
+  <div id="errBanner" class="hidden mb-4 bg-red-50 border border-red-200 rounded-xl px-5 py-3 flex items-start gap-3">
+    <i class="fas fa-exclamation-circle text-red-500 mt-0.5 flex-shrink-0"></i>
     <div>
       <p class="font-medium text-red-800 text-sm">Error</p>
-      <p id="errorMsg" class="text-red-600 text-sm mt-0.5"></p>
+      <p id="errMsg" class="text-red-600 text-sm mt-0.5"></p>
     </div>
+    <button onclick="document.getElementById('errBanner').classList.add('hidden')" class="ml-auto text-red-400 hover:text-red-600"><i class="fas fa-times"></i></button>
   </div>
 
   <!-- Loading -->
-  <div id="loadingState" class="hidden text-center py-16">
+  <div id="loading" class="hidden text-center py-16">
     <div class="spinner mx-auto mb-4"></div>
-    <p class="text-gray-500 font-medium">Fetching ads from Facebook Ads Library...</p>
-    <p class="text-gray-400 text-sm mt-1">Filtering Pakistan ads running 2+ months</p>
+    <p class="text-gray-600 font-medium" id="loadMsg">Fetching ads from Facebook Ads Library...</p>
+    <p class="text-gray-400 text-sm mt-1">Pakistan · Active ads · 2-month filter</p>
   </div>
 
-  <!-- Results Area -->
-  <div id="resultsArea" class="hidden">
-
-    <!-- Stats Row -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="statsRow"></div>
+  <!-- Results -->
+  <div id="results" class="hidden">
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5" id="statsRow"></div>
 
     <!-- Tabs -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="flex border-b border-gray-100">
-        <button onclick="switchTab('ads')" id="tab-ads" class="tab-active px-6 py-3.5 text-sm transition-colors">
-          <i class="fas fa-ad mr-2"></i>All Ads
-        </button>
-        <button onclick="switchTab('long')" id="tab-long" class="px-6 py-3.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-          <i class="fas fa-fire mr-2 text-orange-500"></i>2+ Months Running
-        </button>
-        <button onclick="switchTab('trends')" id="tab-trends" class="px-6 py-3.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-          <i class="fas fa-chart-bar mr-2 text-blue-500"></i>Trend Analysis
-        </button>
+      <div class="flex border-b border-gray-100 overflow-x-auto">
+        <button onclick="tab('all')"    id="t-all"    class="tab-active px-5 py-3 text-sm whitespace-nowrap"><i class="fas fa-ad mr-1"></i>All Ads</button>
+        <button onclick="tab('hot')"    id="t-hot"    class="px-5 py-3 text-sm text-gray-500 hover:text-gray-700 whitespace-nowrap"><i class="fas fa-fire mr-1 text-orange-400"></i>2+ Months</button>
+        <button onclick="tab('trends')" id="t-trends" class="px-5 py-3 text-sm text-gray-500 hover:text-gray-700 whitespace-nowrap"><i class="fas fa-chart-bar mr-1 text-blue-400"></i>Trends</button>
       </div>
 
-      <!-- All Ads Tab -->
-      <div id="panel-ads" class="p-4">
-        <div class="flex items-center justify-between mb-4">
-          <p class="text-sm text-gray-500"><span id="adsCount">0</span> ads found</p>
+      <!-- All Ads -->
+      <div id="p-all" class="p-4">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-sm text-gray-500"><span id="cntAll">0</span> ads found</p>
           <div class="flex gap-2">
-            <button onclick="sortAds('days')" class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600">
-              <i class="fas fa-sort-amount-down mr-1"></i>Days Running
-            </button>
-            <button onclick="exportCSV()" class="text-xs px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 text-green-700">
-              <i class="fas fa-download mr-1"></i>Export CSV
-            </button>
+            <button onclick="sortBy('days')" class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600"><i class="fas fa-sort-amount-down mr-1"></i>Days</button>
+            <button onclick="exportCSV()"    class="text-xs px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg text-green-700 hover:bg-green-100"><i class="fas fa-download mr-1"></i>CSV</button>
           </div>
         </div>
-        <div id="adsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
-      </div>
-
-      <!-- Long Running Tab -->
-      <div id="panel-long" class="p-4 hidden">
-        <div class="flex items-center gap-2 mb-4">
-          <div class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></div>
-          <p class="text-sm font-medium text-gray-700">Ads continuously running for 60+ days — these indicate proven products/services</p>
+        <div id="gridAll" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+        <div id="nextBtn" class="hidden mt-5 text-center">
+          <button onclick="loadMore()" class="px-6 py-2.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl hover:bg-blue-100 text-sm font-medium">
+            <i class="fas fa-plus mr-1"></i> Load More
+          </button>
         </div>
-        <div id="longRunningGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
       </div>
 
-      <!-- Trends Tab -->
-      <div id="panel-trends" class="p-4 hidden">
+      <!-- 2+ Months -->
+      <div id="p-hot" class="p-4 hidden">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+          <p class="text-sm text-gray-600 font-medium">Ads running 60+ days — proven products with consistent ROI</p>
+          <span class="ml-auto text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-full" id="cntHot">0</span>
+        </div>
+        <div id="gridHot" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </div>
+
+      <!-- Trends -->
+      <div id="p-trends" class="p-4 hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Category Chart -->
           <div>
-            <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              <i class="fas fa-chart-pie text-blue-500"></i>Top Categories (2+ months)
-            </h3>
-            <canvas id="categoryChart" height="220"></canvas>
+            <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"><i class="fas fa-chart-pie text-blue-500"></i>Categories (2+ months)</h3>
+            <canvas id="catChart" height="230"></canvas>
           </div>
-          <!-- Trending Keywords -->
           <div>
-            <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              <i class="fas fa-fire text-orange-500"></i>Trending Keywords
-            </h3>
-            <div id="keywordsCloud" class="flex flex-wrap gap-2"></div>
+            <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"><i class="fas fa-fire text-orange-500"></i>Trending Keywords</h3>
+            <div id="kwCloud" class="flex flex-wrap gap-2"></div>
           </div>
-          <!-- Top Advertisers -->
           <div class="lg:col-span-2">
-            <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              <i class="fas fa-trophy text-yellow-500"></i>Top Advertisers Running Long Campaigns
-            </h3>
-            <div id="topAdvertisers" class="space-y-2"></div>
+            <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"><i class="fas fa-trophy text-yellow-500"></i>Top Advertisers (long campaigns)</h3>
+            <div id="topAds" class="space-y-2"></div>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 
   <!-- Empty state -->
-  <div id="emptyState" class="text-center py-20">
+  <div id="empty" class="text-center py-20">
     <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
       <i class="fab fa-facebook text-4xl text-blue-300"></i>
     </div>
     <h3 class="text-gray-500 font-medium mb-1">Ready to Research</h3>
-    <p class="text-gray-400 text-sm">Enter your Facebook Access Token and search for ads</p>
-    <div class="mt-6 inline-flex items-center gap-2 text-xs text-gray-400 bg-gray-100 rounded-xl px-4 py-2">
+    <p class="text-gray-400 text-sm">Enter your Facebook Access Token and click Search</p>
+    <div class="mt-5 inline-flex items-center gap-2 text-xs text-gray-400 bg-gray-100 rounded-xl px-4 py-2">
       <i class="fas fa-info-circle text-blue-400"></i>
-      Ads running 2+ months = proven market demand
+      Ads running 2+ months = proven market demand in Pakistan
     </div>
   </div>
-
 </div>
 
-<!-- Ad Detail Modal -->
-<div id="adModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+<!-- Modal -->
+<div id="modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
     <div class="flex items-center justify-between p-5 border-b border-gray-100">
-      <h3 class="font-semibold text-gray-800" id="modalTitle">Ad Details</h3>
-      <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-        <i class="fas fa-times text-gray-500"></i>
-      </button>
+      <h3 class="font-semibold text-gray-800 truncate pr-3" id="modalTitle">Ad Details</h3>
+      <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center flex-shrink-0"><i class="fas fa-times text-gray-500"></i></button>
     </div>
-    <div id="modalContent" class="p-5"></div>
+    <div id="modalBody" class="p-5"></div>
   </div>
 </div>
 
 <script>
-let allAds = [];
-let trendsData = {};
-let categoryChartInstance = null;
-let currentSort = 'default';
+const FB_API = 'https://graph.facebook.com/v20.0/ads_archive';
+const STOP = new Set(['this','that','with','have','from','they','will','been','more','also','your','when','were','what','their','about','which','been','into','then','than','some','such','only','very','just','like','over','make','many','time','know','look','year','good','come','even','back','after','most','also','want','give','here','still','well','much','before','through','should','where','these','those','every','would','could','other','first','right','must','both','same','each','take','does','said','used','being','made','does']);
+
+const CATS = {
+  'Beauty & Skincare': ['skincare','cream','serum','beauty','makeup','lotion','facewash','moisturizer','whitening','glow','fairness','sunscreen'],
+  'Fashion & Clothing': ['clothes','fashion','dress','shirt','shoes','wear','outfit','jeans','kurta','shalwar','kameez','lawn','fabric'],
+  'Electronics': ['phone','mobile','laptop','earphones','charger','gadget','tech','electronics','speaker','smartwatch','tablet','accessories'],
+  'Health & Fitness': ['weight','protein','supplement','fitness','gym','health','diet','slimming','organic','vitamins','herbal','natural'],
+  'Home & Kitchen': ['kitchen','home','furniture','decor','appliance','cookware','cleaning','bedsheet','curtain','mattress','sofa'],
+  'Food & Beverages': ['food','restaurant','delivery','snacks','drinks','tea','coffee','biryani','halal','bakery','mithai','sweet'],
+  'Education': ['course','learning','academy','training','skill','certificate','class','tutor','english','ielts','digital'],
+  'Real Estate': ['property','house','apartment','plot','real','estate','housing','flat','commercial','invest'],
+  'Make Money': ['earn','income','work','online','freelance','business','profit','investment','passive','affiliate'],
+};
+
+let allAds = [], nextCursor = null;
+let catChart = null;
 
 function toggleToken() {
   const el = document.getElementById('accessToken');
-  const icon = document.getElementById('tokenEyeIcon');
-  if (el.type === 'password') {
-    el.type = 'text';
-    icon.className = 'fas fa-eye-slash';
-  } else {
-    el.type = 'password';
-    icon.className = 'fas fa-eye';
-  }
+  const ic = document.getElementById('eyeIcon');
+  el.type = el.type === 'password' ? 'text' : 'password';
+  ic.className = el.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
 }
 
-function quickSearch(term) {
+function quick(term) {
   document.getElementById('searchTerms').value = term;
   searchAds();
 }
 
+function getToken() {
+  const t = document.getElementById('accessToken').value.trim();
+  if (!t) { showErr('Please enter your Facebook Access Token.'); return null; }
+  return t;
+}
+
+async function fetchFB(params) {
+  const url = new URL(FB_API);
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, v));
+  const r = await fetch(url.toString());
+  if (!r.ok && r.status !== 200) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
 async function searchAds() {
-  const token = document.getElementById('accessToken').value.trim();
-  const apiUrl = document.getElementById('apiUrl').value.trim();
-  const searchTerms = document.getElementById('searchTerms').value.trim();
-  const adType = document.getElementById('adType').value;
+  const token = getToken(); if (!token) return;
+  const terms = document.getElementById('searchTerms').value.trim();
   const limit = document.getElementById('limit').value;
-  const filterLongRunning = document.getElementById('filterLongRunning').checked;
+  const filterLong = document.getElementById('filterLong').checked;
 
-  if (!token) {
-    showError('Please enter your Facebook Access Token.');
-    return;
-  }
+  const cutoff = daysAgo(62);
+  showLoading(true, 'Fetching Pakistan ads from Facebook...');
+  hideErr();
+  allAds = []; nextCursor = null;
 
-  showLoading(true);
-  hideError();
+  const fields = [
+    'id','ad_creation_time','ad_delivery_start_time','ad_delivery_stop_time',
+    'page_name','page_id','ad_creative_bodies','ad_creative_link_captions',
+    'ad_creative_link_descriptions','ad_creative_link_titles',
+    'ad_snapshot_url','currency','spend','impressions','publisher_platforms'
+  ].join(',');
+
+  const params = {
+    access_token: token,
+    ad_reached_countries: "['PK']",
+    ad_delivery_date_min: cutoff,
+    ad_active_status: 'ACTIVE',
+    fields,
+    limit,
+    search_type: 'KEYWORD_UNORDERED',
+  };
+  if (terms) params.search_terms = terms;
 
   try {
-    const resp = await fetch(`${apiUrl}/api/search`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ access_token: token, search_terms: searchTerms, ad_type: adType, limit, filter_long_running: filterLongRunning })
-    });
-    const data = await resp.json();
+    const data = await fetchFB(params);
+    if (data.error) { showErr(data.error.message || 'Facebook API error'); showLoading(false); return; }
 
-    if (!resp.ok || data.error) {
-      showError(data.error || 'Failed to fetch ads. Check your token and backend URL.');
-      showLoading(false);
-      return;
+    allAds = enrich(data.data || []);
+    nextCursor = data.paging?.cursors?.after || null;
+
+    if (filterLong) {
+      allAds = allAds.filter(a => a.hot);
     }
 
-    allAds = data.ads || [];
-    trendsData = data.trends || {};
-    renderResults(data);
+    render();
   } catch(e) {
-    showError(`Cannot connect to backend (${apiUrl}). Make sure the Flask server is running.`);
+    showErr('Request failed: ' + e.message + '. Check your token has ads_read permission.');
   }
-
   showLoading(false);
 }
 
-function renderResults(data) {
-  document.getElementById('emptyState').classList.add('hidden');
-  document.getElementById('resultsArea').classList.remove('hidden');
+async function loadMore() {
+  const token = getToken(); if (!token) return;
+  if (!nextCursor) return;
 
-  // Stats
-  const stats = [
-    { label: 'Total Ads Found', value: data.trends.total_ads, icon: 'fa-ad', color: 'blue' },
-    { label: 'Running 2+ Months', value: data.trends.long_running_count, icon: 'fa-fire', color: 'orange' },
-    { label: 'Top Category', value: data.trends.top_categories[0]?.[0] || 'N/A', icon: 'fa-tag', color: 'purple' },
-    { label: 'Search Date', value: data.search_date, icon: 'fa-calendar', color: 'green' },
-  ];
+  const terms = document.getElementById('searchTerms').value.trim();
+  const limit = document.getElementById('limit').value;
+  const cutoff = daysAgo(62);
+  const fields = 'id,ad_creation_time,ad_delivery_start_time,page_name,page_id,ad_creative_bodies,ad_creative_link_titles,ad_creative_link_descriptions,ad_snapshot_url,currency,spend,impressions,publisher_platforms';
 
-  document.getElementById('statsRow').innerHTML = stats.map(s => `
-    <div class="stat-card rounded-xl p-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-${s.color}-100 rounded-xl flex items-center justify-center">
-          <i class="fas ${s.icon} text-${s.color}-600"></i>
-        </div>
-        <div>
-          <p class="text-xs text-gray-500">${s.label}</p>
-          <p class="font-bold text-gray-800 text-lg leading-tight">${s.value}</p>
-        </div>
-      </div>
-    </div>
-  `).join('');
+  const params = {
+    access_token: token,
+    ad_reached_countries: "['PK']",
+    ad_delivery_date_min: cutoff,
+    ad_active_status: 'ACTIVE',
+    fields,
+    limit,
+    search_type: 'KEYWORD_UNORDERED',
+    after: nextCursor,
+  };
+  if (terms) params.search_terms = terms;
 
-  const longRunning = allAds.filter(a => a.running_2_months);
+  document.getElementById('nextBtn').innerHTML = '<span class="text-sm text-gray-400"><i class="fas fa-circle-notch fa-spin mr-1"></i>Loading...</span>';
 
-  document.getElementById('adsCount').textContent = allAds.length;
-  renderAdsGrid('adsGrid', allAds);
-  renderAdsGrid('longRunningGrid', longRunning);
-  renderTrends(data.trends);
-
-  // Update tab badge
-  document.getElementById('tab-long').innerHTML =
-    `<i class="fas fa-fire mr-2 text-orange-500"></i>2+ Months (${longRunning.length})`;
+  try {
+    const data = await fetchFB(params);
+    const more = enrich(data.data || []);
+    allAds = [...allAds, ...more];
+    nextCursor = data.paging?.cursors?.after || null;
+    render();
+  } catch(e) {
+    showErr('Load more failed: ' + e.message);
+  }
 }
 
-function renderAdsGrid(gridId, ads) {
-  const grid = document.getElementById(gridId);
-  if (!ads.length) {
-    grid.innerHTML = `<div class="col-span-3 text-center py-12 text-gray-400">
-      <i class="fas fa-inbox text-4xl mb-3 block"></i>No ads found
-    </div>`;
-    return;
+async function loadAllCategories() {
+  const token = getToken(); if (!token) return;
+  showLoading(true, 'Scanning top categories in Pakistan...');
+  hideErr();
+  allAds = []; nextCursor = null;
+
+  const fields = 'id,ad_creation_time,ad_delivery_start_time,page_name,page_id,ad_creative_bodies,ad_creative_link_titles,ad_creative_link_descriptions,ad_snapshot_url,currency,spend,impressions,publisher_platforms';
+  const cutoff = daysAgo(62);
+  const searches = ['skincare', 'clothes fashion', 'mobile phone', 'weight loss', 'food delivery', 'property house', 'online course', 'earn money online'];
+
+  for (const term of searches) {
+    document.getElementById('loadMsg').textContent = `Scanning: "${term}"...`;
+    try {
+      const data = await fetchFB({
+        access_token: token,
+        ad_reached_countries: "['PK']",
+        ad_delivery_date_min: cutoff,
+        ad_active_status: 'ACTIVE',
+        fields,
+        limit: 25,
+        search_type: 'KEYWORD_UNORDERED',
+        search_terms: term,
+      });
+      if (!data.error) {
+        allAds = [...allAds, ...enrich(data.data || [])];
+      }
+    } catch(_) {}
   }
 
-  grid.innerHTML = ads.map((ad, i) => {
-    const daysColor = ad.days_running >= 90 ? 'text-red-600' : ad.days_running >= 60 ? 'text-orange-600' : 'text-green-600';
-    const badge = ad.running_2_months
-      ? `<span class="badge-running text-white text-xs px-2 py-0.5 rounded-full font-medium">🔥 ${ad.days_running}d running</span>`
-      : `<span class="badge-new text-white text-xs px-2 py-0.5 rounded-full font-medium">New</span>`;
+  // deduplicate
+  const seen = new Set();
+  allAds = allAds.filter(a => { if (seen.has(a.id)) return false; seen.add(a.id); return true; });
 
-    const platforms = (ad.platforms || []).map(p =>
-      `<span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">${p}</span>`
-    ).join('');
+  render();
+  tab('trends');
+  showLoading(false);
+}
 
-    const keywordsHtml = (ad.keywords || []).slice(0,5).map(k =>
-      `<span class="keyword-pill text-xs px-2 py-0.5 rounded-full text-blue-700">${k}</span>`
-    ).join('');
+function enrich(raw) {
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 62);
+  return raw.map(ad => {
+    const dateStr = (ad.ad_delivery_start_time || ad.ad_creation_time || '').slice(0,10);
+    let days = 0, hot = false;
+    if (dateStr) {
+      const d = new Date(dateStr);
+      days = Math.floor((Date.now() - d) / 86400000);
+      hot = d <= cutoff;
+    }
+    const bodies = ad.ad_creative_bodies || [];
+    const titles = ad.ad_creative_link_titles || [];
+    const descs  = ad.ad_creative_link_descriptions || [];
+    const full = [...bodies, ...titles, ...descs].join(' ');
+    const cat = categorize(full);
+    const kw = keywords(full).slice(0, 10);
+    const sp = ad.spend || {};
+    const im = ad.impressions || {};
+    return {
+      id: ad.id, page_name: ad.page_name || 'Unknown', page_id: ad.page_id || '',
+      body: bodies[0] || '', title: titles[0] || '', desc: descs[0] || '',
+      snapshot: ad.ad_snapshot_url || '', start: dateStr, days, hot,
+      category: cat, keywords: kw,
+      spend_lo: typeof sp === 'object' ? sp.lower_bound : 'N/A',
+      spend_hi: typeof sp === 'object' ? sp.upper_bound : 'N/A',
+      imp_lo:   typeof im === 'object' ? im.lower_bound : 'N/A',
+      imp_hi:   typeof im === 'object' ? im.upper_bound : 'N/A',
+      currency: ad.currency || 'PKR',
+      platforms: ad.publisher_platforms || [],
+    };
+  });
+}
 
-    const bodyText = ad.ad_body ? ad.ad_body.substring(0, 120) + (ad.ad_body.length > 120 ? '...' : '') : 'No text available';
+function categorize(text) {
+  const t = text.toLowerCase();
+  for (const [cat, kws] of Object.entries(CATS)) {
+    if (kws.some(k => t.includes(k))) return cat;
+  }
+  return 'Other';
+}
 
+function keywords(text) {
+  return [...new Set(
+    (text.toLowerCase().match(/\b[a-z]{4,}\b/g) || []).filter(w => !STOP.has(w))
+  )];
+}
+
+function daysAgo(n) {
+  const d = new Date(); d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0,10);
+}
+
+function render() {
+  document.getElementById('empty').classList.add('hidden');
+  document.getElementById('results').classList.remove('hidden');
+
+  const hot = allAds.filter(a => a.hot);
+
+  // Stats
+  const catCounts = {};
+  hot.forEach(a => catCounts[a.category] = (catCounts[a.category]||0)+1);
+  const topCat = Object.entries(catCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'N/A';
+
+  document.getElementById('statsRow').innerHTML = [
+    {label:'Total Ads',    val: allAds.length, icon:'fa-ad',       color:'blue'},
+    {label:'2+ Months',   val: hot.length,    icon:'fa-fire',     color:'orange'},
+    {label:'Top Niche',   val: topCat,        icon:'fa-tag',      color:'purple'},
+    {label:'Analysed',    val: new Date().toLocaleDateString('en-PK',{day:'numeric',month:'short'}), icon:'fa-calendar', color:'green'},
+  ].map(s=>`
+    <div class="stat-card rounded-xl p-4 flex items-center gap-3">
+      <div class="w-10 h-10 bg-${s.color}-100 rounded-xl flex items-center justify-center flex-shrink-0">
+        <i class="fas ${s.icon} text-${s.color}-600"></i>
+      </div>
+      <div><p class="text-xs text-gray-500">${s.label}</p><p class="font-bold text-gray-800 text-lg leading-tight">${s.val}</p></div>
+    </div>`).join('');
+
+  // Grids
+  document.getElementById('cntAll').textContent = allAds.length;
+  document.getElementById('cntHot').textContent = hot.length + ' ads';
+  document.getElementById('t-hot').innerHTML = `<i class="fas fa-fire mr-1 text-orange-400"></i>2+ Months (${hot.length})`;
+
+  renderGrid('gridAll', allAds);
+  renderGrid('gridHot', hot);
+  renderTrends(hot);
+
+  document.getElementById('nextBtn').classList.toggle('hidden', !nextCursor);
+  if (nextCursor) document.getElementById('nextBtn').innerHTML = `
+    <button onclick="loadMore()" class="px-6 py-2.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl hover:bg-blue-100 text-sm font-medium">
+      <i class="fas fa-plus mr-1"></i> Load More
+    </button>`;
+}
+
+function renderGrid(id, ads) {
+  const g = document.getElementById(id);
+  if (!ads.length) {
+    g.innerHTML = `<div class="col-span-3 text-center py-10 text-gray-400"><i class="fas fa-inbox text-3xl mb-2 block"></i>No ads found</div>`;
+    return;
+  }
+  g.innerHTML = ads.map((ad, i) => {
+    const badge = ad.hot
+      ? `<span class="badge-hot text-white text-xs px-2 py-0.5 rounded-full whitespace-nowrap">🔥 ${ad.days}d</span>`
+      : `<span class="badge-new text-white text-xs px-2 py-0.5 rounded-full">New</span>`;
+    const preview = (ad.body || ad.title || 'No text').slice(0,110);
+    const kws = ad.keywords.slice(0,4).map(k=>`<span class="keyword-pill text-xs px-2 py-0.5 rounded-full text-blue-700">${esc(k)}</span>`).join('');
+    const plats = ad.platforms.map(p=>`<span class="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full">${p}</span>`).join('');
     return `
-    <div class="ad-card bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden cursor-pointer"
-         onclick="openModal(${i})">
+    <div class="ad-card bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden cursor-pointer" onclick="openModal(${ads === allAds ? i : allAds.indexOf(ad)})">
       <div class="p-4">
-        <div class="flex items-start justify-between mb-2">
-          <div class="flex items-center gap-2 flex-1 min-w-0">
-            <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
-              ${(ad.page_name || '?')[0].toUpperCase()}
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2 min-w-0 flex-1">
+            <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              ${(ad.page_name[0]||'?').toUpperCase()}
             </div>
             <div class="min-w-0">
-              <p class="font-semibold text-gray-800 text-sm truncate">${escHtml(ad.page_name)}</p>
-              <p class="text-xs text-gray-400">${ad.start_date || 'Unknown date'}</p>
+              <p class="font-semibold text-gray-800 text-sm truncate">${esc(ad.page_name)}</p>
+              <p class="text-xs text-gray-400">${ad.start || '—'}</p>
             </div>
           </div>
           ${badge}
         </div>
-
-        ${ad.ad_title ? `<p class="font-medium text-gray-800 text-sm mb-1">${escHtml(ad.ad_title)}</p>` : ''}
-        <p class="text-gray-500 text-xs leading-relaxed mb-3">${escHtml(bodyText)}</p>
-
-        <div class="flex flex-wrap gap-1 mb-3">${keywordsHtml}</div>
-
-        <div class="flex items-center justify-between pt-2 border-t border-gray-50">
-          <div class="flex flex-wrap gap-1">${platforms}</div>
-          <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">${ad.category}</span>
+        ${ad.title?`<p class="font-medium text-gray-800 text-sm mb-1 truncate">${esc(ad.title)}</p>`:''}
+        <p class="text-gray-500 text-xs leading-relaxed mb-2">${esc(preview)}${(ad.body||ad.title||'').length>110?'…':''}</p>
+        <div class="flex flex-wrap gap-1 mb-2">${kws}</div>
+        <div class="flex items-center justify-between pt-2 border-t border-gray-50 text-xs">
+          <div class="flex flex-wrap gap-1">${plats}</div>
+          <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">${ad.category}</span>
         </div>
-
-        ${ad.spend_lower !== 'N/A' ? `
+        ${ad.spend_lo!=='N/A'?`
         <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
-          <div class="bg-green-50 rounded-lg p-2 text-center">
-            <span class="text-gray-400 block">Spend</span>
-            <span class="font-semibold text-green-700">${ad.currency} ${ad.spend_lower}–${ad.spend_upper}</span>
-          </div>
-          <div class="bg-blue-50 rounded-lg p-2 text-center">
-            <span class="text-gray-400 block">Impressions</span>
-            <span class="font-semibold text-blue-700">${formatNum(ad.impressions_lower)}+</span>
-          </div>
-        </div>` : ''}
+          <div class="bg-green-50 rounded-lg p-1.5 text-center"><span class="text-gray-400 block text-xs">Spend</span><span class="font-semibold text-green-700">${ad.currency} ${fmt(ad.spend_lo)}–${fmt(ad.spend_hi)}</span></div>
+          <div class="bg-blue-50 rounded-lg p-1.5 text-center"><span class="text-gray-400 block text-xs">Impressions</span><span class="font-semibold text-blue-700">${fmtN(ad.imp_lo)}+</span></div>
+        </div>`:''}
       </div>
-      ${ad.ad_snapshot_url ? `
-      <div class="border-t border-gray-50 px-4 py-2">
-        <a href="${ad.ad_snapshot_url}" target="_blank" onclick="event.stopPropagation()"
-           class="text-xs text-blue-500 hover:text-blue-700 flex items-center gap-1">
-          <i class="fas fa-external-link-alt"></i> View on Facebook
-        </a>
-      </div>` : ''}
+      ${ad.snapshot?`<div class="border-t border-gray-50 px-4 py-2"><a href="${ad.snapshot}" target="_blank" onclick="event.stopPropagation()" class="text-xs text-blue-500 hover:text-blue-700"><i class="fas fa-external-link-alt mr-1"></i>View on Facebook</a></div>`:''}
     </div>`;
   }).join('');
 }
 
-function renderTrends(trends) {
-  // Category Chart
-  if (categoryChartInstance) categoryChartInstance.destroy();
-  const categories = trends.top_categories || [];
-  if (categories.length) {
-    const ctx = document.getElementById('categoryChart').getContext('2d');
-    categoryChartInstance = new Chart(ctx, {
+function renderTrends(hot) {
+  // Category chart
+  const catMap = {};
+  hot.forEach(a => catMap[a.category] = (catMap[a.category]||0)+1);
+  const cats = Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+  if (catChart) catChart.destroy();
+  if (cats.length) {
+    catChart = new Chart(document.getElementById('catChart').getContext('2d'), {
       type: 'doughnut',
       data: {
-        labels: categories.map(c => c[0]),
-        datasets: [{
-          data: categories.map(c => c[1]),
-          backgroundColor: [
-            '#1877f2','#f093fb','#38ef7d','#ffd700','#ff6b6b',
-            '#4ecdc4','#a29bfe','#fd79a8'
-          ],
-          borderWidth: 0,
-        }]
+        labels: cats.map(c=>c[0]),
+        datasets: [{ data: cats.map(c=>c[1]),
+          backgroundColor:['#1877f2','#f093fb','#38ef7d','#ffd700','#ff6b6b','#4ecdc4','#a29bfe','#fd79a8'],
+          borderWidth:0 }]
       },
-      options: {
-        plugins: { legend: { position: 'right', labels: { font: { size: 11 } } } },
-        cutout: '65%',
-      }
+      options: { plugins:{ legend:{position:'right',labels:{font:{size:11}}} }, cutout:'62%' }
     });
   }
 
   // Keywords cloud
-  const kw = trends.trending_keywords || [];
-  const maxCount = kw[0]?.[1] || 1;
-  document.getElementById('keywordsCloud').innerHTML = kw.map(([word, count]) => {
-    const size = Math.max(11, Math.min(20, Math.round(11 + (count / maxCount) * 9)));
-    const opacity = Math.max(0.5, count / maxCount);
-    return `<span class="keyword-pill px-3 py-1.5 rounded-full text-blue-700 cursor-default hover:bg-blue-100 transition-colors"
-              style="font-size:${size}px;opacity:${opacity}" title="${count} occurrences">
-              ${escHtml(word)} <span class="text-blue-400 text-xs">${count}</span>
-            </span>`;
+  const kwMap = {};
+  hot.forEach(a => a.keywords.forEach(k => kwMap[k]=(kwMap[k]||0)+1));
+  const kws = Object.entries(kwMap).sort((a,b)=>b[1]-a[1]).slice(0,25);
+  const max = kws[0]?.[1]||1;
+  document.getElementById('kwCloud').innerHTML = kws.map(([w,c])=>{
+    const sz = Math.max(11, Math.min(20, Math.round(11+(c/max)*9)));
+    return `<span class="keyword-pill px-3 py-1 rounded-full text-blue-700 cursor-default hover:bg-blue-50 transition" style="font-size:${sz}px" title="${c}x">${esc(w)} <span class="text-blue-400 text-xs">${c}</span></span>`;
   }).join('');
 
   // Top advertisers
-  const advertisers = trends.top_advertisers || [];
-  const maxAds = advertisers[0]?.[1] || 1;
-  document.getElementById('topAdvertisers').innerHTML = advertisers.map(([name, count], i) => {
-    const pct = Math.round((count / maxAds) * 100);
-    return `
+  const pgMap = {};
+  hot.forEach(a => pgMap[a.page_name]=(pgMap[a.page_name]||0)+1);
+  const pages = Object.entries(pgMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxP = pages[0]?.[1]||1;
+  document.getElementById('topAds').innerHTML = pages.map(([name,count],i)=>`
     <div class="flex items-center gap-3">
-      <span class="text-xs font-bold text-gray-400 w-5">#${i+1}</span>
-      <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-        ${name[0]?.toUpperCase() || '?'}
-      </div>
+      <span class="text-xs font-bold text-gray-300 w-5">#${i+1}</span>
+      <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0">${(name[0]||'?').toUpperCase()}</div>
       <div class="flex-1 min-w-0">
         <div class="flex items-center justify-between mb-0.5">
-          <p class="text-sm font-medium text-gray-700 truncate">${escHtml(name)}</p>
+          <p class="text-sm font-medium text-gray-700 truncate">${esc(name)}</p>
           <span class="text-xs text-gray-400 ml-2 flex-shrink-0">${count} ads</span>
         </div>
-        <div class="bg-gray-100 rounded-full h-1.5 overflow-hidden">
-          <div class="bg-blue-500 h-1.5 rounded-full trend-bar" style="width:${pct}%"></div>
-        </div>
+        <div class="bg-gray-100 rounded-full h-1.5"><div class="bg-blue-500 h-1.5 rounded-full" style="width:${Math.round(count/maxP*100)}%"></div></div>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
-function sortAds(by) {
-  if (by === 'days') {
-    allAds.sort((a, b) => b.days_running - a.days_running);
-    renderAdsGrid('adsGrid', allAds);
-  }
+function sortBy(field) {
+  if (field === 'days') allAds.sort((a,b) => b.days - a.days);
+  renderGrid('gridAll', allAds);
 }
 
-function switchTab(tab) {
-  ['ads','long','trends'].forEach(t => {
-    document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
-    const btn = document.getElementById(`tab-${t}`);
-    btn.classList.toggle('tab-active', t === tab);
-    btn.classList.toggle('text-gray-500', t !== tab);
+function tab(name) {
+  ['all','hot','trends'].forEach(n => {
+    document.getElementById(`p-${n}`).classList.toggle('hidden', n!==name);
+    const btn = document.getElementById(`t-${n}`);
+    btn.classList.toggle('tab-active', n===name);
+    btn.classList.toggle('text-gray-500', n!==name);
   });
 }
 
-function openModal(index) {
-  const ad = allAds[index];
-  if (!ad) return;
-  document.getElementById('modalTitle').textContent = ad.page_name || 'Ad Details';
-  document.getElementById('modalContent').innerHTML = `
+function openModal(i) {
+  const ad = allAds[i]; if (!ad) return;
+  document.getElementById('modalTitle').textContent = ad.page_name;
+  document.getElementById('modalBody').innerHTML = `
     <div class="space-y-4">
       <div class="flex items-center gap-3">
-        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-          ${(ad.page_name || '?')[0].toUpperCase()}
-        </div>
+        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">${(ad.page_name[0]||'?').toUpperCase()}</div>
         <div>
-          <p class="font-bold text-gray-800">${escHtml(ad.page_name)}</p>
-          <p class="text-sm text-gray-400">Started: ${ad.start_date} · Running ${ad.days_running} days</p>
+          <p class="font-bold text-gray-800">${esc(ad.page_name)}</p>
+          <p class="text-sm text-gray-400">Started: ${ad.start||'Unknown'} · Running ${ad.days} days</p>
         </div>
-        ${ad.running_2_months ? '<span class="ml-auto badge-running text-white text-xs px-3 py-1 rounded-full">🔥 Long-Running</span>' : ''}
+        ${ad.hot?'<span class="ml-auto badge-hot text-white text-xs px-3 py-1 rounded-full whitespace-nowrap">🔥 Long-Running</span>':''}
       </div>
-
-      ${ad.ad_title ? `<div class="bg-blue-50 rounded-xl p-4"><p class="font-semibold text-gray-800">${escHtml(ad.ad_title)}</p></div>` : ''}
-      ${ad.ad_body ? `<div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed">${escHtml(ad.ad_body)}</div>` : ''}
-      ${ad.ad_description ? `<p class="text-sm text-gray-500">${escHtml(ad.ad_description)}</p>` : ''}
-
+      ${ad.title?`<div class="bg-blue-50 rounded-xl p-4"><p class="font-semibold text-gray-800">${esc(ad.title)}</p></div>`:''}
+      ${ad.body?`<div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed">${esc(ad.body)}</div>`:''}
+      ${ad.desc?`<p class="text-sm text-gray-500 px-1">${esc(ad.desc)}</p>`:''}
       <div class="grid grid-cols-2 gap-3 text-sm">
-        <div class="bg-gray-50 rounded-xl p-3">
-          <p class="text-gray-400 text-xs mb-1">Category</p>
-          <p class="font-medium text-gray-700">${ad.category}</p>
-        </div>
-        <div class="bg-gray-50 rounded-xl p-3">
-          <p class="text-gray-400 text-xs mb-1">Platforms</p>
-          <p class="font-medium text-gray-700">${(ad.platforms || []).join(', ') || 'N/A'}</p>
-        </div>
-        ${ad.spend_lower !== 'N/A' ? `
-        <div class="bg-green-50 rounded-xl p-3">
-          <p class="text-gray-400 text-xs mb-1">Estimated Spend</p>
-          <p class="font-medium text-green-700">${ad.currency} ${ad.spend_lower} – ${ad.spend_upper}</p>
-        </div>
-        <div class="bg-blue-50 rounded-xl p-3">
-          <p class="text-gray-400 text-xs mb-1">Impressions</p>
-          <p class="font-medium text-blue-700">${formatNum(ad.impressions_lower)} – ${formatNum(ad.impressions_upper)}</p>
-        </div>` : ''}
+        <div class="bg-gray-50 rounded-xl p-3"><p class="text-gray-400 text-xs mb-1">Category</p><p class="font-medium text-gray-700">${ad.category}</p></div>
+        <div class="bg-gray-50 rounded-xl p-3"><p class="text-gray-400 text-xs mb-1">Platforms</p><p class="font-medium text-gray-700">${ad.platforms.join(', ')||'N/A'}</p></div>
+        ${ad.spend_lo!=='N/A'?`
+        <div class="bg-green-50 rounded-xl p-3"><p class="text-gray-400 text-xs mb-1">Estimated Spend</p><p class="font-medium text-green-700">${ad.currency} ${fmt(ad.spend_lo)}–${fmt(ad.spend_hi)}</p></div>
+        <div class="bg-blue-50 rounded-xl p-3"><p class="text-gray-400 text-xs mb-1">Impressions</p><p class="font-medium text-blue-700">${fmtN(ad.imp_lo)}–${fmtN(ad.imp_hi)}</p></div>`:''}
       </div>
-
-      ${ad.keywords.length ? `
-      <div>
-        <p class="text-xs text-gray-400 mb-2">Keywords extracted</p>
-        <div class="flex flex-wrap gap-1.5">
-          ${ad.keywords.map(k => `<span class="keyword-pill text-xs px-2.5 py-1 rounded-full text-blue-700">${escHtml(k)}</span>`).join('')}
-        </div>
-      </div>` : ''}
-
-      ${ad.ad_snapshot_url ? `
-      <a href="${ad.ad_snapshot_url}" target="_blank"
-         class="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition-colors">
-        <i class="fab fa-facebook"></i> View Original Ad on Facebook
-      </a>` : ''}
-    </div>
-  `;
-  document.getElementById('adModal').classList.remove('hidden');
-  document.getElementById('adModal').classList.add('flex');
+      ${ad.keywords.length?`
+      <div><p class="text-xs text-gray-400 mb-2">Extracted Keywords</p>
+        <div class="flex flex-wrap gap-1.5">${ad.keywords.map(k=>`<span class="keyword-pill text-xs px-2.5 py-1 rounded-full text-blue-700">${esc(k)}</span>`).join('')}</div>
+      </div>`:''}
+      ${ad.snapshot?`<a href="${ad.snapshot}" target="_blank" class="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition"><i class="fab fa-facebook"></i>View Original Ad on Facebook</a>`:''}
+    </div>`;
+  document.getElementById('modal').classList.remove('hidden');
+  document.getElementById('modal').classList.add('flex');
 }
 
 function closeModal() {
-  document.getElementById('adModal').classList.add('hidden');
-  document.getElementById('adModal').classList.remove('flex');
+  document.getElementById('modal').classList.add('hidden');
+  document.getElementById('modal').classList.remove('flex');
 }
-
-document.getElementById('adModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
+document.getElementById('modal').addEventListener('click', e => { if (e.target===e.currentTarget) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
 
 function exportCSV() {
   if (!allAds.length) return;
-  const headers = ['Page Name','Ad Title','Ad Body','Start Date','Days Running','2+ Months','Category','Platforms','Spend Lower','Spend Upper','Impressions Lower','Currency'];
-  const rows = allAds.map(a => [
-    a.page_name, a.ad_title, a.ad_body?.replace(/\n/g,' '), a.start_date,
-    a.days_running, a.running_2_months ? 'Yes' : 'No',
-    a.category, (a.platforms||[]).join('|'), a.spend_lower, a.spend_upper,
-    a.impressions_lower, a.currency
-  ].map(v => `"${String(v||'').replace(/"/g,'""')}"`));
-
-  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
+  const h = ['Page Name','Title','Body','Start Date','Days Running','2+ Months','Category','Platforms','Spend Low','Spend High','Impressions Low','Currency'];
+  const rows = allAds.map(a=>[a.page_name,a.title,a.body?.replace(/\n/g,' '),a.start,a.days,a.hot?'Yes':'No',a.category,a.platforms.join('|'),a.spend_lo,a.spend_hi,a.imp_lo,a.currency].map(v=>`"${String(v??'').replace(/"/g,'""')}"`));
+  const csv = [h.join(','),...rows.map(r=>r.join(','))].join('\n');
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `pakistan_fb_ads_${new Date().toISOString().slice(0,10)}.csv`;
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = `pk_fb_ads_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
-  URL.revokeObjectURL(url);
 }
 
-function showLoading(show) {
-  document.getElementById('loadingState').classList.toggle('hidden', !show);
-  if (show) {
-    document.getElementById('resultsArea').classList.add('hidden');
-    document.getElementById('emptyState').classList.add('hidden');
-  }
+function showLoading(show, msg='') {
+  document.getElementById('loading').classList.toggle('hidden', !show);
+  if (msg) document.getElementById('loadMsg').textContent = msg;
+  if (show) { document.getElementById('results').classList.add('hidden'); document.getElementById('empty').classList.add('hidden'); }
 }
 
-function showError(msg) {
-  document.getElementById('errorMsg').textContent = msg;
-  document.getElementById('errorBanner').classList.remove('hidden');
-}
-
-function hideError() {
-  document.getElementById('errorBanner').classList.add('hidden');
-}
-
-function escHtml(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function formatNum(n) {
-  if (!n || n === 'N/A') return 'N/A';
-  const num = parseInt(n);
-  if (isNaN(num)) return n;
-  if (num >= 1000000) return (num/1000000).toFixed(1) + 'M';
-  if (num >= 1000) return (num/1000).toFixed(1) + 'K';
-  return num;
+function showErr(msg) { document.getElementById('errMsg').textContent = msg; document.getElementById('errBanner').classList.remove('hidden'); }
+function hideErr() { document.getElementById('errBanner').classList.add('hidden'); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(n) { return n==='N/A'?'N/A':String(n); }
+function fmtN(n) {
+  if (!n||n==='N/A') return 'N/A';
+  const v=parseInt(n); if(isNaN(v)) return n;
+  return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(1)+'K':String(v);
 }
 </script>
 </body>
