@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+enum AdStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SyncStatus {
+  SUCCESS
+  FAILED
+  RUNNING
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  name           String?
+  image          String?
+  password       String?
+  role           Role            @default(USER)
+  plan           Plan            @default(FREE)
+  planExpiresAt  DateTime?
+  dailySearches  Int             @default(0)
+  lastSearchDate DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  savedProducts  SavedProduct[]
+  searches       SearchHistory[]
+  accounts       Account[]
+  sessions       Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Product {
+  id              String         @id @default(cuid())
+  name            String
+  category        String
+  adCount         Int            @default(0)
+  advertiserCount Int            @default(0)
+  firstSeenAt     DateTime       @default(now())
+  lastSeenAt      DateTime       @default(now())
+  trendingScore   Float          @default(0)
+  country         String         @default("PK")
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  ads             Ad[]
+  savedBy         SavedProduct[]
+
+  @@index([trendingScore(sort: Desc)])
+  @@index([category])
+  @@index([isActive])
+}
+
+model Ad {
+  id             String    @id @default(cuid())
+  fbAdId         String    @unique
+  pageId         String
+  pageName       String
+  pageCategory   String?
+  adTitle        String?   @db.Text
+  adBody         String?   @db.Text
+  adCallToAction String?
+  adImageUrl     String?
+  adVideoUrl     String?
+  startDate      DateTime?
+  endDate        DateTime?
+  status         AdStatus  @default(ACTIVE)
+  estimatedReach String?
+  spendLower     String?
+  spendUpper     String?
+  adLibraryUrl   String?
+  platforms      String[]
+  productId      String
+  product        Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([productId])
+  @@index([status])
+  @@index([startDate])
+}
+
+model SavedProduct {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  note      String?  @db.Text
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model SearchHistory {
+  id           String   @id @default(cuid())
+  userId       String
+  query        String
+  filters      Json?
+  resultsCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SyncLog {
+  id            String     @id @default(cuid())
+  status        SyncStatus @default(RUNNING)
+  productsFound Int        @default(0)
+  adsFound      Int        @default(0)
+  duration      Int?
+  errorMessage  String?    @db.Text
+  createdAt     DateTime   @default(now())
+}
