@@ -412,7 +412,7 @@
 
     <!-- ADD TO CART — sends to WooCommerce cart with correct quantity -->
     <form id="cartForm" method="get" action="<?php echo esc_url(home_url('/cart/')); ?>">
-      <input type="hidden" name="add-to-cart" value="15"/>
+      <input type="hidden" name="add-to-cart" value="17"/>
       <input type="hidden" name="quantity" id="qtyInput" value="2"/>
       <button type="submit" class="add-to-cart-btn">Add to Cart</button>
     </form>
