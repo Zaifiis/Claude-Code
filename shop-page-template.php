@@ -190,7 +190,7 @@
   <div class="logo">Snap<span>lyr</span></div>
   <nav class="header-nav">
     <a href="<?php echo home_url(); ?>">Home</a>
-    <a href="<?php echo home_url('/shop/'); ?>" style="color:var(--primary);">Shop</a>
+    <a href="<?php echo home_url('/our-products/'); ?>" style="color:var(--primary);">Shop</a>
     <a href="#">Contact</a>
   </nav>
   <div class="header-icons">
@@ -205,7 +205,7 @@
 </header>
 
 <div class="breadcrumb">
-  <a href="<?php echo home_url(); ?>">Home</a> › Shop
+  <a href="<?php echo home_url(); ?>">Home</a> › Our Products
 </div>
 
 <div class="shop-hero">
@@ -243,7 +243,7 @@
     <div class="product-card">
       <div class="product-card-img">
         <span class="card-badge-sale">Sale</span>
-        <img src="https://snaplyr.com/wp-content/uploads/2026/05/motion-1.webp" alt="Motion Sensor Night Light"/>
+        <img src="https://www.thebeamhouse.store/cdn/shop/files/e42ff886-fe8d-45be-b56e-9be116e6bce8.png?v=1754492881" alt="Motion Sensor Night Light"/>
       </div>
       <div class="product-card-body">
         <div class="card-product-name">Motion Sensor Night Light</div>
