@@ -365,6 +365,24 @@ $db_reviews = get_posts([
   </style>
 </head>
 <body>
+
+<!-- Purchase Notification Popup -->
+<div id="purchase-notif" style="
+  position:fixed;bottom:20px;left:20px;z-index:9999;
+  background:#fff;border:1px solid #e5e7eb;border-radius:12px;
+  padding:12px 16px;box-shadow:0 4px 20px rgba(0,0,0,0.15);
+  display:flex;align-items:center;gap:12px;max-width:290px;
+  transform:translateY(120px);opacity:0;transition:all 0.4s ease;
+  font-family:'Segoe UI',Arial,sans-serif;font-size:13px;
+">
+  <div style="width:42px;height:42px;border-radius:50%;background:#d8f3dc;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💡</div>
+  <div style="flex:1;min-width:0;">
+    <strong id="pn-name" style="display:block;font-weight:700;color:#1b1b1b;font-size:13px;"></strong>
+    <span id="pn-action" style="color:#6b7280;font-size:11px;display:block;margin-top:1px;"></span>
+  </div>
+  <div id="pn-time" style="font-size:10px;color:#9ca3af;white-space:nowrap;flex-shrink:0;"></div>
+</div>
+
 <div class="topbar"><span>🚚</span> FREE DELIVERY ALL OVER PAKISTAN <span>🚚</span></div>
 <header>
   <div class="logo">Snap<span>lyr</span></div>
@@ -726,6 +744,81 @@ $db_reviews = get_posts([
       form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
+
+  // ── Purchase Notifications ──
+  (function() {
+    const allNames = [
+      // Classic / traditional Pakistani names
+      'Ahmed','Muhammad','Usman','Ali','Hassan','Bilal','Omar','Imran','Kamran','Asif',
+      'Tariq','Hamza','Waqar','Farhan','Shoaib','Rizwan','Zaid','Adeel','Saad','Faisal',
+      'Nadeem','Ahsan','Waseem','Salman','Junaid','Tahir','Raza','Amir','Naeem','Khalid',
+      'Aamir','Ijaz','Pervaiz','Shahid','Arshad','Bashir','Nasir','Ghulam','Qasim','Iqbal',
+      // Women – classic
+      'Fatima','Ayesha','Sara','Nadia','Sana','Hina','Rabia','Mehwish','Sobia','Amna',
+      'Zainab','Mariam','Rukhsana','Shaista','Nargis','Samina','Parveen','Razia','Kiran','Lubna',
+      'Noor','Bushra','Fauzia','Nasreen','Shaheen','Zara','Alia','Sidra','Iram','Saima',
+      // Young / modern Pakistani names (2000s–2010s)
+      'Ayan','Rayan','Zayan','Daniyal','Rayyan','Huzaifa','Musa','Ibrahim','Yahya','Suleman',
+      'Armaan','Zayn','Aarav','Hamdan','Faris','Zubair','Anas','Talha','Abuzar','Muaaz',
+      'Mahnoor','Aiza','Hoorain','Eman','Maryam','Hoor','Laraib','Inaya','Alishba','Zoha',
+      'Nimra','Areesha','Hania','Maha','Tania','Aroha','Quratulain','Shanzay','Parisa','Rida',
+      // Young men – trending
+      'Shaheer','Ahad','Fawad','Wahaj','Sheheryar','Bilal Abbas','Asad','Sami','Danish','Zohair',
+      'Haseeb','Rafay','Rauf','Tooba','Subhan','Saim','Hammad','Moiz','Zubyan','Farrukh',
+      // Unique / new-gen
+      'Aryan','Cyrus','Emaan','Izhan','Rehaan','Jibraan','Rayaan','Kian','Ehan','Shayan',
+      'Amal','Nayab','Sehar','Minahil','Bisma','Ushna','Sundus','Tayyaba','Ifrah','Zunera',
+      // Punjabi / regional flavour
+      'Gurdeep','Chaudhry Ahsan','Raja Imran','Rana Ali','Sheikh Bilal','Malik Usman','Syed Omar',
+      'Chaudary Raza','Pasha','Butt Saab','Javed','Pervez','Ramzan','Ghulam Mustafa','Nazar'
+    ];
+    const cities = [
+      'Lahore','Karachi','Islamabad','Rawalpindi','Faisalabad','Multan','Peshawar',
+      'Gujranwala','Sialkot','Quetta','Hyderabad','Abbottabad','Gojra','Sargodha',
+      'Bahawalpur','Dera Ghazi Khan','Sheikhupura','Sukkur','Larkana','Mardan',
+      'Sahiwal','Rahim Yar Khan','Okara','Gujrat','Wah Cantt','Jhelum','Attock',
+      'Muzaffarabad','Mirpur','Chakwal','Khanewal','Vehari','Pakpattan','Chiniot',
+      'Hafizabad','Narowal','Mandi Bahauddin','Toba Tek Singh','Jhang','Kasur'
+    ];
+    const products = [
+      'LED Solar Wall Lamp','Solar Wall Lamp (Pack of 2)','Outdoor Solar Light','Solar Wall Lamp'
+    ];
+    const times = ['just now','1m ago','2m ago','3m ago','4m ago','5m ago','6m ago','8m ago'];
+    // Shuffle names so they don't repeat until the full list cycles
+    function shuffle(arr) {
+      let a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+    let namePool = shuffle(allNames);
+    let nameIdx = 0;
+    // Intervals: 3s, 5s, 2s, 1s, 4s cycling with small random jitter
+    const baseIntervals = [3000, 5000, 2000, 1000, 4000, 3500, 2500, 1500, 6000, 2000];
+    let intIdx = 0;
+
+    function showNotif() {
+      if (nameIdx >= namePool.length) { namePool = shuffle(allNames); nameIdx = 0; }
+      const name = namePool[nameIdx++];
+      const city = cities[Math.floor(Math.random() * cities.length)];
+      const prod = products[Math.floor(Math.random() * products.length)];
+      const time = times[Math.floor(Math.random() * times.length)];
+      const el = document.getElementById('purchase-notif');
+      document.getElementById('pn-name').textContent = name + ' from ' + city;
+      document.getElementById('pn-action').textContent = 'just purchased ' + prod;
+      document.getElementById('pn-time').textContent = time;
+      el.style.transform = 'translateY(0)';
+      el.style.opacity = '1';
+      setTimeout(() => { el.style.transform = 'translateY(120px)'; el.style.opacity = '0'; }, 3500);
+      intIdx = (intIdx + 1) % baseIntervals.length;
+      const next = baseIntervals[intIdx] + Math.floor(Math.random() * 800);
+      setTimeout(showNotif, next + 4000);
+    }
+
+    setTimeout(showNotif, 3000);
+  })();
 </script>
 <?php wp_footer(); ?>
 </body>
