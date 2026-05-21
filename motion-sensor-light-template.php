@@ -13,11 +13,7 @@ $db_reviews = get_posts(array(
     'order'          => 'DESC',
 ));
 
-// Try to find WooCommerce product ID by slug
-$wc_product_id = 0;
-$_p = get_posts(array('post_type'=>'product','name'=>'motion-sensor-night-light','posts_per_page'=>1));
-if (!empty($_p)) $wc_product_id = $_p[0]->ID;
-unset($_p);
+$wc_product_id = 52;
 
 // Sizes config: [label, sale_price, original_price]
 $sizes = array(
@@ -56,9 +52,16 @@ $sizes = array(
     .logo span { color: var(--primary); }
     .header-nav { display: flex; gap: 18px; font-size: 13px; font-weight: 500; }
     .header-nav a { white-space: nowrap; transition: color 0.2s; }
-    .header-nav a:hover { color: var(--primary); }
+    .header-nav a:hover, .header-nav a.active-link { color: var(--primary); }
     .header-icons { display: flex; gap: 14px; align-items: center; flex-shrink: 0; }
     .header-icons svg { width: 22px; height: 22px; cursor: pointer; }
+    .mob-btn { display: none; background: none; border: none; font-size: 26px; cursor: pointer; color: var(--text); padding: 2px 6px; line-height: 1; }
+    .mob-nav { display: none; position: fixed; top: 57px; left: 0; right: 0; background: #fff; border-bottom: 2px solid var(--border); box-shadow: 0 6px 20px rgba(0,0,0,0.1); z-index: 99; padding: 8px 0; }
+    .mob-nav.open { display: block; }
+    .mob-nav a { display: flex; align-items: center; gap: 10px; padding: 14px 22px; font-size: 15px; font-weight: 600; color: var(--text); border-bottom: 1px solid #f3f4f6; text-decoration: none; transition: background 0.15s; }
+    .mob-nav a:last-child { border-bottom: none; }
+    .mob-nav a:hover, .mob-nav a.active-link { background: var(--primary-light); color: var(--primary); }
+    .mob-nav a .nav-icon { font-size: 17px; }
 
     /* Breadcrumb */
     .breadcrumb { max-width: 1100px; margin: 12px auto 0; padding: 0 16px; font-size: 12px; color: var(--muted); }
@@ -235,7 +238,7 @@ $sizes = array(
     /* Responsive */
     @media (max-width: 900px) { .header-nav { gap: 14px; font-size: 12px; } .product-wrapper { gap: 28px; } .reviews-grid { grid-template-columns: repeat(2,1fr); } .reviews-summary { grid-template-columns: 130px 1fr; gap: 20px; } }
     @media (max-width: 768px) {
-      .topbar { font-size: 11px; padding: 7px 10px; } header { padding: 10px 14px; } .logo { font-size: 18px; } .header-nav { display: none; } .header-icons svg { width: 24px; height: 24px; }
+      .topbar { font-size: 11px; padding: 7px 10px; } header { padding: 10px 14px; } .logo { font-size: 18px; } .header-nav { display: none; } .mob-btn { display: block; } .header-icons svg { width: 24px; height: 24px; }
       .breadcrumb { margin-top: 10px; padding: 0 14px; }
       .product-wrapper { grid-template-columns: 1fr; gap: 20px; margin: 12px auto 32px; padding: 0 14px; }
       .gallery { position: static; }
@@ -274,11 +277,12 @@ $sizes = array(
 <div class="topbar"><span>🚚</span> FREE DELIVERY ALL OVER PAKISTAN &nbsp;|&nbsp; 5–7 DAY DELIVERY <span>🚚</span></div>
 
 <header>
+  <button class="mob-btn" onclick="toggleMobNav()" aria-label="Menu">&#9776;</button>
   <div class="logo">Snap<span>lyr</span></div>
   <nav class="header-nav">
     <a href="<?php echo home_url(); ?>">Home</a>
+    <a href="<?php echo home_url('/motion-sensor-night-light/'); ?>" class="active-link">Motion Sensor Light</a>
     <a href="<?php echo home_url('/our-products/'); ?>">Shop</a>
-    <a href="#reviews">Reviews</a>
     <a href="#">Contact</a>
   </nav>
   <div class="header-icons">
@@ -291,6 +295,13 @@ $sizes = array(
     </a>
   </div>
 </header>
+<nav class="mob-nav" id="mobNav">
+  <a href="<?php echo home_url(); ?>"><span class="nav-icon">🏠</span> Home</a>
+  <a href="<?php echo home_url('/motion-sensor-night-light/'); ?>" class="active-link"><span class="nav-icon">💡</span> Motion Sensor Night Light</a>
+  <a href="<?php echo home_url('/our-products/'); ?>"><span class="nav-icon">🛍️</span> Shop All Products</a>
+  <a href="<?php echo function_exists('wc_get_cart_url') ? wc_get_cart_url() : home_url('/cart/'); ?>"><span class="nav-icon">🛒</span> Cart</a>
+  <a href="#"><span class="nav-icon">📞</span> Contact Us</a>
+</nav>
 
 <div class="breadcrumb">
   <a href="<?php echo home_url(); ?>">Home</a> ›
@@ -303,13 +314,13 @@ $sizes = array(
   <!-- Gallery -->
   <div class="gallery">
     <div class="gallery-main">
-      <img id="main-img" src="https://www.thebeamhouse.store/cdn/shop/files/e42ff886-fe8d-45be-b56e-9be116e6bce8.png?v=1754492881" alt="Motion Sensor Night Light"/>
+      <img id="main-img" src="https://snaplyr.com/wp-content/uploads/2026/05/1-2.webp" alt="Motion Sensor Night Light"/>
     </div>
     <div class="gallery-thumbs">
-      <img src="https://www.thebeamhouse.store/cdn/shop/files/e42ff886-fe8d-45be-b56e-9be116e6bce8.png?v=1754492881"     alt="Motion Sensor Night Light 1" class="active" onclick="switchImg(this)"/>
-      <img src="https://www.thebeamhouse.store/cdn/shop/files/WhatsApp_Image_2025-05-11_at_07.23.44_707595f7.jpg?v=1754492881" alt="Motion Sensor Night Light 2" onclick="switchImg(this)"/>
-      <img src="https://www.thebeamhouse.store/cdn/shop/files/WhatsApp_Image_2025-05-11_at_07.23.45_7f3323f7.jpg?v=1754492881" alt="Motion Sensor Night Light 3" onclick="switchImg(this)"/>
-      <img src="https://www.thebeamhouse.store/cdn/shop/files/4734f474-7f4e-4d31-8ed5-1e8409c1da4d.png?v=1754492881"         alt="Motion Sensor Night Light 4" onclick="switchImg(this)"/>
+      <img src="https://snaplyr.com/wp-content/uploads/2026/05/1-2.webp" alt="Motion Sensor Night Light 1" class="active" onclick="switchImg(this)"/>
+      <img src="https://snaplyr.com/wp-content/uploads/2026/05/3m.webp"  alt="Motion Sensor Night Light 2" onclick="switchImg(this)"/>
+      <img src="https://snaplyr.com/wp-content/uploads/2026/05/2-2.webp" alt="Motion Sensor Night Light 3" onclick="switchImg(this)"/>
+      <img src="https://snaplyr.com/wp-content/uploads/2026/05/4m.webp"  alt="Motion Sensor Night Light 4" onclick="switchImg(this)"/>
     </div>
   </div>
 
@@ -680,6 +691,18 @@ $sizes = array(
 <?php wp_footer(); ?>
 
 <script>
+// ── Mobile nav ──
+function toggleMobNav() {
+  var n = document.getElementById('mobNav');
+  n.classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  var nav = document.getElementById('mobNav');
+  if (nav.classList.contains('open') && !nav.contains(e.target) && !e.target.closest('.mob-btn')) {
+    nav.classList.remove('open');
+  }
+});
+
 // ── Gallery ──
 function switchImg(el) {
   document.getElementById('main-img').src = el.src;

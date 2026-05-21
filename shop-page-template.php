@@ -159,12 +159,22 @@
     footer ul li a:hover { color: #fff; }
     .footer-bottom { max-width: 1100px; margin: 14px auto 0; font-size: 11px; color: #6b7280; text-align: center; }
 
+    /* ── Mobile Nav ── */
+    .mob-btn { display: none; background: none; border: none; font-size: 26px; cursor: pointer; color: var(--text); padding: 2px 6px; line-height: 1; }
+    .mob-nav { display: none; position: fixed; top: 57px; left: 0; right: 0; background: #fff; border-bottom: 2px solid var(--border); box-shadow: 0 6px 20px rgba(0,0,0,0.1); z-index: 99; padding: 8px 0; }
+    .mob-nav.open { display: block; }
+    .mob-nav a { display: flex; align-items: center; gap: 10px; padding: 14px 22px; font-size: 15px; font-weight: 600; color: var(--text); border-bottom: 1px solid #f3f4f6; text-decoration: none; transition: background 0.15s; }
+    .mob-nav a:last-child { border-bottom: none; }
+    .mob-nav a:hover, .mob-nav a.active-link { background: var(--primary-light); color: var(--primary); }
+    .mob-nav a .nav-icon { font-size: 17px; }
+
     /* ── Responsive ── */
     @media (max-width: 768px) {
       .topbar { font-size: 11px; padding: 7px 10px; }
       header { padding: 10px 14px; }
       .logo { font-size: 18px; }
       .header-nav { display: none; }
+      .mob-btn { display: block; }
       .header-icons svg { width: 24px; height: 24px; }
       .breadcrumb { margin-top: 10px; padding: 0 14px; }
       .shop-hero { margin-top: 24px; padding: 0 14px; }
@@ -187,10 +197,12 @@
 <body>
 <div class="topbar"><span>🚚</span> FREE DELIVERY ALL OVER PAKISTAN <span>🚚</span></div>
 <header>
+  <button class="mob-btn" onclick="toggleMobNav()" aria-label="Menu">&#9776;</button>
   <div class="logo">Snap<span>lyr</span></div>
   <nav class="header-nav">
     <a href="<?php echo home_url(); ?>">Home</a>
-    <a href="<?php echo home_url('/our-products/'); ?>" style="color:var(--primary);">Shop</a>
+    <a href="<?php echo home_url('/motion-sensor-night-light/'); ?>">Motion Sensor Light</a>
+    <a href="<?php echo home_url('/our-products/'); ?>" class="active-link">Shop</a>
     <a href="#">Contact</a>
   </nav>
   <div class="header-icons">
@@ -203,6 +215,13 @@
     </a>
   </div>
 </header>
+<nav class="mob-nav" id="mobNav">
+  <a href="<?php echo home_url(); ?>"><span class="nav-icon">🏠</span> Home</a>
+  <a href="<?php echo home_url('/motion-sensor-night-light/'); ?>"><span class="nav-icon">💡</span> Motion Sensor Light</a>
+  <a href="<?php echo home_url('/our-products/'); ?>" class="active-link"><span class="nav-icon">🛍️</span> Shop All Products</a>
+  <a href="<?php echo function_exists('wc_get_cart_url') ? wc_get_cart_url() : home_url('/cart/'); ?>"><span class="nav-icon">🛒</span> Cart</a>
+  <a href="#"><span class="nav-icon">📞</span> Contact Us</a>
+</nav>
 
 <div class="breadcrumb">
   <a href="<?php echo home_url(); ?>">Home</a> › Our Products
@@ -291,6 +310,18 @@
   </div>
   <div class="footer-bottom">&copy; <?php echo date('Y'); ?> Snaplyr. All rights reserved.</div>
 </footer>
+<script>
+  function toggleMobNav() {
+    var n = document.getElementById('mobNav');
+    n.classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    var nav = document.getElementById('mobNav');
+    if (nav && nav.classList.contains('open') && !nav.contains(e.target) && !e.target.closest('.mob-btn')) {
+      nav.classList.remove('open');
+    }
+  });
+</script>
 <?php wp_footer(); ?>
 </body>
 </html>
