@@ -1,0 +1,23 @@
+Options -Indexes
+RewriteEngine On
+
+# Security headers
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "DENY"
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Block direct access to sensitive directories and files
+RewriteRule ^includes/   - [F,L]
+RewriteRule ^config\.php$ - [F,L]
+
+# Block uploads directory browsing (not direct file access — files served normally)
+RewriteRule ^uploads/$   - [F,L]
+
+# Protect log files
+RewriteRule \.log$       - [F,L]
+
+# Allow direct file access
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
