@@ -66,34 +66,6 @@ function generateSerialNumber(PDO $pdo): string
 // ─── Financial Calculations ────────────────────────────────────────────────────
 
 /**
- * Calculates the gross amount a client owes for a task.
- * If $customPrice is supplied, it takes precedence over the word-count formula.
- *
- * @param int        $wordCount   Number of words.
- * @param string     $taskType    'technical' | 'simple'
- * @param float|null $customPrice Optional fixed price.
- * @return float                  Gross client pay in PKR.
- */
-function calculateClientPay(int $wordCount, string $taskType, ?float $customPrice = null): float
-{
-    if ($customPrice !== null && $customPrice > 0) {
-        return round($customPrice, 2);
-    }
-
-    if ($wordCount <= 0) {
-        return 0.0;
-    }
-
-    $pdo  = getPDO();
-    $key  = $taskType === 'technical' ? 'technical_rate' : 'simple_rate';
-    $fall = $taskType === 'technical' ? RATE_TECHNICAL   : RATE_SIMPLE;
-    $val  = getSetting($pdo, $key);
-    $rate = ($val !== null && is_numeric($val)) ? (float)$val : (float)$fall;
-
-    return round($wordCount * $rate, 2);
-}
-
-/**
  * Calculates TL pay per task for a given date.
  * daily_salary = tl_monthly_salary / working_days
  * tl_pay_per_task = daily_salary / tasks_assigned_that_day
