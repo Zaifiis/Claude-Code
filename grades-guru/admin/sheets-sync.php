@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sync_all'])) {
              FROM tasks t
              JOIN users u ON u.id=t.client_id
              LEFT JOIN users tl ON tl.id=t.tl_id
-             WHERE t.synced_to_sheets=0 OR t.synced_to_sheets IS NULL"
+             WHERE t.sheets_synced=0 OR t.sheets_synced IS NULL"
         )->fetchAll();
 
         $synced  = 0;
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sync_all'])) {
                 date('Y-m-d H:i:s')
             ];
             if (sheetsAppendRow(SPREADSHEET_ID, SHEET_NAME, $row)) {
-                $pdo->prepare("UPDATE tasks SET synced_to_sheets=1 WHERE id=?")->execute([$t['id']]);
+                $pdo->prepare("UPDATE tasks SET sheets_synced=1 WHERE id=?")->execute([$t['id']]);
                 $synced++;
             } else {
                 $failed++;
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sync_one'])) {
             ];
             $ok = sheetsAppendRow(SPREADSHEET_ID, SHEET_NAME, $row);
             if ($ok) {
-                $pdo->prepare("UPDATE tasks SET synced_to_sheets=1 WHERE id=?")->execute([$tid]);
+                $pdo->prepare("UPDATE tasks SET sheets_synced=1 WHERE id=?")->execute([$tid]);
                 setFlash('success', 'Task synced to Google Sheets.');
             } else {
                 setFlash('error', 'Sync failed. Check Google Sheets credentials.');
@@ -91,8 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sync_one'])) {
 // Stats
 $syncStats = $pdo->query(
     "SELECT COUNT(*) AS total,
-            SUM(synced_to_sheets=1) AS synced,
-            SUM(synced_to_sheets=0 OR synced_to_sheets IS NULL) AS unsynced
+            SUM(sheets_synced=1) AS synced,
+            SUM(sheets_synced=0 OR sheets_synced IS NULL) AS unsynced
      FROM tasks"
 )->fetch();
 
@@ -100,7 +100,7 @@ $syncStats = $pdo->query(
 $unsyncedTasks = $pdo->query(
     "SELECT t.id, t.serial_number, t.task_name, t.status, t.created_at, u.name AS client_name
      FROM tasks t JOIN users u ON u.id=t.client_id
-     WHERE t.synced_to_sheets=0 OR t.synced_to_sheets IS NULL
+     WHERE t.sheets_synced=0 OR t.sheets_synced IS NULL
      ORDER BY t.created_at DESC LIMIT 50"
 )->fetchAll();
 
