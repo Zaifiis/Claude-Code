@@ -685,6 +685,239 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); line-height: 1.25; }
 .rounded      { border-radius: var(--radius); }
 .overflow-hidden { overflow: hidden; }
 
+/* ── Stats Grid (client, 4-col) ──────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+@media(max-width:1100px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:640px){  .stats-grid{ grid-template-columns:1fr; } }
+
+/* ── Two-column grid ─────────────────────────────────────── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+@media(max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
+
+/* ── Margin / typography utilities ───────────────────────── */
+.mb-3  { margin-bottom: 1.5rem; }
+.fw-600{ font-weight: 600; }
+
+/* ── Discount Banner ─────────────────────────────────────── */
+.discount-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef9e7 100%);
+  border: 1px solid #fde68a;
+  border-left: 5px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 12px rgba(245,158,11,.1);
+}
+.discount-banner i  { font-size: 1.5rem; color: #b45309; margin-top: 2px; flex-shrink: 0; }
+.discount-banner h4 { font-size: 1rem; font-weight: 700; color: #78350f; margin-bottom: .25rem; }
+.discount-banner p  { font-size: .875rem; color: #92400e; }
+
+/* ── Referral Code Display ───────────────────────────────── */
+.referral-code-display { display: flex; flex-direction: column; gap: .75rem; }
+
+.code-label {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-muted);
+}
+
+.code-value {
+  font-family: 'Courier New', monospace;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 3px;
+  background: linear-gradient(135deg, rgba(10,22,40,.04), rgba(244,196,48,.08));
+  border: 2px dashed rgba(244,196,48,.55);
+  border-radius: var(--radius-sm);
+  padding: .875rem 1.25rem;
+  text-align: center;
+}
+
+.copy-row {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: .4rem .5rem .4rem .875rem;
+  overflow: hidden;
+}
+.copy-text {
+  flex: 1;
+  font-family: monospace;
+  font-size: .8125rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .4rem .875rem;
+  background: var(--primary);
+  color: var(--accent);
+  border: none;
+  border-radius: 6px;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.copy-btn:hover { background: var(--primary-light); transform: translateY(-1px); }
+
+/* ── Progress Bar ────────────────────────────────────────── */
+.progress-wrapper { margin-top: .375rem; }
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: .775rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: .5rem;
+}
+.progress-bar-bg {
+  height: 8px;
+  background: var(--border);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--success), #34d399);
+  border-radius: 9999px;
+  transition: width .6s ease;
+  min-width: 4px;
+}
+.progress-hint {
+  font-size: .775rem;
+  color: var(--text-muted);
+  margin-top: .5rem;
+  font-weight: 500;
+}
+
+/* ── Spin Promo Card ─────────────────────────────────────── */
+.spin-promo {
+  background: linear-gradient(135deg, #0d1f3c 0%, var(--primary) 100%) !important;
+  border: none !important;
+  color: #fff;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.75rem 1.5rem !important;
+}
+.spin-promo-text { flex: 1; }
+.spin-promo h3   { color: var(--accent) !important; font-size: 1rem; margin-bottom: .5rem; }
+.spin-promo p    { color: rgba(255,255,255,.68); font-size: .875rem; line-height: 1.5; }
+.spin-available-date {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  font-size: .775rem;
+  color: rgba(255,255,255,.45);
+  margin-top: .625rem;
+}
+
+/* ── Button large variant ────────────────────────────────── */
+.btn-lg { padding: .875rem 1.75rem; font-size: 1rem; }
+
+/* ── WhatsApp Button ─────────────────────────────────────── */
+.wa-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .625rem;
+  background: #25D366;
+  color: #fff;
+  font-weight: 700;
+  font-size: .9375rem;
+  padding: .875rem 1.5rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: var(--transition);
+  width: 100%;
+}
+.wa-btn:hover { background: #1ebe5a; color: #fff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,211,102,.35); }
+.wa-btn i { font-size: 1.25rem; }
+
+/* ── Empty State ─────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  color: var(--text-muted);
+  text-align: center;
+  gap: 1rem;
+}
+.empty-state i { font-size: 3rem; opacity: .3; }
+.empty-state p { font-size: .9375rem; }
+
+/* ── Notification Items ──────────────────────────────────── */
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: .875rem;
+  padding: .875rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.notif-dot.info    { background: var(--info); }
+.notif-dot.success { background: var(--success); }
+.notif-dot.warning { background: var(--warning); }
+.notif-dot.error   { background: var(--danger); }
+.notif-text { font-size: .875rem; font-weight: 500; color: var(--text); line-height: 1.5; }
+.notif-time { font-size: .75rem; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: .3rem; }
+
+/* ── Nav Badge ───────────────────────────────────────────── */
+.nav-badge {
+  margin-left: auto;
+  background: var(--danger);
+  color: #fff;
+  font-size: .65rem;
+  font-weight: 700;
+  padding: .15rem .45rem;
+  border-radius: 9999px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.5;
+}
+.nav-badge.pulse {
+  background: var(--accent);
+  color: var(--primary);
+  animation: pulseBadge 1.5s ease-in-out infinite;
+}
+@keyframes pulseBadge {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(244,196,48,.5); }
+  50%       { box-shadow: 0 0 0 7px rgba(244,196,48,0); }
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media(max-width: 900px) {
   .sidebar { transform: translateX(-100%); }
@@ -700,4 +933,6 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); line-height: 1.25; }
   .card-header { padding: 1rem; }
   .card-body { padding: 1rem; }
   .stat-value { font-size: 1.375rem; }
+  .spin-promo { flex-direction: column; text-align: center; }
+  .grid-2 { grid-template-columns: 1fr; }
 }
