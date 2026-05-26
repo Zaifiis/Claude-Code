@@ -92,14 +92,14 @@ $referralsMade = $referralsMade->fetchAll();
 
 // Spin history
 $spins = $pdo->prepare(
-    "SELECT * FROM spin_results WHERE user_id=? ORDER BY spun_at DESC LIMIT 20"
+    "SELECT * FROM spin_results WHERE user_id=? ORDER BY created_at DESC LIMIT 20"
 );
 $spins->execute([$clientId]);
 $spins = $spins->fetchAll();
 
 $flash     = getFlash();
 $csrfToken = getCsrfToken();
-$statusColors = ['pending'=>'badge-gray','assigned'=>'badge-navy','in_progress'=>'badge-gold','completed'=>'badge-blue','delivered'=>'badge-emerald','revision'=>'badge-orange'];
+$statusColors = ['pending'=>'badge-gray','assigned'=>'badge-navy','in_progress'=>'badge-gold','completed'=>'badge-info','delivered'=>'badge-emerald','revision'=>'badge-orange'];
 $payColors    = ['due'=>'badge-orange','partial'=>'badge-gold','paid'=>'badge-emerald'];
 ?>
 <!DOCTYPE html>
@@ -184,7 +184,7 @@ $payColors    = ['due'=>'badge-orange','partial'=>'badge-gold','paid'=>'badge-em
           <span class="badge badge-gold"><?= number_format((float)$client['discount_percentage'],0) ?>% Discount</span>
           <?php endif; ?>
           <span class="badge badge-navy">Ref: <?= sanitize($client['referral_code']) ?></span>
-          <span class="badge badge-blue"><?= (int)$client['referral_count'] ?> Referrals</span>
+          <span class="badge badge-info"><?= (int)$client['referral_count'] ?> Referrals</span>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:.5rem;">
@@ -241,7 +241,7 @@ $payColors    = ['due'=>'badge-orange','partial'=>'badge-gold','paid'=>'badge-em
           <?php foreach($spins as $sp): ?>
           <div style="padding:.6rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
             <div style="font-size:.85rem;color:var(--primary)"><?= sanitize($sp['result']) ?></div>
-            <div style="font-size:.75rem;color:var(--text-muted)"><?= formatDate($sp['spun_at']) ?></div>
+            <div style="font-size:.75rem;color:var(--text-muted)"><?= formatDate($sp['created_at']) ?></div>
           </div>
           <?php endforeach; ?>
           </div>
