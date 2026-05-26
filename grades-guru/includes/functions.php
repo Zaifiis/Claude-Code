@@ -63,54 +63,6 @@ function generateSerialNumber(PDO $pdo): string
     return sprintf('GG-%s-%04d', $year, $next);
 }
 
-// ─── Financial Calculations ────────────────────────────────────────────────────
-
-/**
- * Calculates TL pay per task for a given date.
- * daily_salary = tl_monthly_salary / working_days
- * tl_pay_per_task = daily_salary / tasks_assigned_that_day
- *
- * @param PDO    $pdo   Active database connection.
- * @param string $date  Date string 'YYYY-MM-DD'.
- * @return float         TL pay per task in PKR.
- */
-function calculateTLPay(PDO $pdo, string $date): float
-{
-    $salary      = (float)(getSetting($pdo, 'tl_monthly_salary') ?? TL_MONTHLY_SALARY);
-    $workingDays = (int)(getSetting($pdo, 'working_days_per_month') ?? TL_WORKING_DAYS);
-
-    if ($workingDays <= 0) {
-        return 0.0;
-    }
-
-    $daily = $salary / $workingDays;
-
-    $stmt = $pdo->prepare('SELECT COUNT(*) FROM tasks WHERE assigned_date = ?');
-    $stmt->execute([$date]);
-    $taskCount = (int)$stmt->fetchColumn();
-
-    return $taskCount > 0 ? round($daily / $taskCount, 2) : 0.0;
-}
-
-/**
- * Calculates profit: final_client_pay − writer_pay − tl_pay.
- */
-function calculateProfit(float $clientPay, float $writerPay, float $tlPay): float
-{
-    return round($clientPay - $writerPay - $tlPay, 2);
-}
-
-/**
- * Returns the discounted amount for a given percentage.
- */
-function applyDiscount(float $amount, float $discountPct): float
-{
-    if ($discountPct <= 0) {
-        return round($amount, 2);
-    }
-    return round($amount * (1 - $discountPct / 100), 2);
-}
-
 // ─── Settings ──────────────────────────────────────────────────────────────────
 
 /**
