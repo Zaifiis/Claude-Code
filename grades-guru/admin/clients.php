@@ -34,8 +34,6 @@ if ($search) { $where[] = "(u.name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?)";
 if ($filterStatus) { $where[] = "u.status = ?"; $params[] = $filterStatus; }
 $wc = 'WHERE ' . implode(' AND ', $where);
 
-$total = (int)$pdo->prepare("SELECT COUNT(*) FROM users u $wc")->execute($params)->fetchColumn();
-// Re-execute for count
 $cstmt = $pdo->prepare("SELECT COUNT(*) FROM users u $wc");
 $cstmt->execute($params);
 $total = (int)$cstmt->fetchColumn();
