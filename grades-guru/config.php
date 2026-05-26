@@ -32,7 +32,7 @@ define('TL_MONTHLY_SALARY', 65000);
 define('TL_WORKING_DAYS', 26);
 
 // ─── Contact & Communication ──────────────────────────────────────────────────
-define('WHATSAPP_NUMBER', '923001234567');
+define('WHATSAPP_NUMBER', '923036959592');
 
 // ─── File Storage ─────────────────────────────────────────────────────────────
 define('UPLOAD_PATH', __DIR__ . '/uploads/');

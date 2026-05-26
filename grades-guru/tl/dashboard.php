@@ -242,7 +242,7 @@ function deadlineClass(string $deadline, string $status): string
 <div class="layout">
 
   <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <a href="dashboard.php">
         <div class="logo-icon">GG</div>
@@ -294,17 +294,31 @@ function deadlineClass(string $deadline, string $status): string
 
     <!-- Topbar -->
     <header class="topbar">
-      <div class="topbar-title">
-        <h1>TL Dashboard</h1>
-        <p><?= date('l, F j, Y') ?></p>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="topbar-title">
+          <h1>TL Dashboard</h1>
+          <p><?= date('l, F j, Y') ?></p>
+        </div>
       </div>
       <div class="topbar-right">
-        <?php if ($notifCount > 0): ?>
-          <div style="position:relative;">
-            <i class="fa-solid fa-bell" style="color:var(--gold); font-size:1.1rem;"></i>
-            <span class="notif-badge"><?= $notifCount ?></span>
+        <div class="notif-wrap">
+          <button class="topbar-btn" id="notifBtn" title="Notifications">
+            <i class="fa-solid fa-bell"></i>
+            <?php if ($notifCount > 0): ?>
+              <span class="notif-badge"><?= min($notifCount, 9) ?></span>
+            <?php endif; ?>
+          </button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-panel-header">
+              <span class="notif-panel-title">Notifications</span>
+              <button class="notif-mark-read" id="notifMarkRead">Mark all read</button>
+            </div>
+            <div class="notif-panel-body" id="notifPanelBody"></div>
           </div>
-        <?php endif; ?>
+        </div>
         <div class="topbar-avatar" title="<?= sanitize($user['name']) ?>">
           <?= strtoupper(substr($user['name'], 0, 2)) ?>
         </div>
@@ -522,7 +536,40 @@ function deadlineClass(string $deadline, string $status): string
 </div><!-- /.layout -->
 
 <script>
-// Auto-submit search with short debounce
+// ── Hamburger ─────────────────────────────────────────────────────────────────
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+// ── Notification dropdown ─────────────────────────────────────────────────────
+(function() {
+  const NOTIFS = <?= json_encode(array_map(fn($n) => [
+    'message'    => $n['message'],
+    'type'       => $n['type'],
+    'created_at' => timeAgo($n['created_at']),
+  ], $notifications)) ?>;
+  const btn   = document.getElementById('notifBtn');
+  const panel = document.getElementById('notifPanel');
+  const body  = document.getElementById('notifPanelBody');
+  if (!btn) return;
+  body.innerHTML = NOTIFS.length === 0
+    ? '<div class="notif-panel-empty"><i class="fa-regular fa-bell-slash"></i>No unread notifications</div>'
+    : NOTIFS.map(n => `<div class="notif-panel-item">
+        <div class="notif-dot ${n.type}"></div>
+        <div><div class="notif-text">${n.message}</div><div class="notif-time">${n.created_at}</div></div>
+      </div>`).join('');
+  btn.addEventListener('click', e => { e.stopPropagation(); panel.classList.toggle('show'); });
+  document.addEventListener('click', () => panel.classList.remove('show'));
+  panel.addEventListener('click', e => e.stopPropagation());
+  document.getElementById('notifMarkRead').addEventListener('click', () => {
+    fetch('../api/mark-notifications-read.php', { method:'POST' }).catch(()=>{});
+    document.querySelector('.notif-badge')?.remove();
+    body.innerHTML = '<div class="notif-panel-empty"><i class="fa-regular fa-bell-slash"></i>All caught up!</div>';
+    panel.classList.remove('show');
+  });
+})();
+
+// ── Auto-submit search with short debounce ────────────────────────────────────
 const searchInput = document.getElementById('searchInput');
 let searchTimer;
 if (searchInput) {

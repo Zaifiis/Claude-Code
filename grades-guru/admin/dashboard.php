@@ -169,12 +169,21 @@ $flash = getFlash();
       </div>
     </div>
     <div class="topbar-right">
-      <button class="topbar-btn" title="Notifications">
-        <i class="fa-solid fa-bell"></i>
-        <?php if(count($unreadNotifs)): ?>
-        <span class="notif-badge"><?= count($unreadNotifs) ?></span>
-        <?php endif; ?>
-      </button>
+      <div class="notif-wrap">
+        <button class="topbar-btn" id="notifBtn" title="Notifications">
+          <i class="fa-solid fa-bell"></i>
+          <?php if(count($unreadNotifs)): ?>
+          <span class="notif-badge"><?= min(count($unreadNotifs),9) ?></span>
+          <?php endif; ?>
+        </button>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-panel-header">
+            <span class="notif-panel-title">Notifications</span>
+            <button class="notif-mark-read" id="notifMarkRead">Mark all read</button>
+          </div>
+          <div class="notif-panel-body" id="notifPanelBody"></div>
+        </div>
+      </div>
       <div class="topbar-avatar" title="<?= sanitize($user['name']) ?>"><?= strtoupper(substr($user['name'],0,1)) ?></div>
     </div>
   </header>
@@ -358,6 +367,34 @@ $flash = getFlash();
 </div>
 
 <script>
+// ── Notification dropdown ─────────────────────────────────────────────────────
+(function() {
+  const NOTIFS = <?= json_encode(array_map(fn($n) => [
+    'message'    => $n['message'],
+    'type'       => $n['type'],
+    'created_at' => timeAgo($n['created_at']),
+  ], $unreadNotifs)) ?>;
+  const btn   = document.getElementById('notifBtn');
+  const panel = document.getElementById('notifPanel');
+  const body  = document.getElementById('notifPanelBody');
+  if (!btn) return;
+  body.innerHTML = NOTIFS.length === 0
+    ? '<div class="notif-panel-empty"><i class="fa-regular fa-bell-slash"></i>No unread notifications</div>'
+    : NOTIFS.map(n => `<div class="notif-panel-item">
+        <div class="notif-dot ${n.type}"></div>
+        <div><div class="notif-text">${n.message}</div><div class="notif-time">${n.created_at}</div></div>
+      </div>`).join('');
+  btn.addEventListener('click', e => { e.stopPropagation(); panel.classList.toggle('show'); });
+  document.addEventListener('click', () => panel.classList.remove('show'));
+  panel.addEventListener('click', e => e.stopPropagation());
+  document.getElementById('notifMarkRead').addEventListener('click', () => {
+    fetch('../api/mark-notifications-read.php', { method:'POST' }).catch(()=>{});
+    document.querySelector('.notif-badge')?.remove();
+    body.innerHTML = '<div class="notif-panel-empty"><i class="fa-regular fa-bell-slash"></i>All caught up!</div>';
+    panel.classList.remove('show');
+  });
+})();
+
 // ── Revenue vs Profit Chart ────────────────────────────────────────────────────
 const revCtx = document.getElementById('revenueProfitChart').getContext('2d');
 new Chart(revCtx, {
