@@ -461,29 +461,29 @@ $db_reviews = get_posts([
       <p class="bundle-label">Buy MORE – SAVE Upto 26%</p>
       <p style="font-size:11px;color:var(--muted);margin-bottom:10px;">SAVE BIG MEGA SALE OFFER</p>
       <div class="bundle-options">
-        <label class="bundle-option" onclick="selectBundle(this,1)">
+        <label class="bundle-option" data-unit-price="2199" onclick="selectBundle(this,1)">
           <input type="radio" name="bundle" value="1"/>
           <div class="bundle-main"><div class="bundle-title">Buy 1</div><div class="bundle-sub">Standard</div></div>
           <div class="bundle-price-col"><div class="bundle-price">PKR 2,199</div></div>
         </label>
-        <label class="bundle-option selected" onclick="selectBundle(this,2)">
+        <label class="bundle-option selected" data-unit-price="1979" onclick="selectBundle(this,2)">
           <span class="bundle-badge badge-popular">POPULAR</span>
           <input type="radio" name="bundle" value="2" checked/>
           <div class="bundle-main"><div class="bundle-title">Buy 2</div><div class="bundle-sub" style="color:var(--accent);">10% OFF</div></div>
           <div class="bundle-price-col"><div class="bundle-price" style="color:var(--accent);">PKR 3,958</div><div class="bundle-old-price">PKR 4,398</div></div>
         </label>
-        <label class="bundle-option" onclick="selectBundle(this,3)">
+        <label class="bundle-option" data-unit-price="1759" onclick="selectBundle(this,3)">
           <span class="bundle-badge badge-best">BEST VALUE</span>
           <input type="radio" name="bundle" value="3"/>
           <div class="bundle-main"><div class="bundle-title">Buy 3</div><div class="bundle-sub">20% OFF</div></div>
           <div class="bundle-price-col"><div class="bundle-price">PKR 5,277</div><div class="bundle-old-price">PKR 6,597</div></div>
         </label>
-        <label class="bundle-option" onclick="selectBundle(this,4)">
+        <label class="bundle-option" data-unit-price="1693" onclick="selectBundle(this,4)">
           <input type="radio" name="bundle" value="4"/>
           <div class="bundle-main"><div class="bundle-title">Buy 4</div><div class="bundle-sub">23% OFF</div></div>
           <div class="bundle-price-col"><div class="bundle-price">PKR 6,773</div><div class="bundle-old-price">PKR 8,796</div></div>
         </label>
-        <label class="bundle-option" onclick="selectBundle(this,5)">
+        <label class="bundle-option" data-unit-price="1627" onclick="selectBundle(this,5)">
           <span class="bundle-badge badge-save">SAVE MOST</span>
           <input type="radio" name="bundle" value="5"/>
           <div class="bundle-main"><div class="bundle-title">Buy 5</div><div class="bundle-sub">26% OFF</div></div>
@@ -501,9 +501,10 @@ $db_reviews = get_posts([
         <div class="time-block"><div class="time-num" id="cd-s">01</div><div class="time-label">Secs</div></div>
       </div>
     </div>
-    <form id="cartForm" method="get" action="<?php echo esc_url(home_url('/cart/')); ?>">
+    <form id="cartForm" method="post" action="<?php echo esc_url(home_url('/cart/')); ?>">
       <input type="hidden" name="add-to-cart" value="17"/>
       <input type="hidden" name="quantity" id="qtyInput" value="2"/>
+      <input type="hidden" name="snaplyr_unit_price" id="unitPriceInput" value="1979"/>
       <button type="submit" class="add-to-cart-btn">🛒 Add to Cart</button>
     </form>
     <div class="shipping-info">
@@ -703,6 +704,7 @@ $db_reviews = get_posts([
   function selectBundle(el, qty) {
     selectedQty = qty;
     document.getElementById('qtyInput').value = qty;
+    document.getElementById('unitPriceInput').value = el.dataset.unitPrice || 2199;
     document.querySelectorAll('.bundle-option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
   }

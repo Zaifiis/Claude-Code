@@ -467,6 +467,7 @@ $sizes = array(
       <input type="hidden" name="add-to-cart" value="<?php echo esc_attr($wc_product_id); ?>"/>
       <input type="hidden" name="quantity" id="atc-qty" value="1"/>
       <input type="hidden" name="snaplyr_size" id="atc-size" value="50 CM"/>
+      <input type="hidden" name="snaplyr_unit_price" id="atc-unit-price" value="2649"/>
       <button type="submit" class="add-to-cart-btn">🛒 &nbsp; Add to Cart</button>
     </form>
     <?php else: ?>
@@ -724,6 +725,8 @@ function selectSize(btn) {
   document.getElementById('price-orig').textContent = 'Rs.' + currentOrig.toLocaleString() + '.00 PKR';
   document.getElementById('price-sale').textContent = 'Rs.' + currentSale.toLocaleString() + '.00 PKR';
   if (document.getElementById('atc-size')) document.getElementById('atc-size').value = currentSize;
+  var unitPrice = Math.round(currentSale * (1 - selectedDiscount / 100));
+  if (document.getElementById('atc-unit-price')) document.getElementById('atc-unit-price').value = unitPrice;
   updateBundlePrices();
 }
 
@@ -753,6 +756,8 @@ function selectBundle(qty, disc) {
   document.querySelectorAll('.bundle-option').forEach(b => b.classList.remove('active'));
   document.getElementById('bundle-' + qty).classList.add('active');
   if (document.getElementById('atc-qty')) document.getElementById('atc-qty').value = qty;
+  var unitPrice = Math.round(currentSale * (1 - disc / 100));
+  if (document.getElementById('atc-unit-price')) document.getElementById('atc-unit-price').value = unitPrice;
 }
 
 // ── Sale countdown (random 90–150 min) ──
