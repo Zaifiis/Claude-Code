@@ -20,7 +20,7 @@ $pdo = getPDO();
 
 // Validate token
 if ($token && $uid) {
-    $row = $pdo->prepare("SELECT `value` FROM settings WHERE `key`=? LIMIT 1");
+    $row = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key=? LIMIT 1");
     $row->execute(["reset_$uid"]);
     $stored = $row->fetchColumn();
     if ($stored) {
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($errors)) {
             $pdo->prepare("UPDATE users SET password=? WHERE id=?")->execute([password_hash($pwd, PASSWORD_BCRYPT), $uid]);
             // Invalidate token
-            $pdo->prepare("DELETE FROM settings WHERE `key`=?")->execute(["reset_$uid"]);
+            $pdo->prepare("DELETE FROM settings WHERE setting_key=?")->execute(["reset_$uid"]);
             $done = true;
         }
     }

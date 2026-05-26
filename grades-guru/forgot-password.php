@@ -36,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Store reset token (using settings table as a lightweight store)
                 $pdo->prepare(
-                    "INSERT INTO settings (`key`, `value`) VALUES (?, ?)
-                     ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)"
+                    "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
+                     ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value)"
                 )->execute(["reset_{$foundUser['id']}", json_encode(['token'=>$token,'expires'=>$expires,'email'=>$email])]);
 
                 $resetLink = APP_URL . "/reset-password.php?token=$token&uid={$foundUser['id']}";

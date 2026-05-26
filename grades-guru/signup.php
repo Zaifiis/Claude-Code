@@ -140,9 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Welcome notification
                 createNotification(
+                    $pdo,
                     $newUserId,
-                    'Welcome to Grades Guru!',
-                    'Your account is ready. Spin the wheel to win your first discount!',
+                    'Welcome to Grades Guru! Your account is ready. Spin the wheel to win your first discount!',
                     'success'
                 );
 
