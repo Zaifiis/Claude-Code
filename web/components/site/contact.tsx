@@ -7,8 +7,8 @@ export function Contact() {
   const [submitted, setSubmitted] = useState(false);
 
   return (
-    <section id="contact" className="relative overflow-hidden bg-black px-6 py-24">
-      <Spotlight className="left-1/2 top-0 -translate-x-1/2" fill="white" />
+    <section className="relative overflow-hidden bg-background px-6 pb-24 pt-32">
+      <Spotlight className="left-1/2 top-0 -translate-x-1/2" fill="#4f8ef7" />
 
       <div className="relative z-10 mx-auto max-w-2xl text-center">
         <p className="mb-3 text-sm font-medium uppercase tracking-widest text-neutral-400">
@@ -56,7 +56,7 @@ export function Contact() {
             />
             <button
               type="submit"
-              className="mt-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition-colors hover:bg-neutral-200"
+              className="mt-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-[#020c45] transition-colors hover:bg-neutral-200"
             >
               Send message
             </button>

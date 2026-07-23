@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Navbar } from "@/components/site/navbar";
+import { Footer } from "@/components/site/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nova Studio — Design & 3D Studio",
+  title: "Profinity Solutions — Design & 3D Studio",
   description:
-    "Nova Studio designs and builds interactive brands, products, and 3D experiences.",
+    "Profinity Solutions designs and builds interactive brands, products, and 3D experiences.",
 };
 
 export default function RootLayout({
@@ -28,7 +30,11 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col bg-background text-foreground">
+        <Navbar />
+        <main className="flex-1">{children}</main>
+        <Footer />
+      </body>
     </html>
   );
 }

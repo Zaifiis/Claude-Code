@@ -1,8 +1,8 @@
 export const nav = [
-  { label: "Services", href: "#services" },
-  { label: "Work", href: "#work" },
-  { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
+  { label: "Services", href: "/services" },
+  { label: "Work", href: "/work" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export const services = [
@@ -10,7 +10,7 @@ export const services = [
     icon: "Palette",
     title: "Brand & Identity",
     description:
-      "Logo, visual language, and design systems that make a studio instantly recognizable.",
+      "Logo, visual language, and design systems that make a company instantly recognizable.",
   },
   {
     icon: "Code2",
@@ -62,20 +62,23 @@ export const projects = [
 export const testimonials = [
   {
     quote:
-      "Nova Studio took a vague idea and turned it into a product our users actually love using.",
+      "Profinity Solutions took a vague idea and turned it into a product our users actually love using.",
     name: "Priya Shah",
-    role: "CEO, Aurora Finance",
+    designation: "CEO, Aurora Finance",
+    src: "https://images.unsplash.com/photo-1512316609839-ce289d3eba0a?q=80&w=1368&auto=format&fit=crop",
   },
   {
     quote:
       "The 3D work they shipped made our landing page feel like nothing else in our category.",
     name: "Daniel Cho",
-    role: "Head of Design, Nimbus Robotics",
+    designation: "Head of Design, Nimbus Robotics",
+    src: "https://images.unsplash.com/photo-1628749528992-f5702133b686?q=80&w=1368&auto=format&fit=crop",
   },
   {
     quote:
       "Fast, communicative, and genuinely good taste. Exactly what we needed for our relaunch.",
     name: "Maren Voss",
-    role: "Founder, Fieldnote",
+    designation: "Founder, Fieldnote",
+    src: "https://images.unsplash.com/photo-1524267213992-b76e8577d046?q=80&w=1368&auto=format&fit=crop",
   },
 ];

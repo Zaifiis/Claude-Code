@@ -1,23 +1,16 @@
-import { Navbar } from "@/components/site/navbar";
 import { Hero } from "@/components/site/hero";
-import { Services } from "@/components/site/services";
-import { Portfolio } from "@/components/site/portfolio";
-import { About } from "@/components/site/about";
-import { Contact } from "@/components/site/contact";
-import { Footer } from "@/components/site/footer";
+import { HomeHighlights } from "@/components/site/home-highlights";
+import { CTABanner } from "@/components/site/cta-banner";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-black">
-      <Navbar />
-      <main className="flex-1">
-        <Hero />
-        <Services />
-        <Portfolio />
-        <About />
-        <Contact />
-      </main>
-      <Footer />
-    </div>
+    <>
+      <Hero />
+      <HomeHighlights />
+      <CTABanner
+        title="Have a project in mind?"
+        description="Tell us a bit about what you're building — we usually reply within one business day."
+      />
+    </>
   );
 }
