@@ -1,0 +1,650 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        -144
+      ],
+      "id": "edb92f2c-8695-41bf-aa01-48411b01841f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, slug, display_name\nFROM platforms\nWHERE slug = 'linkedin' AND enabled = true\nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        864,
+        -144
+      ],
+      "id": "a1b2c3d4-0001-4a1a-9b1a-000000000001",
+      "name": "Get Platform",
+      "notesInFlow": false,
+      "notes": "Reads the active platform row from Supabase. Downstream nodes reference this via $('Get Platform').item.json.id for the content_items.platform_id foreign key.",
+      "credentials": {
+        "postgres": {
+          "id": "SUPABASE_POSTGRES_CREDENTIAL",
+          "name": "Supabase Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT title AS idea\nFROM content_items\nWHERE platform_id = $1\nORDER BY created_at DESC\nLIMIT 20;",
+        "options": {
+          "queryReplacement": "={{ $json.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1088,
+        -144
+      ],
+      "id": "5974cb74-114a-424d-8253-7578aa6b7fc3",
+      "name": "Get Past Ideas",
+      "notes": "Replaces the Google Sheets read. Same output shape the Join Ideas code node already expects (an 'idea' field per row), so Join Ideas needed no changes.",
+      "credentials": {
+        "postgres": {
+          "id": "SUPABASE_POSTGRES_CREDENTIAL",
+          "name": "Supabase Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all incoming items\nconst items = $input.all();\n\n// Extract the text field from each item\nconst texts = items.map(item => item.json.idea);\n\n// Concatenate them (adjust the separator as needed)\nconst concatenated = texts.join(\", \");\n\n// Return a single item with the concatenated text\nreturn [{ json: { mergedText: concatenated } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        -144
+      ],
+      "id": "d6af5cec-345c-40f4-9f92-c2990907a41c",
+      "name": "Join Ideas"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=ROLE:\nYou are \"The Operator\" — a CEO of an AI automation agency who writes LinkedIn posts personally, no ghostwriter polish. You share hard-won insights from running automation systems for real businesses. You do not sound like a marketer. You sound like someone who has actually built the thing and has an opinion about it.\n\nVOICE:\n- Confident, direct, slightly blunt. Never salesy or desperate.\n- Speak from experience and observation, not hype.\n- No corporate jargon (\"synergy,\" \"leverage\" as a verb, \"game-changer\").\n- No contractions banned — write naturally, the way a sharp founder actually talks.\n- Short, declarative sentences. Let the idea carry weight, not adjectives.\n\nCRITICAL RULE — NO FABRICATION:\n- NEVER invent a specific client name, a specific person, or a specific numeric result unless it is explicitly present in the input context.\n- If no real data exists in {{ $json.mergedText }}, write from industry-general observation instead (\"Most service businesses lose leads the same way\" — not \"Alex saved 100 hours\").\n- It is always better to make a sharp general point than to fabricate a fake success story. Fabricated proof, if noticed, destroys more trust than it builds.\n\nLINKEDIN FORMATTING RULES (STRICT):\n- Every line is 5–9 words maximum.\n- One blank line (double line break) after every single line. No exceptions.\n- The first 2 lines are the hook — this is all LinkedIn shows before \"see more.\" They must earn the click alone, with no context needed.\n- No bullet symbols like \"-\" or \"•\" — write short standalone lines instead, each on its own line.\n- Total post length: 120–180 words. Long enough to deliver one real idea, short enough to read in 30 seconds.\n- End with a \"P.S.\" line — one sentence, a related afterthought or soft offer, not a hard pitch.\n- Final line is always a genuine question to the reader, designed to pull a comment — not \"thoughts?\" but a specific, answerable question tied to the post's topic.\n\nSTRUCTURE:\n1. HOOK (2 lines): A sharp, specific observation or contrarian claim. Must stand alone with zero context.\n2. THE PATTERN (3–5 lines): Describe the problem as something you have personally observed across businesses — general, credible, not fabricated.\n3. THE REFRAME (3–5 lines): Shift the reader's perspective — what they think the problem is, versus what it actually is.\n4. THE INSIGHT (3–5 lines): Your actual point of view as the CEO. This is the value of the post — a real belief, not a generic tip.\n5. THE IMPLICATION (2–3 lines): What this means for the reader's business if left unaddressed, stated plainly, no threats or manipulation.\n6. P.S. line + engagement question.\n\nTONE GUARDRAILS:\n- Confident, not condescending. Insightful, not preachy.\n- No manufactured urgency, no fake scarcity, no guilt-tripping the reader.\n- The goal is that a real CEO would be proud to have written this under their own name.\n\nOUTPUT JSON FORMAT:\n{\n  \"name\": \"INTERNAL_REF\",\n  \"industry\": \"TARGET_INDUSTRY\",\n  \"problem\": \"THE GENERAL PATTERN OBSERVED, NOT A FABRICATED CLIENT STORY\",\n  \"automation_solution\": \"THE CORE FIX OR REFRAME\",\n  \"tools_stack\": \"TECH_LIST_IF_RELEVANT\",\n  \"business_result\": \"GENERAL IMPACT STATEMENT, NO INVENTED NUMBERS UNLESS FROM CONTEXT\",\n  \"title\": \"SHARP_HOOK_TITLE\",\n  \"text\": \"FULL_POST_WITH_LINKEDIN_LINE_BREAKS_AND_PS_AND_QUESTION\",\n  \"image\": \"IMAGE_DESCRIPTION_MATCHING_POST_TOPIC\",\n  \"hashtags\": \"#automation #ai #systems\"\n}\n\nVISUAL STRATEGY OUTPUT RULES:\nAlso create a post-specific visual strategy. Do not default to generic gears, funnels, robots, brains, dashboards, or the same composition repeatedly.\nheadline: maximum 6 words, uppercase, exact text for the graphic.\nvisual_metaphor: one concrete visual metaphor that communicates THIS post's core insight.\nhero_object: one simple premium 3D object/system representing that metaphor.\ncomposition: choose one of EDITORIAL_SPLIT, DIAGONAL_FLOW, CENTRAL_OBJECT, ASYMMETRIC_GRID, MACRO_OBJECT, ISOMETRIC_SYSTEM, NEGATIVE_SPACE.\ntext_position: choose LEFT_TOP, RIGHT_TOP, LEFT_CENTER, RIGHT_CENTER.\nAvoid visual concepts similar to past ideas in mergedText when possible.\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=ROLE:\nYou are the CEO of an AI automation agency who writes LinkedIn posts personally. You share real insights from building automation systems for businesses. You do not manipulate — you state hard truths plainly and let the insight do the work.\n\nOPERATING PRINCIPLES:\n1. THE POWER DYNAMIC: You are an experienced operator sharing what you have observed, not selling a dream. The reader respects direct, earned authority — not hype.\n2. THE REFRAME: Show the reader what they think their problem is, versus what it actually is. Insight comes from reframing, not from guilt.\n3. THE VOICE: Confident, blunt, plain-spoken. Natural contractions are fine — write the way a sharp founder actually talks, not like a script.\n4. NAMING PATTERNS: You may name recurring patterns you have observed (e.g. \"the follow-up gap,\" \"the manual tax\") to make ideas memorable — but only as observed patterns, never attached to a specific invented person or number.\n\nNO FABRICATION RULE (STRICT):\nNever invent a specific client name, person, or numeric result unless it is explicitly present in {{ $json.mergedText }}. If no real data exists, write from general industry observation instead. A sharp general insight beats a fabricated success story every time — fabricated proof destroys trust if ever noticed.\n\nLINKEDIN FORMATTING (STRICT):\n- Every line: 5-9 words maximum.\n- One blank line after every single line, no exceptions.\n- First 2 lines are the hook — must stand alone, no context needed, this is all LinkedIn shows before \"see more.\"\n- Total length: 120-180 words.\n- End with a \"P.S.\" line — one sentence, a related afterthought or soft offer, never a hard pitch.\n- Final line: a specific, answerable question tied to the post's topic, written to pull comments — never a generic \"thoughts?\"\n- Use \"The Power of Three\" for rhythm where it fits naturally.\n\nTONE GUARDRAILS:\nConfident, not condescending. Insightful, not preachy. No manufactured urgency, no fake scarcity, no guilt-tripping. Write it the way a real CEO would be proud to post under their own name."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1488,
+        -144
+      ],
+      "id": "b29e134e-e621-4c0b-9fe1-5479022b1983",
+      "name": "Idea Generator",
+      "retryOnFail": true,
+      "notes": "Prompt unchanged from the Google Sheets version. To make this platform-aware later, interpolate platform_settings.brand_voice_prompt (fetched by a Postgres node) into this ROLE section instead of the hardcoded 'Operator' persona."
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"name\": \"name\",\n  \"industry\": \"industry\",\n  \"problem\": \"problem\",\n  \"automation_solution\": \"automation_solution\",\n  \"tools_stack\": \"tools_stack\",\n  \"business_result\": \"business_result\",\n  \"title\": \"title\",\n  \"text\": \"text\",\n  \"image\": \"image\",\n  \"headline\": \"MAX 6 WORDS\",\n  \"visual_metaphor\": \"specific visual metaphor\",\n  \"hero_object\": \"single 3D hero object\",\n  \"composition\": \"EDITORIAL_SPLIT\",\n  \"text_position\": \"LEFT_TOP\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1696,
+        48
+      ],
+      "id": "7dc57b73-b931-4878-9b6e-a045ac0b562c",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1392,
+        48
+      ],
+      "id": "1e73a530-740d-424d-ac42-34daa162be70",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "4VwWeE0f99SO58tc",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-image-1-mini"
+            },
+            {
+              "name": "size",
+              "value": "1024x1024"
+            },
+            {
+              "name": "prompt",
+              "value": "=Create one premium square LinkedIn graphic for Apexion, an AI automation agency.\n\nPOST CORE PROBLEM:\n{{ $('Idea Generator').item.json.output.problem }}\n\nPOST REFRAME / SOLUTION:\n{{ $('Idea Generator').item.json.output.automation_solution }}\n\nEXACT HEADLINE:\n{{ $('Idea Generator').item.json.output.headline }}\n\nPOST-SPECIFIC VISUAL METAPHOR:\n{{ $('Idea Generator').item.json.output.visual_metaphor }}\n\nHERO OBJECT:\n{{ $('Idea Generator').item.json.output.hero_object }}\n\nCOMPOSITION:\n{{ $('Idea Generator').item.json.output.composition }}\n\nTEXT POSITION:\n{{ $('Idea Generator').item.json.output.text_position }}\n\nBRAND SYSTEM:\n1:1 square. Warm charcoal #1C1B1A background. Muted champagne-gold #C9A85C accent. Soft off-white #D9D6CE secondary text. No other colors.\nPremium minimal 3D editorial advertising. Soft studio lighting, subtle depth shadows, low visual density, generous negative space.\n\nDESIGN RULES:\nThe visual must communicate the specific post insight, not generic AI automation.\nUse the requested visual metaphor as the dominant concept.\nRender the EXACT HEADLINE once, large, bold, uppercase, clean sans-serif, maximum 6 words.\nEmphasize the most meaningful 1-2 words in champagne gold; remaining headline text off-white.\nPlace headline according to TEXT POSITION and composition.\nUse exactly ONE main 3D hero object. Maximum one tiny supporting object only if essential to explain the metaphor.\nAdd a small APEXION wordmark at bottom-left as a signature.\n\nDO NOT INCLUDE:\nPeople, faces, office scenes, robots, AI brains, dashboards, generic gears or funnels unless explicitly required by the visual metaphor, extra decorative objects, extra text, duplicate text, cropped text, broken words, watermarks.\n\nCreate a distinct composition driven by this post's meaning while preserving Apexion's brand identity."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1872,
+        -144
+      ],
+      "id": "f87bcf4f-ab64-4da1-a8c5-e642e99884f5",
+      "name": "OpenAI Image1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hkDei776lLHcOGOz",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2096,
+        -144
+      ],
+      "id": "e78bca8b-0ca5-4c7b-a158-07723224224f",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Idea Generator').item.json.output.name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1LODO3YtfXjS0qXafPbnq1bbtPk-AEgUO",
+          "mode": "list",
+          "cachedResultName": "Content Post Automation",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1LODO3YtfXjS0qXafPbnq1bbtPk-AEgUO"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2320,
+        -144
+      ],
+      "id": "de66de18-1e6d-4aa1-bfd6-b2ea0309407d",
+      "name": "Save Image",
+      "notes": "Image hosting is unchanged (Google Drive). Only the metadata row (Save Post) moved off Sheets. Swap this for Supabase Storage later if you want everything in one place.",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "dtAjZFjZwhNnNKqa",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO content_items (\n  platform_id, name, industry, problem, automation_solution, tools_stack,\n  business_result, title, post_text, image_url, headline, visual_metaphor,\n  hero_object, composition, text_position, status\n) VALUES (\n  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'Pending'\n);",
+        "options": {
+          "queryReplacement": "={{ $('Get Platform').item.json.id }},={{ $('Idea Generator').item.json.output.name }},={{ $('Idea Generator').item.json.output.industry }},={{ $('Idea Generator').item.json.output.problem }},={{ $('Idea Generator').item.json.output.automation_solution }},={{ $('Idea Generator').item.json.output.tools_stack }},={{ $('Idea Generator').item.json.output.business_result }},={{ $('Idea Generator').item.json.output.title }},={{ $('Idea Generator').item.json.output.text }},={{ $json.webContentLink }},={{ $('Idea Generator').item.json.output.headline }},={{ $('Idea Generator').item.json.output.visual_metaphor }},={{ $('Idea Generator').item.json.output.hero_object }},={{ $('Idea Generator').item.json.output.composition }},={{ $('Idea Generator').item.json.output.text_position }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2512,
+        -144
+      ],
+      "id": "1f0f577a-c305-421b-b59d-c19feda7de5f",
+      "name": "Save Post",
+      "notes": "Replaces the Google Sheets append. Writes straight into the same content_items table the dashboard reads/edits, with status='Pending' so it shows up in the dashboard Queue for review.",
+      "credentials": {
+        "postgres": {
+          "id": "SUPABASE_POSTGRES_CREDENTIAL",
+          "name": "Supabase Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        240
+      ],
+      "id": "542184d5-3c77-4a68-a5b5-9e751f7952c1",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT ci.id, ci.post_text, ci.image_url, ci.title, p.slug AS platform_slug\nFROM content_items ci\nJOIN platforms p ON p.id = ci.platform_id\nWHERE ci.status = 'Ready'\nORDER BY ci.created_at ASC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        864,
+        240
+      ],
+      "id": "83440227-a6a5-4c5d-8260-c91b681b77ad",
+      "name": "Get Ready Posts",
+      "notes": "Replaces the Google Sheets Status=Ready filter. Only items approved in the dashboard Queue (status flipped Pending -> Ready) show up here.",
+      "credentials": {
+        "postgres": {
+          "id": "SUPABASE_POSTGRES_CREDENTIAL",
+          "name": "Supabase Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.platform_slug }}",
+                    "rightValue": "linkedin",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "LinkedIn"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.platform_slug }}",
+                    "rightValue": "twitter",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Twitter (not wired yet)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.platform_slug }}",
+                    "rightValue": "instagram",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Instagram (not wired yet)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.platform_slug }}",
+                    "rightValue": "facebook",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Facebook (not wired yet)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1088,
+        240
+      ],
+      "id": "a1b2c3d4-0002-4a1a-9b1a-000000000002",
+      "name": "Platform Router",
+      "notes": "Scaffold for the multi-platform future: only the LinkedIn branch is wired to a publish node today. When Twitter/Instagram/Facebook nodes are added, connect them to the matching output here — no other node needs to change."
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.image_url.match(/id=([a-zA-Z0-9_-]+)/)[1] }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1312,
+        144
+      ],
+      "id": "53e73dcd-fa8e-4285-8496-234542a91506",
+      "name": "Download Image",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "dtAjZFjZwhNnNKqa",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "person": "ZQ7SdlOLKw",
+        "text": "={{ $('Get Ready Posts').item.json.post_text }}",
+        "shareMediaCategory": "IMAGE",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        144
+      ],
+      "id": "92deaceb-ded6-4656-8eff-74403f2b4585",
+      "name": "Publish Post",
+      "notes": "text now references Get Ready Posts explicitly (post_text column) instead of relying on $json.text surviving the Download Image step, which doesn't reliably pass through non-file fields.",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "LxnVvFJDT7bhBsYM",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE content_items\nSET status = 'Posted', posted_at = now()\nWHERE id = $1;",
+        "options": {
+          "queryReplacement": "={{ $('Get Ready Posts').item.json.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1808,
+        144
+      ],
+      "id": "25f22e51-9f8d-44c1-8be4-13616a457f30",
+      "name": "Update Status",
+      "notes": "Replaces the Google Sheets row_number update. Matches by primary key instead of row position, so it's safe even if rows are reordered or deleted in the dashboard.",
+      "credentials": {
+        "postgres": {
+          "id": "SUPABASE_POSTGRES_CREDENTIAL",
+          "name": "Supabase Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Platform",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Platform": {
+      "main": [
+        [
+          {
+            "node": "Get Past Ideas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Past Ideas": {
+      "main": [
+        [
+          {
+            "node": "Join Ideas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Join Ideas": {
+      "main": [
+        [
+          {
+            "node": "Idea Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Idea Generator": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Idea Generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Idea Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Image1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Save Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Image": {
+      "main": [
+        [
+          {
+            "node": "Save Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get Ready Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Ready Posts": {
+      "main": [
+        [
+          {
+            "node": "Platform Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Platform Router": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [],
+        []
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Publish Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish Post": {
+      "main": [
+        [
+          {
+            "node": "Update Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "9014c6aa693adc8cc970f633b10676ad870cb50b3f250fd19e670cf61b3f82a7"
+  }
+}
