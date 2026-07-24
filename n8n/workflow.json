@@ -1,5 +1,5 @@
 {
-  "name": "Content Automation (Supabase-backed)",
+  "name": "Content Automation (Supabase API)",
   "nodes": [
     {
       "parameters": {
@@ -22,12 +22,26 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT p.id, p.slug, p.display_name, s.brand_voice_prompt\nFROM platforms p\nLEFT JOIN platform_settings s ON s.platform_id = p.id\nWHERE p.slug = 'linkedin' AND p.enabled = true\nLIMIT 1;",
-        "options": {}
+        "operation": "getAll",
+        "tableId": "platforms",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "slug",
+              "condition": "eq",
+              "keyValue": "linkedin"
+            },
+            {
+              "keyName": "enabled",
+              "condition": "eq",
+              "keyValue": "true"
+            }
+          ]
+        }
       },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
       "position": [
         920,
         -144
@@ -35,22 +49,30 @@
       "id": "a1111111-0000-4000-8000-000000000001",
       "name": "Get Platform",
       "credentials": {
-        "postgres": {
-          "id": "REPLACE_WITH_YOUR_POSTGRES_CRED_ID",
-          "name": "Supabase Postgres"
+        "supabaseApi": {
+          "id": "REPLACE_WITH_YOUR_SUPABASE_CRED_ID",
+          "name": "Supabase account"
         }
       }
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT COALESCE(problem, title, post_text) AS idea\nFROM content_items\nWHERE platform_id = $1\nORDER BY created_at DESC\nLIMIT 30;",
-        "options": {
-          "queryReplacement": "={{ $json.id }}"
+        "operation": "getAll",
+        "tableId": "content_items",
+        "returnAll": false,
+        "limit": 30,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "platform_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Platform').item.json.id }}"
+            }
+          ]
         }
       },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
       "position": [
         1152,
         -144
@@ -59,15 +81,15 @@
       "name": "Get Past Ideas",
       "alwaysOutputData": true,
       "credentials": {
-        "postgres": {
-          "id": "REPLACE_WITH_YOUR_POSTGRES_CRED_ID",
-          "name": "Supabase Postgres"
+        "supabaseApi": {
+          "id": "REPLACE_WITH_YOUR_SUPABASE_CRED_ID",
+          "name": "Supabase account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// Get all incoming rows (past ideas for this platform)\nconst items = $input.all();\n\n// Extract the idea text from each row\nconst texts = items.map(item => item.json.idea).filter(Boolean);\n\n// Concatenate them so the agent can avoid repeating topics\nconst concatenated = texts.join(\", \");\n\n// Carry the platform id / brand voice forward so downstream nodes can use it\nconst platform = $('Get Platform').first().json;\n\nreturn [{ json: { mergedText: concatenated, platform_id: platform.id, brand_voice_prompt: platform.brand_voice_prompt } }];"
+        "jsCode": "// Collect past ideas so the agent avoids repeating topics\nconst items = $input.all();\nconst texts = items.map(i => i.json.problem || i.json.title || i.json.post_text).filter(Boolean);\nconst concatenated = texts.join(\", \");\n\n// Carry the LinkedIn platform id forward for the Save Post step\nconst platform = $('Get Platform').first().json;\n\nreturn [{ json: { mergedText: concatenated, platform_id: platform.id } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -84,7 +106,7 @@
         "text": "=ROLE:\nYou are \"The Operator\" — a CEO of an AI automation agency who writes LinkedIn posts personally, no ghostwriter polish. You share hard-won insights from running automation systems for real businesses. You do not sound like a marketer. You sound like someone who has actually built the thing and has an opinion about it.\n\nVOICE:\n- Confident, direct, slightly blunt. Never salesy or desperate.\n- Speak from experience and observation, not hype.\n- No corporate jargon (\"synergy,\" \"leverage\" as a verb, \"game-changer\").\n- Short, declarative sentences. Let the idea carry weight, not adjectives.\n\nCRITICAL RULE — NO FABRICATION:\n- NEVER invent a specific client name, a specific person, or a specific numeric result unless it is explicitly present in the input context.\n- If no real data exists in {{ $json.mergedText }}, write from industry-general observation instead.\n- It is always better to make a sharp general point than to fabricate a fake success story.\n\nLINKEDIN FORMATTING RULES (STRICT):\n- Every line is 5–9 words maximum.\n- One blank line (double line break) after every single line. No exceptions.\n- The first 2 lines are the hook — this is all LinkedIn shows before \"see more.\"\n- No bullet symbols like \"-\" or \"•\" — write short standalone lines instead.\n- Total post length: 120–180 words.\n- End with a \"P.S.\" line — one sentence, a related afterthought or soft offer, not a hard pitch.\n- Final line is always a genuine, specific question to the reader.\n\nSTRUCTURE:\n1. HOOK (2 lines): A sharp, specific observation or contrarian claim.\n2. THE PATTERN (3–5 lines): The problem as something you have personally observed across businesses.\n3. THE REFRAME (3–5 lines): What they think the problem is, versus what it actually is.\n4. THE INSIGHT (3–5 lines): Your actual point of view as the CEO.\n5. THE IMPLICATION (2–3 lines): What this means for the reader's business if left unaddressed.\n6. P.S. line + engagement question.\n\nOUTPUT JSON FORMAT:\n{\n  \"name\": \"INTERNAL_REF\",\n  \"industry\": \"TARGET_INDUSTRY\",\n  \"problem\": \"THE GENERAL PATTERN OBSERVED, NOT A FABRICATED CLIENT STORY\",\n  \"automation_solution\": \"THE CORE FIX OR REFRAME\",\n  \"tools_stack\": \"TECH_LIST_IF_RELEVANT\",\n  \"business_result\": \"GENERAL IMPACT STATEMENT, NO INVENTED NUMBERS UNLESS FROM CONTEXT\",\n  \"title\": \"SHARP_HOOK_TITLE\",\n  \"text\": \"FULL_POST_WITH_LINKEDIN_LINE_BREAKS_AND_PS_AND_QUESTION\",\n  \"image\": \"IMAGE_DESCRIPTION_MATCHING_POST_TOPIC\",\n  \"hashtags\": \"#automation #ai #systems\"\n}\n\nVISUAL STRATEGY OUTPUT RULES:\nAlso create a post-specific visual strategy. Do not default to generic gears, funnels, robots, brains, dashboards, or the same composition repeatedly.\nheadline: maximum 6 words, uppercase, exact text for the graphic.\nvisual_metaphor: one concrete visual metaphor that communicates THIS post's core insight.\nhero_object: one simple premium 3D object/system representing that metaphor.\ncomposition: choose one of EDITORIAL_SPLIT, DIAGONAL_FLOW, CENTRAL_OBJECT, ASYMMETRIC_GRID, MACRO_OBJECT, ISOMETRIC_SYSTEM, NEGATIVE_SPACE.\ntext_position: choose LEFT_TOP, RIGHT_TOP, LEFT_CENTER, RIGHT_CENTER.\nAvoid visual concepts similar to past ideas in mergedText when possible.\n",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "={{ $json.brand_voice_prompt || 'You are the CEO of an AI automation agency who writes LinkedIn posts personally. You share real insights from building automation systems for businesses. You do not manipulate — you state hard truths plainly and let the insight do the work. Never invent a specific client name, person, or numeric result unless it is explicitly present in the input. Every line 5-9 words. One blank line after every line. First 2 lines are the hook. Total 120-180 words. End with a P.S. line and a specific engagement question.' }}"
+          "systemMessage": "You are the CEO of an AI automation agency who writes LinkedIn posts personally. You share real insights from building automation systems for businesses. You do not manipulate — you state hard truths plainly and let the insight do the work. Never invent a specific client name, person, or numeric result unless it is explicitly present in the input. Every line 5-9 words. One blank line after every line. First 2 lines are the hook. Total 120-180 words. End with a P.S. line and a specific engagement question."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -224,44 +246,80 @@
     },
     {
       "parameters": {
-        "operation": "insert",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "mode": "list",
-          "value": "content_items"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "platform_id": "={{ $('Join Ideas').item.json.platform_id }}",
-            "name": "={{ $('Idea Generator').item.json.output.name }}",
-            "industry": "={{ $('Idea Generator').item.json.output.industry }}",
-            "problem": "={{ $('Idea Generator').item.json.output.problem }}",
-            "automation_solution": "={{ $('Idea Generator').item.json.output.automation_solution }}",
-            "tools_stack": "={{ $('Idea Generator').item.json.output.tools_stack }}",
-            "business_result": "={{ $('Idea Generator').item.json.output.business_result }}",
-            "title": "={{ $('Idea Generator').item.json.output.title }}",
-            "post_text": "={{ $('Idea Generator').item.json.output.text }}",
-            "image_url": "={{ $json.webContentLink }}",
-            "headline": "={{ $('Idea Generator').item.json.output.headline }}",
-            "visual_metaphor": "={{ $('Idea Generator').item.json.output.visual_metaphor }}",
-            "hero_object": "={{ $('Idea Generator').item.json.output.hero_object }}",
-            "composition": "={{ $('Idea Generator').item.json.output.composition }}",
-            "text_position": "={{ $('Idea Generator').item.json.output.text_position }}",
-            "status": "Pending"
-          },
-          "matchingColumns": [],
-          "schema": []
-        },
-        "options": {}
+        "operation": "create",
+        "tableId": "content_items",
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "platform_id",
+              "fieldValue": "={{ $('Join Ideas').item.json.platform_id }}"
+            },
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.name }}"
+            },
+            {
+              "fieldId": "industry",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.industry }}"
+            },
+            {
+              "fieldId": "problem",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.problem }}"
+            },
+            {
+              "fieldId": "automation_solution",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.automation_solution }}"
+            },
+            {
+              "fieldId": "tools_stack",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.tools_stack }}"
+            },
+            {
+              "fieldId": "business_result",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.business_result }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.title }}"
+            },
+            {
+              "fieldId": "post_text",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.text }}"
+            },
+            {
+              "fieldId": "image_url",
+              "fieldValue": "={{ $json.webContentLink }}"
+            },
+            {
+              "fieldId": "headline",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.headline }}"
+            },
+            {
+              "fieldId": "visual_metaphor",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.visual_metaphor }}"
+            },
+            {
+              "fieldId": "hero_object",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.hero_object }}"
+            },
+            {
+              "fieldId": "composition",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.composition }}"
+            },
+            {
+              "fieldId": "text_position",
+              "fieldValue": "={{ $('Idea Generator').item.json.output.text_position }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Pending"
+            }
+          ]
+        }
       },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
       "position": [
         2528,
         -144
@@ -269,9 +327,9 @@
       "id": "1f0f577a-c305-421b-b59d-c19feda7de5f",
       "name": "Save Post",
       "credentials": {
-        "postgres": {
-          "id": "REPLACE_WITH_YOUR_POSTGRES_CRED_ID",
-          "name": "Supabase Postgres"
+        "supabaseApi": {
+          "id": "REPLACE_WITH_YOUR_SUPABASE_CRED_ID",
+          "name": "Supabase account"
         }
       }
     },
@@ -296,12 +354,21 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT c.*, c.post_text AS text\nFROM content_items c\nJOIN platforms p ON p.id = c.platform_id\nWHERE c.status = 'Ready' AND p.slug = 'linkedin' AND p.enabled = true\nORDER BY c.created_at ASC;",
-        "options": {}
+        "operation": "getAll",
+        "tableId": "content_items",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "Ready"
+            }
+          ]
+        }
       },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
       "position": [
         1184,
         240
@@ -309,9 +376,9 @@
       "id": "83440227-a6a5-4c5d-8260-c91b681b77ad",
       "name": "Get Ready Posts",
       "credentials": {
-        "postgres": {
-          "id": "REPLACE_WITH_YOUR_POSTGRES_CRED_ID",
-          "name": "Supabase Postgres"
+        "supabaseApi": {
+          "id": "REPLACE_WITH_YOUR_SUPABASE_CRED_ID",
+          "name": "Supabase account"
         }
       }
     },
@@ -343,7 +410,7 @@
     {
       "parameters": {
         "person": "ZQ7SdlOLKw",
-        "text": "={{ $json.text }}",
+        "text": "={{ $('Get Ready Posts').item.json.post_text }}",
         "shareMediaCategory": "IMAGE",
         "additionalFields": {}
       },
@@ -364,14 +431,33 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE content_items\nSET status = 'Posted', posted_at = now()\nWHERE id = $1;",
-        "options": {
-          "queryReplacement": "={{ $('Get Ready Posts').item.json.id }}"
+        "operation": "update",
+        "tableId": "content_items",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Get Ready Posts').item.json.id }}"
+            }
+          ]
+        },
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "Posted"
+            },
+            {
+              "fieldId": "posted_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
         }
       },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
       "position": [
         2016,
         240
@@ -379,9 +465,9 @@
       "id": "25f22e51-9f8d-44c1-8be4-13616a457f30",
       "name": "Update Status",
       "credentials": {
-        "postgres": {
-          "id": "REPLACE_WITH_YOUR_POSTGRES_CRED_ID",
-          "name": "Supabase Postgres"
+        "supabaseApi": {
+          "id": "REPLACE_WITH_YOUR_SUPABASE_CRED_ID",
+          "name": "Supabase account"
         }
       }
     }
