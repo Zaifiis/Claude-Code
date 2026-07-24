@@ -1,105 +1,147 @@
 # Content Automation Dashboard
 
-A control panel for the n8n content automation pipeline. Replaces the Google
-Sheet as the backend: both this dashboard and n8n read/write the same Supabase
-(Postgres) database.
+A control panel for the n8n content-automation pipeline. It replaces the Google
+Sheet that the workflow used to read and write, giving you a real UI to:
+
+- **Overview** — per-platform counts of Pending / Ready / Posted content.
+- **Queue** — review what n8n generated, edit the copy, then approve (→ `Ready`)
+  or reject. Approving is what makes the publish workflow pick a post up.
+- **Calendar** — a month view of scheduled and posted content across platforms.
+- **Platforms** — turn each platform on/off and set the brand-voice prompt and
+  posting cadence the workflow uses. LinkedIn is enabled by default; X/Twitter,
+  Instagram and Facebook are seeded but disabled, ready to wire up later.
+
+The dashboard and n8n share **one Supabase Postgres database**. n8n writes rows;
+the dashboard reads and edits them; n8n reads them back. Neither talks to the
+other directly — the database is the single source of truth.
 
 ```
-┌─────────────┐         ┌───────────────────┐         ┌───────────────┐
-│  Dashboard  │ ──────▶ │  Supabase (PG)    │ ◀────── │  n8n workflow │
-│  (Next.js)  │  read/  │  platforms        │  read/  │  generate +   │
-│             │  write  │  content_items    │  write  │  publish      │
-└─────────────┘         │  platform_settings│         └───────┬───────┘
-                        └───────────────────┘                 │
-                                                              ▼
-                                              LinkedIn / (Twitter, IG, FB later)
+┌──────────────┐        writes / updates       ┌──────────────┐
+│     n8n      │ ───────────────────────────▶  │              │
+│  workflow    │                               │   Supabase   │
+│ (Postgres    │ ◀───────────────────────────  │   Postgres   │
+│  nodes)      │        reads Ready posts       │              │
+└──────────────┘                               └──────┬───────┘
+                                                      │ reads / edits
+                                               ┌──────▼───────┐
+                                               │  Dashboard   │
+                                               │ (Next.js)    │
+                                               └──────────────┘
 ```
 
-## What the dashboard does
+## 1. Create the Supabase project
 
-- **Overview** — per-platform counts of Pending / Ready / Posted content and recent activity.
-- **Queue** — review posts n8n generated (`Pending`), edit the text, then
-  **Approve** (sets `Ready` — the publish workflow only picks up `Ready` items)
-  or **Reject**.
-- **Calendar** — month view of scheduled and posted content across platforms.
-- **Platforms** — toggle each platform on/off and edit its brand-voice prompt
-  and cron cadences. n8n reads this before generating.
+1. Create a project at [supabase.com](https://supabase.com) (free tier is fine).
+2. Open **SQL Editor**, paste the contents of [`supabase/schema.sql`](supabase/schema.sql),
+   and run it. This creates the `platforms`, `platform_settings`, and
+   `content_items` tables, seeds the four platforms, and enables Row Level
+   Security. (A successful run reports "Success. No rows returned" — that's
+   expected; the script only creates and inserts.)
+3. Go to **Authentication → Users → Add user** and create yourself an email +
+   password. This is your dashboard login — there is intentionally no public
+   sign-up page.
 
-## Setup
-
-### 1. Supabase
-
-1. Create a project at [supabase.com](https://supabase.com).
-2. Open the SQL editor and run `supabase/schema.sql` from this repo. This
-   creates `platforms`, `platform_settings`, `content_items`, and seeds
-   LinkedIn (enabled) plus Twitter/Instagram/Facebook (disabled).
-3. In **Authentication → Users**, create your login user (email + password).
-   There is intentionally no public sign-up.
-
-### 2. Dashboard
+## 2. Run the dashboard
 
 ```bash
 cd dashboard
-cp .env.example .env.local   # fill in NEXT_PUBLIC_SUPABASE_URL + ANON KEY
-npm install
-npm run dev                  # http://localhost:3000
+cp .env.example .env.local
 ```
 
-Deploy: push to GitHub and import into [Vercel](https://vercel.com) — set the
-same two env vars in the Vercel project settings. (Any Node host works; Vercel
-is just the least friction for Next.js.)
+Fill `.env.local` from **Supabase → Project Settings → API**:
 
-### 3. n8n
+```
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT-REF.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
 
-1. In n8n, create a **Postgres credential** using your Supabase connection
-   info: **Project Settings → Database → Connection string** (use the
-   *Session pooler* / port 5432 variant; SSL required). This connection
-   bypasses RLS, which is what n8n needs.
-2. Import `n8n/workflow.json` (repo root). It is the same pipeline as before
-   with the four Google Sheets nodes replaced:
+Then:
 
-   | Old (Sheets)            | New (Postgres)                                    |
-   |-------------------------|---------------------------------------------------|
-   | Get Past Ideas (read)   | `SELECT title FROM content_items ...`             |
-   | Save Post (append)      | `INSERT INTO content_items ... status='Pending'`  |
-   | Get Ready Posts (filter)| `SELECT ... WHERE status='Ready'`                 |
-   | Update Status (update)  | `UPDATE content_items SET status='Posted' ...` by id |
+```bash
+npm install
+npm run dev
+```
 
-3. Point each Postgres node at the credential you created (the JSON references
-   a placeholder credential named "Supabase Postgres account").
-4. Google Drive (image storage), OpenAI, and LinkedIn credentials are unchanged.
+Open <http://localhost:3000> and log in with the user from step 1.
 
-### The daily loop
+## 3. Point n8n at the same database
 
-1. **8:00** — n8n generates a post + image, inserts it as `Pending`.
-2. **You** — open the Queue, edit if needed, click **Approve & mark Ready**.
-3. **9:00** — n8n publishes everything `Ready`, marks it `Posted` with a timestamp.
+The updated workflow lives at [`../n8n/workflow.json`](../n8n/workflow.json). It is
+the original workflow with the four Google Sheets nodes replaced by Postgres
+nodes (plus a new **Get Platform** node that reads the enabled platform and its
+brand-voice prompt from the dashboard).
 
-Nothing goes out without passing through the Queue.
+1. In n8n: **Credentials → New → Postgres**. Fill it from **Supabase → Project
+   Settings → Database → Connection info** (use the **Session pooler** host,
+   port `5432`, database `postgres`, your DB password, SSL enabled). This
+   connection uses the service role and bypasses RLS, which is what n8n needs.
+2. **Workflows → Import from File** → select `n8n/workflow.json`.
+3. Open each of the five Postgres nodes — **Get Platform, Get Past Ideas, Save
+   Post, Get Ready Posts, Update Status** — and select the credential you just
+   created. (Their credential IDs are placeholders on purpose.)
+4. The OpenAI, Google Drive, and LinkedIn nodes keep their original credential
+   IDs, so they should reconnect automatically on your instance. Re-select them
+   if not.
 
-## Adding more platforms
+### How the columns map
 
-The schema and workflow are already multi-platform:
+The Sheet's columns became `content_items` columns. A few were renamed:
 
-1. **Platforms page** — flip the platform on and write its brand voice prompt.
-2. **n8n** — the publish workflow has a **Platform Router** switch node with
-   outputs for twitter / instagram / facebook that are not yet connected.
-   Add the platform's publish node (e.g. the X node, or Facebook Graph API
-   HTTP request) and connect it to the matching router output, ending in the
-   same `Update Status` node.
-3. **Generation** — duplicate the generation branch per platform, or make it
-   loop over enabled platforms and interpolate
-   `platform_settings.brand_voice_prompt` into the Idea Generator prompt.
+| Old sheet column | New DB column |
+| ---------------- | ------------- |
+| `text`           | `post_text`   |
+| `image`          | `image_url`   |
+| `Status`         | `status`      |
+| `Date`           | `created_at` (set automatically) |
 
-## Notes / current limitations
+`status` is an enum: `Pending` → `Ready` → `Posted` (or `Rejected`). The
+generation workflow inserts rows as `Pending`; you approve them to `Ready` in
+the dashboard; the publish workflow flips them to `Posted`.
 
-- Images still live in Google Drive (the workflow saves the `webContentLink`
-  into `content_items.image_url`). Moving them to Supabase Storage would drop
-  the Google dependency entirely.
-- The cron fields on the Platforms page are stored config; n8n's Schedule
-  Trigger nodes don't read them automatically. Treat them as the source of
-  truth you mirror into the trigger settings (n8n has no built-in way to drive
-  trigger schedules from a DB row).
-- Old rows in the Google Sheet are not migrated automatically. If you want the
-  history, export the sheet as CSV and import it into `content_items` via the
-  Supabase table editor.
+## 4. Test the round trip
+
+1. Run the **generation** workflow manually (top schedule). A new card should
+   appear in the dashboard **Queue** as `Pending`.
+2. Edit and **Approve** it — status becomes `Ready`.
+3. Run the **publish** workflow manually (bottom schedule). It publishes the
+   `Ready` post to LinkedIn and sets it to `Posted`; it now shows on the
+   **Calendar**.
+
+Once that works, **deactivate your old Google-Sheets workflow** so you don't get
+double posts.
+
+## 5. Deploy (optional)
+
+Deploy the dashboard to [Vercel](https://vercel.com) so you can approve posts
+from your phone:
+
+1. Import your GitHub repo.
+2. Set **Root Directory** to `dashboard`.
+3. Add the same `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   env vars.
+4. Deploy.
+
+## Adding more platforms later
+
+The schema already seeds `twitter`, `instagram`, and `facebook` (disabled). To
+turn one on:
+
+1. Enable it on the **Platforms** page and set its brand voice.
+2. In n8n, duplicate the LinkedIn generate/publish branches, change the
+   **Get Platform** / **Get Ready Posts** queries to that platform's `slug`, and
+   swap the final **Publish Post** node for that platform's node (e.g. the X or
+   Facebook Graph node). The `content_items` table already carries a
+   `platform_id`, so the dashboard picks the new platform up with no changes.
+
+> **Note:** publishing to Instagram/Facebook needs a Meta (Facebook Ads / Graph)
+> connection, and X needs an X/Twitter credential — those are authorized
+> separately in n8n when you get to them.
+
+## Tech notes
+
+- Next.js 16 (App Router). Auth session refresh runs in `proxy.ts` (Next 16
+  renamed `middleware.ts` → `proxy.ts`).
+- Supabase Auth via `@supabase/ssr`. All dashboard routes are gated; the only
+  public route is `/login`.
+- Server Actions (`app/(dashboard)/**/actions.ts`) perform all writes and
+  `revalidatePath` the affected pages.
