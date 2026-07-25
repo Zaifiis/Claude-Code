@@ -24,6 +24,8 @@
   .key-row{display:flex;gap:8px;align-items:center}
   .key-row input{background:var(--bg);border:1px solid var(--line);color:var(--cream);
     border-radius:8px;padding:8px 10px;font-size:13px;width:230px}
+  .key-row select{background:var(--bg);border:1px solid var(--line);color:var(--cream);
+    border-radius:8px;padding:8px 10px;font-size:13px;max-width:190px}
   .key-row button{background:var(--marigold);color:#17130f;border:none;border-radius:8px;
     padding:8px 12px;font-weight:600;cursor:pointer}
   .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;max-width:1080px;margin:0 auto;padding:20px}
@@ -67,6 +69,7 @@
 <header>
   <div class="brand"><b>Zaiqa Line</b><span>AI order bot · pickup</span></div>
   <div class="key-row">
+    <select id="voicePick" title="Voice"></select>
     <input id="apiKey" type="password" placeholder="Paste OpenRouter key (sk-or-...)" />
     <button id="saveKey">Save</button>
   </div>
@@ -128,11 +131,15 @@ let apiKey = localStorage.getItem(KEY_LS) || '';
 const model = localStorage.getItem(MODEL_LS) || 'openai/gpt-4o-mini';
 
 const SYSTEM = `You are "Zaiqa Line", a warm, friendly order-taking assistant for a Pakistani
-restaurant. Pickup only. Speak natural spoken English in 1-3 short sentences (your words are read aloud,
-so no lists, markdown, or emoji). Only take items on the menu; use the tools to add/remove items.
-Before placing the order, read the full order and total back and get a clear yes, and make sure you have
-the customer's name and phone number. Prices are in Rupees. Never invent prices or order numbers; rely on
-the tool results. The menu is: ${MENU.map(m=>`${m.en} (Rs ${m.price})`).join('; ')}.`;
+restaurant. Pickup only.
+IMPORTANT: Reply ONLY in casual, natural spoken ROMAN URDU — that is, the Urdu language written in
+English/Latin letters (for example: "Zaroor! Aap ko kitni biryani chahiye?" or "Aap ka order taiyaar hai,
+total pandra sau rupay."). Do NOT use Urdu (Arabic) script. Keep replies to 1-2 short spoken sentences,
+no lists, markdown, or emoji (your words are read aloud).
+Only take items on the menu; use the tools to add/remove items. Before placing the order, read the full
+order and total back and get a clear haan/yes, and make sure you have the customer's name and phone number.
+Prices are in Rupees. Never invent prices or order numbers; rely on the tool results.
+The menu (say item names in English, they are dish names): ${MENU.map(m=>`${m.en} (Rs ${m.price})`).join('; ')}.`;
 
 // ─────────────── Tools ───────────────
 const tools = [
@@ -213,14 +220,38 @@ async function sendUser(text){
 // ─────────────── Voice (browser) ───────────────
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 let rec=null, listening=false;
-if(SR){rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.continuous=false;
+if(SR){rec=new SR();rec.lang='ur-PK';rec.interimResults=false;rec.continuous=false;
   rec.onresult=e=>{const t=e.results[0][0].transcript;sendUser(t);};
   rec.onend=()=>{listening=false;micBtn.classList.remove('live');};
   rec.onerror=e=>{listening=false;micBtn.classList.remove('live');
     if(e.error==='not-allowed')setStatus('Microphone blocked. Allow it and try again.',true);};
 }
+
+// Voice picker — list the voices installed on this computer and remember the
+// choice. We default to an Urdu voice, else Hindi (reads Urdu well), else any.
+let voices=[], chosenVoice=null;
+const VOICE_LS='zaiqa_voice';
+function scoreVoice(v){const l=(v.lang||'').toLowerCase(),n=(v.name||'').toLowerCase();
+  if(l.startsWith('ur')||n.includes('urdu'))return 3;
+  if(l.startsWith('hi')||n.includes('hindi'))return 2;
+  if(l.startsWith('en-in')||n.includes('india'))return 1;
+  return 0;}
+function loadVoices(){
+  const vp=document.getElementById('voicePick'); if(!vp)return;
+  voices=(window.speechSynthesis?window.speechSynthesis.getVoices():[])||[];
+  if(!voices.length)return;
+  const saved=localStorage.getItem(VOICE_LS);
+  const sorted=[...voices].sort((a,b)=>scoreVoice(b)-scoreVoice(a));
+  vp.innerHTML=sorted.map(v=>`<option value="${v.name}">${v.name} (${v.lang})</option>`).join('');
+  chosenVoice=voices.find(v=>v.name===saved)||sorted[0];
+  if(chosenVoice)vp.value=chosenVoice.name;
+}
+if('speechSynthesis'in window){speechSynthesis.onvoiceschanged=loadVoices;loadVoices();}
+
 function speak(t){if(!('speechSynthesis'in window)||!t)return;
-  const u=new SpeechSynthesisUtterance(t);u.lang='en-US';speechSynthesis.cancel();speechSynthesis.speak(u);}
+  const u=new SpeechSynthesisUtterance(t);
+  if(chosenVoice){u.voice=chosenVoice;u.lang=chosenVoice.lang;}else{u.lang='hi-IN';}
+  u.rate=0.98;speechSynthesis.cancel();speechSynthesis.speak(u);}
 
 // ─────────────── UI ───────────────
 const chat=document.getElementById('chat'), statusEl=document.getElementById('status'),
@@ -254,6 +285,11 @@ micBtn.onclick=()=>{if(!SR){setStatus('Voice needs Google Chrome. You can still 
   if(listening){rec.stop();return;}listening=true;micBtn.classList.add('live');setStatus('Listening…');
   try{rec.start();}catch(e){}};
 
+document.getElementById('voicePick').onchange=e=>{
+  chosenVoice=voices.find(v=>v.name===e.target.value)||chosenVoice;
+  if(chosenVoice){localStorage.setItem(VOICE_LS,chosenVoice.name);
+    speak('Assalam o alaikum, yeh awaaz kaisi lagi?');}};
+
 const keyInput=document.getElementById('apiKey');
 document.getElementById('saveKey').onclick=()=>{apiKey=keyInput.value.trim();
   localStorage.setItem(KEY_LS,apiKey);document.getElementById('keyBanner').style.display='none';
@@ -265,7 +301,7 @@ messages=[{role:'system',content:SYSTEM}];
 keyInput.value=apiKey;
 renderCart();renderMenu();
 if(!apiKey)showKeyBanner();
-addBubble('bot',"Assalam o alaikum! Welcome to Zaiqa Line. What would you like to order today?");
+addBubble('bot',"Assalam o alaikum! Zaiqa Line mein khush aamdeed. Aap kya order karna chahenge?");
 </script>
 </body>
 </html>
