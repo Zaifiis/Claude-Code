@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zaiqa Line — AI Order Bot</title>
+<style>
+  :root{
+    --bg:#17130f; --panel:#221b15; --panel2:#2b241d; --line:#4a3e30;
+    --brass:#c79a4b; --marigold:#e8a935; --ember:#d9622b;
+    --cream:#f3e9d6; --muted:#b7a892; --green:#6fae6a; --red:#d9605a;
+    --sans:'Inter',system-ui,Segoe UI,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--sans);color:var(--cream);
+    background:radial-gradient(1000px 500px at 75% -10%,rgba(232,169,53,.08),transparent 60%),
+      radial-gradient(800px 400px at -10% 110%,rgba(217,98,43,.07),transparent 55%),var(--bg);
+    min-height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 22px;border-bottom:1px solid var(--line);background:rgba(23,19,15,.7)}
+  .brand{display:flex;align-items:baseline;gap:10px}
+  .brand b{color:var(--marigold);font-size:20px;letter-spacing:.5px}
+  .brand span{color:var(--muted);font-size:13px}
+  .key-row{display:flex;gap:8px;align-items:center}
+  .key-row input{background:var(--bg);border:1px solid var(--line);color:var(--cream);
+    border-radius:8px;padding:8px 10px;font-size:13px;width:230px}
+  .key-row button{background:var(--marigold);color:#17130f;border:none;border-radius:8px;
+    padding:8px 12px;font-weight:600;cursor:pointer}
+  .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;max-width:1080px;margin:0 auto;padding:20px}
+  @media(max-width:860px){.wrap{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:16px;padding:16px;display:flex;flex-direction:column}
+  h2{margin:0 0 12px;font-size:13px;letter-spacing:1.4px;text-transform:uppercase;color:var(--brass)}
+  #chat{flex:1;min-height:320px;max-height:52vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px}
+  .msg{padding:10px 13px;border-radius:12px;max-width:85%;font-size:15px;line-height:1.4;white-space:pre-wrap}
+  .msg.user{align-self:flex-end;background:var(--panel2);border:1px solid var(--line)}
+  .msg.bot{align-self:flex-start;background:rgba(232,169,53,.12);border:1px solid rgba(232,169,53,.25)}
+  .msg .who{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px}
+  .status{font-size:12px;color:var(--muted);min-height:16px;margin:6px 2px 0;letter-spacing:.4px}
+  .controls{display:flex;gap:8px;margin-top:12px}
+  .controls input{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--cream);
+    border-radius:10px;padding:11px 13px;font-size:15px}
+  .controls button{border:none;border-radius:10px;padding:0 16px;font-weight:600;cursor:pointer}
+  #send{background:var(--brass);color:#17130f}
+  #mic{background:var(--marigold);color:#17130f;min-width:52px;font-size:18px}
+  #mic.live{background:var(--ember);color:var(--cream)}
+  .cat{font-size:11px;color:var(--brass);letter-spacing:1.3px;text-transform:uppercase;margin:10px 0 4px}
+  .item{display:flex;justify-content:space-between;align-items:center;padding:7px 8px;border-radius:9px}
+  .item:hover{background:rgba(255,255,255,.03)}
+  .item .en{font-size:14px}
+  .price{color:var(--marigold);font-weight:600}
+  .add{border:1px solid var(--brass);color:var(--brass);background:transparent;border-radius:8px;
+    width:28px;height:28px;cursor:pointer;font-size:17px;line-height:1;margin-left:10px}
+  .add:hover{background:var(--brass);color:#17130f}
+  .cart-line{display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid var(--line);font-size:14px}
+  .cart-empty{color:var(--muted);font-size:14px;padding:8px 0}
+  .total{display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;
+    border-top:1px dashed var(--line);font-size:18px;font-weight:700}
+  .total .price{font-size:20px}
+  .banner{background:rgba(217,98,43,.12);border:1px solid var(--ember);color:var(--cream);
+    padding:10px 14px;border-radius:10px;font-size:13px;margin:0 20px}
+  .ok{color:var(--green)} .err{color:var(--red)}
+  a{color:var(--marigold)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><b>Zaiqa Line</b><span>AI order bot · pickup</span></div>
+  <div class="key-row">
+    <input id="apiKey" type="password" placeholder="Paste OpenRouter key (sk-or-...)" />
+    <button id="saveKey">Save</button>
+  </div>
+</header>
+
+<div id="keyBanner" class="banner" style="display:none">
+  Paste your <a href="https://openrouter.ai/keys" target="_blank">OpenRouter API key</a>
+  in the box at the top right and click <b>Save</b> to start ordering. The key stays in this
+  browser only.
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <h2>Talk or type your order</h2>
+    <div id="chat"></div>
+    <div class="status" id="status"></div>
+    <div class="controls">
+      <button id="mic" title="Speak">🎤</button>
+      <input id="text" placeholder="e.g. two chicken biryani and a lassi" />
+      <button id="send">Send</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Your order</h2>
+    <div id="cart"></div>
+    <div id="menu" style="margin-top:14px"></div>
+  </div>
+</div>
+
+<script>
+// ─────────────── Menu (edit freely) ───────────────
+const MENU = [
+  {id:'b1',en:'Chicken Biryani',price:450,cat:'Biryani'},
+  {id:'b2',en:'Beef Biryani',price:520,cat:'Biryani'},
+  {id:'b3',en:'Sindhi Biryani',price:500,cat:'Biryani'},
+  {id:'k1',en:'Chicken Karahi (Half)',price:850,cat:'Karahi'},
+  {id:'k2',en:'Chicken Karahi (Full)',price:1550,cat:'Karahi'},
+  {id:'k3',en:'Mutton Karahi (Half)',price:1350,cat:'Karahi'},
+  {id:'g1',en:'Chicken Tikka',price:320,cat:'Grill'},
+  {id:'g2',en:'Seekh Kabab (4 pcs)',price:380,cat:'Grill'},
+  {id:'g3',en:'Malai Boti',price:420,cat:'Grill'},
+  {id:'t1',en:'Roghni Naan',price:60,cat:'Bread'},
+  {id:'t2',en:'Garlic Naan',price:90,cat:'Bread'},
+  {id:'t3',en:'Tandoori Roti',price:30,cat:'Bread'},
+  {id:'s1',en:'Raita',price:80,cat:'Sides'},
+  {id:'s3',en:'Fresh Fries',price:180,cat:'Sides'},
+  {id:'d1',en:'Gulab Jamun (2 pcs)',price:150,cat:'Sweets'},
+  {id:'r2',en:'Sweet Lassi',price:180,cat:'Drinks'},
+  {id:'r3',en:'Soft Drink',price:90,cat:'Drinks'},
+];
+const byId = Object.fromEntries(MENU.map(m=>[m.id,m]));
+
+// ─────────────── State ───────────────
+let cart = [];            // [{id, qty}]
+let messages = [];        // chat history for the model
+const KEY_LS='zaiqa_or_key', MODEL_LS='zaiqa_or_model';
+let apiKey = localStorage.getItem(KEY_LS) || '';
+const model = localStorage.getItem(MODEL_LS) || 'openai/gpt-4o-mini';
+
+const SYSTEM = `You are "Zaiqa Line", a warm, friendly order-taking assistant for a Pakistani
+restaurant. Pickup only. Speak natural spoken English in 1-3 short sentences (your words are read aloud,
+so no lists, markdown, or emoji). Only take items on the menu; use the tools to add/remove items.
+Before placing the order, read the full order and total back and get a clear yes, and make sure you have
+the customer's name and phone number. Prices are in Rupees. Never invent prices or order numbers; rely on
+the tool results. The menu is: ${MENU.map(m=>`${m.en} (Rs ${m.price})`).join('; ')}.`;
+
+// ─────────────── Tools ───────────────
+const tools = [
+  {type:'function',function:{name:'add_items',description:'Add menu items to the cart by their exact English name.',
+    parameters:{type:'object',properties:{items:{type:'array',items:{type:'object',
+    properties:{name:{type:'string'},qty:{type:'integer'}},required:['name']}}},required:['items']}}},
+  {type:'function',function:{name:'remove_items',description:'Remove items from the cart by name.',
+    parameters:{type:'object',properties:{items:{type:'array',items:{type:'object',
+    properties:{name:{type:'string'},qty:{type:'integer'}},required:['name']}}},required:['items']}}},
+  {type:'function',function:{name:'place_order',description:'Finalize the order after the customer confirms.',
+    parameters:{type:'object',properties:{customer_name:{type:'string'},customer_phone:{type:'string'}},
+    required:['customer_name','customer_phone']}}},
+  {type:'function',function:{name:'clear_cart',description:'Empty the cart.',parameters:{type:'object',properties:{}}}},
+];
+
+function findMenu(name){
+  const n=(name||'').toLowerCase().trim();
+  return MENU.find(m=>m.en.toLowerCase()===n)
+      || MENU.find(m=>m.en.toLowerCase().includes(n)||n.includes(m.en.toLowerCase()));
+}
+function cartLines(){let t=0;const l=cart.map(c=>{const m=byId[c.id];t+=m.price*c.qty;
+  return {name:m.en,qty:c.qty,line_total:m.price*c.qty};});return {lines:l,total:t};}
+
+function dispatch(name,args){
+  if(name==='add_items'){const added=[],unknown=[];
+    for(const it of (args.items||[])){const m=findMenu(it.name);const q=Math.max(1,it.qty||1);
+      if(!m){unknown.push(it.name);continue;}
+      const line=cart.find(c=>c.id===m.id); if(line)line.qty+=q; else cart.push({id:m.id,qty:q});
+      added.push({name:m.en,qty:q});}
+    renderCart(); const {lines,total}=cartLines(); return {ok:true,added,unknown,cart:lines,total};}
+  if(name==='remove_items'){for(const it of (args.items||[])){const m=findMenu(it.name);if(!m)continue;
+      const i=cart.findIndex(c=>c.id===m.id);if(i<0)continue;
+      if(it.qty==null||cart[i].qty<=it.qty)cart.splice(i,1);else cart[i].qty-=it.qty;}
+    renderCart(); const {lines,total}=cartLines(); return {ok:true,cart:lines,total};}
+  if(name==='clear_cart'){cart=[];renderCart();return {ok:true,cart:[],total:0};}
+  if(name==='place_order'){if(cart.length===0)return {ok:false,error:'Cart is empty'};
+    const {lines,total}=cartLines(); const order_no='ZQ-'+(1041+Math.floor(Math.random()*9000));
+    const summary={ok:true,order_no,total,items:lines,customer:args.customer_name};
+    cart=[];renderCart(); return summary;}
+  return {ok:false,error:'unknown tool'};
+}
+
+// ─────────────── OpenRouter call ───────────────
+async function runLoop(){
+  setStatus('Thinking…');
+  for(let step=0; step<6; step++){
+    let data;
+    try{
+      const resp=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+        method:'POST',
+        headers:{'Authorization':'Bearer '+apiKey,'Content-Type':'application/json',
+          'HTTP-Referer':location.href,'X-Title':'Zaiqa Line'},
+        body:JSON.stringify({model,messages,tools,tool_choice:'auto'})
+      });
+      data=await resp.json();
+      if(!resp.ok){throw new Error(data.error?.message||('HTTP '+resp.status));}
+    }catch(e){setStatus('Error: '+e.message,true);return;}
+    const msg=data.choices?.[0]?.message; if(!msg){setStatus('No reply from model',true);return;}
+    messages.push(msg);
+    if(msg.tool_calls&&msg.tool_calls.length){
+      for(const c of msg.tool_calls){let a={};try{a=JSON.parse(c.function.arguments||'{}');}catch(e){}
+        const r=dispatch(c.function.name,a);
+        messages.push({role:'tool',tool_call_id:c.id,content:JSON.stringify(r)});}
+      continue;
+    }
+    setStatus(''); addBubble('bot',msg.content||''); speak(msg.content||''); return;
+  }
+  setStatus('');
+}
+
+async function sendUser(text){
+  if(!apiKey){showKeyBanner();return;}
+  if(!text.trim())return;
+  addBubble('user',text); messages.push({role:'user',content:text});
+  await runLoop();
+}
+
+// ─────────────── Voice (browser) ───────────────
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null, listening=false;
+if(SR){rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.continuous=false;
+  rec.onresult=e=>{const t=e.results[0][0].transcript;sendUser(t);};
+  rec.onend=()=>{listening=false;micBtn.classList.remove('live');};
+  rec.onerror=e=>{listening=false;micBtn.classList.remove('live');
+    if(e.error==='not-allowed')setStatus('Microphone blocked. Allow it and try again.',true);};
+}
+function speak(t){if(!('speechSynthesis'in window)||!t)return;
+  const u=new SpeechSynthesisUtterance(t);u.lang='en-US';speechSynthesis.cancel();speechSynthesis.speak(u);}
+
+// ─────────────── UI ───────────────
+const chat=document.getElementById('chat'), statusEl=document.getElementById('status'),
+  cartEl=document.getElementById('cart'), menuEl=document.getElementById('menu'),
+  textEl=document.getElementById('text'), micBtn=document.getElementById('mic');
+
+function addBubble(who,text){const d=document.createElement('div');d.className='msg '+who;
+  d.innerHTML='<div class="who">'+(who==='user'?'You':'Zaiqa')+'</div>';
+  d.appendChild(document.createTextNode(text));chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
+function setStatus(t,isErr){statusEl.textContent=t;statusEl.className='status'+(isErr?' err':'');}
+
+function renderCart(){const {lines,total}=cartLines();
+  if(lines.length===0){cartEl.innerHTML='<div class="cart-empty">Your order will appear here.</div>';return;}
+  cartEl.innerHTML=lines.map(l=>`<div class="cart-line"><span>${l.name}</span>
+    <span><span style="color:var(--muted)">×${l.qty}</span> &nbsp; <span class="price">Rs ${l.line_total}</span></span></div>`).join('')
+    +`<div class="total"><span>Total</span><span class="price">Rs ${total}</span></div>`;}
+
+function renderMenu(){const cats=[...new Set(MENU.map(m=>m.cat))];
+  menuEl.innerHTML='<h2>Menu</h2>'+cats.map(cat=>`<div class="cat">${cat}</div>`+
+    MENU.filter(m=>m.cat===cat).map(m=>`<div class="item"><span class="en">${m.en}</span>
+      <span><span class="price">Rs ${m.price}</span>
+      <button class="add" data-id="${m.id}">+</button></span></div>`).join('')).join('');
+  menuEl.querySelectorAll('.add').forEach(b=>b.onclick=()=>{
+    const m=byId[b.dataset.id];const line=cart.find(c=>c.id===m.id);
+    if(line)line.qty++;else cart.push({id:m.id,qty:1});renderCart();});}
+
+document.getElementById('send').onclick=()=>{const t=textEl.value;textEl.value='';sendUser(t);};
+textEl.addEventListener('keydown',e=>{if(e.key==='Enter'){const t=textEl.value;textEl.value='';sendUser(t);}});
+micBtn.onclick=()=>{if(!SR){setStatus('Voice needs Google Chrome. You can still type.',true);return;}
+  if(!apiKey){showKeyBanner();return;}
+  if(listening){rec.stop();return;}listening=true;micBtn.classList.add('live');setStatus('Listening…');
+  try{rec.start();}catch(e){}};
+
+const keyInput=document.getElementById('apiKey');
+document.getElementById('saveKey').onclick=()=>{apiKey=keyInput.value.trim();
+  localStorage.setItem(KEY_LS,apiKey);document.getElementById('keyBanner').style.display='none';
+  setStatus(apiKey?'Key saved ✓':'Key cleared');};
+function showKeyBanner(){document.getElementById('keyBanner').style.display='block';keyInput.focus();}
+
+// init
+messages=[{role:'system',content:SYSTEM}];
+keyInput.value=apiKey;
+renderCart();renderMenu();
+if(!apiKey)showKeyBanner();
+addBubble('bot',"Assalam o alaikum! Welcome to Zaiqa Line. What would you like to order today?");
+</script>
+</body>
+</html>
