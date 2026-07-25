@@ -1,0 +1,20 @@
+{
+  "name": "zaiqa-line-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Zaiqa Line — Express + WebSocket bridge from the browser to the Gemini Live API",
+  "scripts": {
+    "dev": "node --watch index.js",
+    "start": "node index.js",
+    "test:mock": "node test/tools.mock.test.js"
+  },
+  "dependencies": {
+    "@google/genai": "^0.14.0",
+    "@supabase/supabase-js": "^2.110.8",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  }
+}
