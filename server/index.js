@@ -1,12 +1,32 @@
 import 'dotenv/config';
-import http from 'node:http';
 import express from 'express';
 import cors from 'cors';
-import { WebSocketServer } from 'ws';
 import { getSupabase } from './src/supabase.js';
-import { bridgeGeminiLive } from './src/gemini.js';
+import { createOrderSession } from './src/tools.js';
+import { runConversation } from './src/openrouter.js';
 
 const PORT = process.env.PORT || 3001;
+
+// English system prompt for the GPT brain (spoken aloud by the browser, so
+// keep replies short and plain — no lists, markdown, or emoji).
+const SYSTEM_PROMPT_EN = `
+You are "Zaiqa Line", the friendly voice ordering assistant for a Pakistani
+restaurant. You speak natural, spoken English, warm and polite.
+
+Rules:
+- Always brief: one to three short sentences. No lists, markdown, or emoji.
+- Pickup orders only. No delivery.
+- Only take items on the menu; use add_items / remove_items to build the cart.
+- Before place_order, read the full order and total back and get a clear yes.
+- You need the customer's name and phone number to place an order.
+- Before any change or cancel, ask for the order number or phone and call
+  lookup_order first; then repeat the order back and only proceed on an
+  explicit yes.
+- An order can't be changed or cancelled more than five minutes after it was
+  placed. If the system refuses, apologise briefly; don't argue.
+- Prices are in Rupees (Rs). Answer from the tool results; never invent an
+  order number or price.
+`.trim();
 
 const app = express();
 app.use(cors());
@@ -16,17 +36,15 @@ app.use(express.json());
 app.get('/health', (_req, res) => {
   res.json({
     ok: true,
-    gemini_model: process.env.GEMINI_MODEL_ID || null,
+    model: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini',
     configured: {
-      gemini_key: Boolean(process.env.GEMINI_API_KEY),
+      openrouter_key: Boolean(process.env.OPENROUTER_API_KEY),
       supabase_url: Boolean(process.env.SUPABASE_URL),
       supabase_service_key: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     },
   });
 });
 
-// Menu endpoint so the frontend can render the list without the anon key
-// (handy in dev; the client can also read Supabase directly).
 app.get('/api/menu', async (_req, res) => {
   try {
     const db = getSupabase();
@@ -38,42 +56,47 @@ app.get('/api/menu', async (_req, res) => {
   }
 });
 
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server, path: '/voice' });
+// In-memory conversation sessions, keyed by a sessionId the browser generates.
+// Each holds its own cart (order session) and message history.
+const sessions = new Map();
 
-wss.on('connection', async (ws) => {
-  const send = (obj) => {
-    if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(obj));
-  };
-
-  let bridge = null;
-  try {
-    bridge = await bridgeGeminiLive({
-      db: getSupabase(),
-      send,
-      onClose: () => send({ type: 'status', state: 'closed' }),
-    });
-  } catch (err) {
-    send({ type: 'error', message: `bridge init failed: ${err.message}` });
-    ws.close();
-    return;
+function getSession(sessionId) {
+  let s = sessions.get(sessionId);
+  if (!s) {
+    s = {
+      order: createOrderSession({ db: getSupabase() }),
+      messages: [{ role: 'system', content: SYSTEM_PROMPT_EN }],
+    };
+    sessions.set(sessionId, s);
   }
+  return s;
+}
 
-  ws.on('message', (raw) => {
-    let m;
-    try { m = JSON.parse(raw.toString()); } catch { return; }
-    switch (m.type) {
-      case 'audio': bridge.sendAudio(m.data); break;   // base64 PCM16 @ 16kHz
-      case 'text':  bridge.sendText(m.text); break;    // typed fallback
-      case 'end':   bridge.close(); break;
-      default: break;
-    }
-  });
-
-  ws.on('close', () => bridge?.close());
-  ws.on('error', () => bridge?.close());
+// One turn of conversation. Body: { sessionId, message }.
+// Returns: { reply, toolResults } — reply is spoken by the browser; toolResults
+// let the page mirror the cart / order state.
+app.post('/api/chat', async (req, res) => {
+  const { sessionId, message } = req.body || {};
+  if (!sessionId || !message) {
+    return res.status(400).json({ error: 'sessionId and message are required' });
+  }
+  try {
+    const session = getSession(sessionId);
+    session.messages.push({ role: 'user', content: String(message) });
+    const { reply, toolResults } = await runConversation(session);
+    res.json({ reply, toolResults });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-server.listen(PORT, () => {
-  console.log(`Zaiqa Line server on http://localhost:${PORT}  (ws: /voice)`);
+// Optional: clear a session (e.g. after an order completes).
+app.post('/api/reset', (req, res) => {
+  const { sessionId } = req.body || {};
+  if (sessionId) sessions.delete(sessionId);
+  res.json({ ok: true });
+});
+
+app.listen(PORT, () => {
+  console.log(`Zaiqa Line server on http://localhost:${PORT}  (OpenRouter + browser voice)`);
 });
