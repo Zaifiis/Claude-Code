@@ -67,9 +67,24 @@ npm run start   # serve the production build
 npm run lint    # eslint
 ```
 
+## Deployment (Hostinger)
+
+Content OS runs as a Node.js server (Server Actions + local database), so it
+needs a Node host — not static file hosting. See **[DEPLOY.md](DEPLOY.md)** for
+step-by-step instructions for both a **Hostinger VPS** (PM2 + reverse proxy) and
+the **shared "Node.js app" manager** (Passenger) in hPanel. Two things matter:
+
+- Run on **Node 20.9+** and **build on the server** (`better-sqlite3` is a
+  native module).
+- Set **`DATA_DIR`** to a persistent, writable path outside the app folder so
+  your database survives redeploys.
+
+A production entry point ([`server.js`](server.js)) is included for hosts that
+require a startup file.
+
 ## Data model
 
-A single relational schema ([`lib/db/schema.sql`](lib/db/schema.sql)) drives
+A single relational schema ([`lib/db/schema.ts`](lib/db/schema.ts)) drives
 everything:
 
 | Table                 | Purpose                                              |

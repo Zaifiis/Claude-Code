@@ -1,12 +1,14 @@
--- Content OS — SQLite schema
--- A real persistent store for a single-user personal content system.
--- The relational shape mirrors a Postgres design (see README) so it can be
--- ported to Supabase/Postgres later with minimal changes.
-
+/**
+ * Canonical database schema, inlined as a string so it is always available at
+ * runtime — including in packaged / standalone / shared-hosting deploys where
+ * source `.sql` files are not shipped next to the server bundle.
+ *
+ * The relational shape mirrors a Postgres design (see README) so it can be
+ * ported to Supabase/Postgres/MySQL later with minimal changes.
+ */
+export const SCHEMA_SQL = /* sql */ `
 PRAGMA foreign_keys = ON;
 
--- One local user. Auth is out of scope for the local build, but the column
--- exists so a real multi-user backend can be added without a data migration.
 CREATE TABLE IF NOT EXISTS users (
   id          TEXT PRIMARY KEY,
   name        TEXT NOT NULL DEFAULT 'You',
@@ -14,7 +16,6 @@ CREATE TABLE IF NOT EXISTS users (
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- The core record: one row per piece of content, across its whole lifecycle.
 CREATE TABLE IF NOT EXISTS content_items (
   id              TEXT PRIMARY KEY,
   user_id         TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -43,7 +44,6 @@ CREATE INDEX IF NOT EXISTS idx_content_status ON content_items(status);
 CREATE INDEX IF NOT EXISTS idx_content_archived ON content_items(archived);
 CREATE INDEX IF NOT EXISTS idx_content_scheduled ON content_items(scheduled_at);
 
--- Reference material (videos / posts / articles) saved independently.
 CREATE TABLE IF NOT EXISTS refs (
   id            TEXT PRIMARY KEY,
   user_id       TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -58,10 +58,8 @@ CREATE TABLE IF NOT EXISTS refs (
 );
 CREATE INDEX IF NOT EXISTS idx_refs_archived ON refs(archived);
 
--- Many-to-many: a reference can inspire many content items, and a content
--- item can cite many references.
 CREATE TABLE IF NOT EXISTS content_references (
-  content_id  TEXT NOT NULL REFERENCES content_items(id) ON DELETE CASCADE,
+  content_id   TEXT NOT NULL REFERENCES content_items(id) ON DELETE CASCADE,
   reference_id TEXT NOT NULL REFERENCES refs(id) ON DELETE CASCADE,
   PRIMARY KEY (content_id, reference_id)
 );
@@ -84,8 +82,6 @@ CREATE TABLE IF NOT EXISTS reference_tags (
   PRIMARY KEY (reference_id, tag_id)
 );
 
--- URL-based attachments (links to briefs, assets, docs). Real & functional;
--- no binary upload pipeline is faked.
 CREATE TABLE IF NOT EXISTS attachments (
   id          TEXT PRIMARY KEY,
   content_id  TEXT NOT NULL REFERENCES content_items(id) ON DELETE CASCADE,
@@ -94,8 +90,6 @@ CREATE TABLE IF NOT EXISTS attachments (
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Manually-entered performance metrics per published item. Shape allows a
--- future platform-API sync to write the same rows.
 CREATE TABLE IF NOT EXISTS performance_metrics (
   content_id  TEXT PRIMARY KEY REFERENCES content_items(id) ON DELETE CASCADE,
   views       INTEGER NOT NULL DEFAULT 0,
@@ -106,3 +100,4 @@ CREATE TABLE IF NOT EXISTS performance_metrics (
   leads       INTEGER NOT NULL DEFAULT 0,
   updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
+`;

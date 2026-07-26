@@ -6,6 +6,14 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    // server.js is a plain CommonJS Node entry point (run directly / by
+    // Passenger), so `require` is expected there.
+    files: ["server.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
+  {
     rules: {
       // This newly-added rule flags idiomatic, non-buggy patterns we rely on:
       // client-only mount guards (portals / next-themes hydration), reading
