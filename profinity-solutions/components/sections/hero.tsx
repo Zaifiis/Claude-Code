@@ -59,7 +59,7 @@ export function Hero() {
     >
       {/* 3D field, or a static gradient for reduced-motion / before mount */}
       {mounted && !reduced ? (
-        <HeroCanvas count={isMobile ? 9 : 18} active={active} />
+        <HeroCanvas count={isMobile ? 12 : 26} active={active} />
       ) : (
         <div
           aria-hidden

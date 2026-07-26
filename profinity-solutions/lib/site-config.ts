@@ -541,4 +541,5 @@ export const FAQS = [
   },
 ];
 
-export const POSTS: { slug: string; title: string; excerpt: string; date: string }[] = [];
+// Blog posts now live in lib/blog.ts (re-exported here for convenience).
+export { POSTS } from './blog';

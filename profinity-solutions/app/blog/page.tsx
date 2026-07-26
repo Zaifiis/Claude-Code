@@ -49,7 +49,9 @@ export default function BlogPage() {
                   href={`/blog/${post.slug}`}
                   className="block h-full rounded-2xl border border-border bg-surface/60 p-6 transition-colors hover:border-brand-blue/40"
                 >
-                  <p className="text-xs text-muted-foreground">{post.date}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {post.date} · {post.readingTime}
+                  </p>
                   <h3 className="mt-2 font-display text-lg font-semibold">{post.title}</h3>
                   <p className="mt-2 text-sm text-muted-foreground">{post.excerpt}</p>
                 </Link>
