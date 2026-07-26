@@ -93,6 +93,45 @@ body::before {
   to { transform: rotate(360deg); }
 }
 
+/* ROI calculator range sliders */
+.roi-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  outline: none;
+}
+.roi-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a8e2fd, #3b82f6);
+  border: 2px solid #050914;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.18);
+  cursor: pointer;
+}
+.roi-range::-moz-range-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a8e2fd, #3b82f6);
+  border: 2px solid #050914;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.18);
+  cursor: pointer;
+}
+.roi-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.4);
+}
+
+/* Testimonial avatar wall — columns drift vertically and loop seamlessly */
+@keyframes avatar-marquee {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+
 @keyframes pin-ping {
   0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
   30% { opacity: 1; }

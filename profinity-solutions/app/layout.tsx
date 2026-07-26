@@ -3,7 +3,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { SITE_CONFIG } from '@/lib/site-config';
 import { Nav } from '@/components/ui/gradient-menu';
-import { Footer } from '@/components/footer';
+import { CinematicFooter } from '@/components/ui/motion-footer';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -52,8 +52,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`dark ${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen bg-base font-sans text-foreground antialiased">
         <Nav />
-        <main>{children}</main>
-        <Footer />
+        {/* The content card scrolls over the cinematic footer, which is revealed
+            underneath it at the bottom of the page. */}
+        <div className="relative">
+          <div className="relative z-10 min-h-screen rounded-b-[2rem] bg-base shadow-[0_50px_90px_-40px_rgba(0,0,0,0.9)] md:rounded-b-[2.5rem]">
+            <main>{children}</main>
+          </div>
+          <CinematicFooter />
+        </div>
       </body>
     </html>
   );

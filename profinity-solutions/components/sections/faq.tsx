@@ -5,12 +5,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { FAQS } from '@/lib/site-config';
 
-export function Faq() {
+export function Faq({ items = FAQS }: { items?: readonly { q: string; a: string }[] }) {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
     <div className="mx-auto max-w-3xl divide-y divide-border rounded-2xl border border-border bg-surface/50">
-      {FAQS.map((faq, i) => {
+      {items.map((faq, i) => {
         const isOpen = open === i;
         return (
           <div key={faq.q}>

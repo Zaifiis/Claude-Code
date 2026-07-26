@@ -4,7 +4,7 @@ import { SectionHeading } from '@/components/sections/section-heading';
 import { ContactForm } from '@/components/sections/contact-form';
 import { Faq } from '@/components/sections/faq';
 import { Reveal } from '@/components/reveal';
-import { SITE_CONFIG } from '@/lib/site-config';
+import { SITE_CONFIG, SALES_FAQS } from '@/lib/site-config';
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -50,9 +50,13 @@ export default function ContactPage() {
       </section>
 
       <section className="container-x py-24">
-        <SectionHeading eyebrow="FAQ" title="Answers before you ask" />
+        <SectionHeading
+          eyebrow="FAQ"
+          title="The questions we get on sales calls"
+          subtitle="The real objections, answered up front — pricing, integrations, safety, and what happens if it doesn't work."
+        />
         <div className="mt-12">
-          <Faq />
+          <Faq items={SALES_FAQS} />
         </div>
       </section>
     </div>
