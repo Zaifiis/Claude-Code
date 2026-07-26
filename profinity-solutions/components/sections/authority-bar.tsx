@@ -1,4 +1,5 @@
 import { Reveal, RevealGroup } from '@/components/reveal';
+import { AnimatedNumber } from '@/components/ui/animated-number';
 import { AUTHORITY } from '@/lib/site-config';
 
 // A trust strip: "who this is for" text-logos plus credibility badges. No
@@ -15,7 +16,7 @@ export function AuthorityBar() {
       <RevealGroup className="mt-7 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
         {AUTHORITY.clients.map((c) => (
           <Reveal as="div" key={c}>
-            <span className="font-display text-base font-semibold tracking-tight text-muted-foreground/70 transition-colors hover:text-foreground sm:text-lg">
+            <span className="font-display text-base font-semibold tracking-tight text-muted-foreground transition-colors hover:text-foreground sm:text-lg">
               {c}
             </span>
           </Reveal>
@@ -23,10 +24,17 @@ export function AuthorityBar() {
       </RevealGroup>
 
       <div className="mt-9 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-4">
-        {AUTHORITY.badges.map((b) => (
+        {AUTHORITY.stats.map((b) => (
           <div key={b.label} className="bg-surface px-4 py-6 text-center">
-            <div className="font-display text-2xl font-bold text-gradient md:text-3xl">{b.value}</div>
-            <p className="mt-1 text-xs text-muted-foreground">{b.label}</p>
+            <div className="font-display text-3xl font-bold text-gradient md:text-4xl">
+              <AnimatedNumber
+                to={b.value}
+                prefix={b.prefix}
+                suffix={b.suffix}
+                decimals={b.decimals}
+              />
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">{b.label}</p>
           </div>
         ))}
       </div>

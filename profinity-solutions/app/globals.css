@@ -3,13 +3,16 @@
 @tailwind utilities;
 
 :root {
-  /* shadcn-style tokens mapped to the Profinity dark palette */
+  /* shadcn-style tokens mapped to the Profinity dark palette.
+     Text tokens are space-separated RGB channels so Tailwind's `/opacity`
+     modifiers (text-foreground/85, text-muted-foreground/70, …) resolve to
+     valid `rgb(... / a)` — a bare hex here would drop those utilities. */
   --background: #050914;
-  --foreground: #f1f5f9;
+  --foreground: 241 245 249;
   --border: rgba(148, 163, 184, 0.14);
   --input: rgba(148, 163, 184, 0.2);
   --muted: #0e1a33;
-  --muted-foreground: #a9b6cc;
+  --muted-foreground: 169 182 204;
   --primary: #3b82f6;
   --primary-foreground: #f1f5f9;
   --accent: #123166;
@@ -26,7 +29,7 @@ html {
 
 body {
   background-color: #050914;
-  color: var(--foreground);
+  color: rgb(var(--foreground));
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }

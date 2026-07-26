@@ -20,12 +20,17 @@ const config: Config = {
           light2: '#a8e2fd',
           glow: '#38bdf8',
         },
-        // shadcn-style tokens (used by the 21st.dev components)
+        // shadcn-style tokens (used by the 21st.dev components).
+        // Text tokens use channel triplets + <alpha-value> so `/opacity`
+        // utilities (text-foreground/85, text-muted-foreground/70) stay valid.
         background: 'var(--background)',
-        foreground: 'var(--foreground)',
+        foreground: 'rgb(var(--foreground) / <alpha-value>)',
         border: 'var(--border)',
         input: 'var(--input)',
-        muted: { DEFAULT: 'var(--muted)', foreground: 'var(--muted-foreground)' },
+        muted: {
+          DEFAULT: 'var(--muted)',
+          foreground: 'rgb(var(--muted-foreground) / <alpha-value>)',
+        },
         primary: { DEFAULT: 'var(--primary)', foreground: 'var(--primary-foreground)' },
         accent: { DEFAULT: 'var(--accent)', foreground: 'var(--accent-foreground)' },
       },

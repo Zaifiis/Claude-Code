@@ -6,6 +6,18 @@ import {
   ShoppingCart,
   FileText,
   Code2,
+  PhoneIncoming,
+  PhoneForwarded,
+  MessageSquare,
+  UserCheck,
+  CalendarClock,
+  CalendarCheck,
+  BellRing,
+  CheckCircle2,
+  Send,
+  Route,
+  Clock,
+  ClipboardCheck,
 } from 'lucide-react';
 
 export type Service = {
@@ -300,10 +312,19 @@ export const CASE_STUDIES: CaseStudy[] = [
 ];
 
 // ── Social proof & authority ──────────────────────────────────────────────
-// Anonymous trust markers. Replace `clients` with real (permitted) names/logos
-// and `badges` with anything you can substantiate.
+// Anonymous trust markers. Replace `clients` with real (permitted) names/logos.
+// `stats` are DIRECTIONAL PLACEHOLDERS — clearly illustrative, not audited
+// claims. Swap in your real figures when you have them; they animate on scroll.
+export type AuthorityStat = {
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  label: string;
+};
+
 export const AUTHORITY = {
-  eyebrow: 'Built for operators who count on it',
+  eyebrow: 'Trusted by operators who count on it',
   // Text "logos" so nothing is faked. Swap for <Image> logos when you have them.
   clients: [
     'Dental Clinics',
@@ -313,12 +334,13 @@ export const AUTHORITY = {
     'Med Spas',
     'Agencies',
   ],
-  badges: [
-    { value: '24/7', label: 'Agents on shift' },
-    { value: '~2s', label: 'First response' },
-    { value: '6+', label: 'AI services' },
-    { value: '100%', label: 'Custom-built' },
-  ],
+  // Growth-focused stats (placeholders — refine with real numbers).
+  stats: [
+    { value: 120, suffix: '+', label: 'Businesses automated' },
+    { value: 35, prefix: '+', suffix: '%', label: 'More booked leads' },
+    { value: 3.2, decimals: 1, suffix: '×', label: 'Faster first reply' },
+    { value: 24, suffix: '/7', label: 'Always-on coverage' },
+  ] as AuthorityStat[],
 } as const;
 
 // ── Client testimonials (quotes) ──────────────────────────────────────────
@@ -380,18 +402,18 @@ export const TESTIMONIAL_AVATARS: { imgSrc: string; alt: string }[] = [
 export const PAIN_POINTS = [
   {
     stat: '78%',
-    title: 'of buyers pick whoever replies first',
-    body: 'Every hour a lead waits, it cools. Miss the first-response window and a competitor closes them instead.',
+    title: 'buy from whoever replies first',
+    body: 'Reply in an hour and a competitor already got the yes.',
   },
   {
     stat: '~27%',
-    title: 'of calls to small businesses go unanswered',
-    body: 'Voicemail is where revenue goes to die. After-hours and lunch-rush calls quietly become lost customers.',
+    title: 'of calls go unanswered',
+    body: 'Every missed call is a customer who called someone else.',
   },
   {
     stat: '13+ hrs',
-    title: 'a week lost to repetitive manual work',
-    body: 'Copy-paste follow-ups, data entry, and triage burn your team’s time on work an agent can do instantly.',
+    title: 'a week lost to busywork',
+    body: 'Follow-ups and data entry an agent does instantly.',
   },
 ];
 
@@ -505,6 +527,70 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
       { value: '1:1', label: 'Personalized' },
     ],
     ping: 'Personalized a visitor just now',
+  },
+];
+
+// ── AI calling agent — animated "how it works" flows ──────────────────────
+// Each outcome tab tells the same agent story from a different angle. Shown as
+// an animated step flow beneath the ROI calculator on the home page.
+export type FlowStep = { icon: LucideIcon; title: string; desc: string };
+export type AgentFlow = {
+  id: string;
+  label: string; // tab label
+  icon: LucideIcon;
+  tagline: string; // one line under the tabs
+  steps: FlowStep[];
+};
+
+export const AGENT_FLOWS: AgentFlow[] = [
+  {
+    id: 'increase-bookings',
+    label: 'Increase bookings',
+    icon: CalendarCheck,
+    tagline: 'Turn more inbound calls into booked appointments — automatically.',
+    steps: [
+      { icon: PhoneIncoming, title: 'Call comes in', desc: 'The agent answers on the first ring, day or night.' },
+      { icon: MessageSquare, title: 'Understands intent', desc: 'A natural conversation — no menus, no scripts to fight.' },
+      { icon: UserCheck, title: 'Qualifies the caller', desc: 'Asks the right questions and captures the details.' },
+      { icon: CalendarClock, title: 'Offers open slots', desc: 'Reads your live calendar and proposes times that fit.' },
+      { icon: CalendarCheck, title: 'Books it in', desc: 'Locks the appointment and confirms on the spot.' },
+    ],
+  },
+  {
+    id: 'cut-no-shows',
+    label: 'Cut no-shows',
+    icon: BellRing,
+    tagline: 'Fill the seats you already booked with automatic reminders.',
+    steps: [
+      { icon: CalendarCheck, title: 'Appointment booked', desc: 'Every booking enters the reminder flow automatically.' },
+      { icon: BellRing, title: 'Sends reminders', desc: 'Timed call and text nudges before the appointment.' },
+      { icon: CheckCircle2, title: 'Confirms or rebooks', desc: 'One tap to confirm — can’t make it? It reschedules.' },
+      { icon: CalendarClock, title: 'Reopens the slot', desc: 'Freed times go back on offer in real time.' },
+    ],
+  },
+  {
+    id: 'instant-lead-reply',
+    label: 'Instant lead reply',
+    icon: Zap,
+    tagline: 'Reply in seconds so leads never cool off waiting.',
+    steps: [
+      { icon: Zap, title: 'New lead lands', desc: 'Form, missed call, or message — the clock starts.' },
+      { icon: Send, title: 'Replies in seconds', desc: 'A real first response before the lead goes cold.' },
+      { icon: UserCheck, title: 'Qualifies on the spot', desc: 'Sorts serious buyers from tyre-kickers.' },
+      { icon: Route, title: 'Routes to a closer', desc: 'Hot leads go straight to whoever closes, with context.' },
+    ],
+  },
+  {
+    id: 'never-miss-a-call',
+    label: 'Never miss a call',
+    icon: PhoneCall,
+    tagline: 'Every call answered — after hours, lunch rush, or overflow.',
+    steps: [
+      { icon: Clock, title: 'After-hours call', desc: '2pm or 2am, the line is always covered.' },
+      { icon: PhoneCall, title: 'AI picks up 24/7', desc: 'Answers every call — no voicemail black hole.' },
+      { icon: ClipboardCheck, title: 'Handles or captures', desc: 'Resolves the routine, records every detail.' },
+      { icon: PhoneForwarded, title: 'Escalates urgent', desc: 'Anything critical goes to a human with full context.' },
+    ],
   },
 ];
 

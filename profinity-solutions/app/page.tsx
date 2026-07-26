@@ -7,6 +7,7 @@ import { CtaBanner } from '@/components/sections/cta-banner';
 import { AuthorityBar } from '@/components/sections/authority-bar';
 import { PainPoints } from '@/components/sections/pain-points';
 import { RoiCalculator } from '@/components/sections/roi-calculator';
+import { AgentFlow } from '@/components/sections/agent-flow';
 import { CaseResults } from '@/components/sections/case-results';
 import { Testimonials } from '@/components/sections/testimonials';
 import { Faq } from '@/components/sections/faq';
@@ -29,7 +30,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="What we build"
           title="Six ways we put AI to work"
-          subtitle="Every service is custom-built around your existing tools — no rip-and-replace, just the speed of automation."
+          subtitle="Built around the tools you already run. No rip-and-replace."
         />
         <div className="mt-14">
           <ServicesBento />
@@ -41,13 +42,25 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="The cost of doing nothing"
           title="Every slow reply is revenue walking out the door"
-          subtitle="Missed calls, cold leads, and hours lost to busywork add up fast. See what it's quietly costing you — then what automation gives back."
+          subtitle="See what it's quietly costing you — and what automation gives back."
         />
         <div className="mt-12">
           <PainPoints />
         </div>
         <div className="mt-8">
           <RoiCalculator />
+        </div>
+      </section>
+
+      {/* How an AI calling agent works — animated flow */}
+      <section id="how-it-works" className="container-x py-24">
+        <SectionHeading
+          eyebrow="How it works"
+          title="What an AI calling agent actually does"
+          subtitle="Pick an outcome. See the agent handle it, step by step."
+        />
+        <div className="mt-12">
+          <AgentFlow />
         </div>
       </section>
 
@@ -63,7 +76,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="Results"
           title="Outcomes, not just automations"
-          subtitle="Anonymous client work, labelled by industry. Figures are representative of the outcomes our agents are built to deliver."
+          subtitle="Real client work, by industry. Numbers show what we build for."
         />
         <div className="mt-14">
           <CaseResults />
@@ -103,7 +116,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="See it in action"
           title="Agents built for real front lines"
-          subtitle="Illustrative scenarios showing how our agents handle the busywork, end to end."
+          subtitle="How our agents handle the busywork, end to end."
         />
         <div className="mt-10 flex flex-wrap items-center justify-center gap-6">
           {DEMO_SCENARIOS.slice(0, 3).map((s) => (
@@ -117,7 +130,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="FAQ"
           title="Answers before you ask"
-          subtitle="More questions? The full sales FAQ lives on our contact page."
+          subtitle="More on the contact page."
         />
         <div className="mt-12">
           <Faq />
