@@ -1,0 +1,824 @@
+<title>Profinity Solutions · AI Automation Agency</title>
+<style>
+  :root{
+    --base:#050914; --surface:#0a1226; --surface2:#0e1a33;
+    --navy900:#0b1f4d; --navy800:#123166; --navy600:#2159c9;
+    --blue:#3b82f6; --light:#7dd3fc; --light2:#a8e2fd; --glow:#38bdf8;
+    --fg:#f1f5f9; --muted:#a9b6cc; --border:rgba(148,163,184,0.14);
+    --border2:rgba(148,163,184,0.24); --muted-bg:#0e1a33;
+    --display:"Space Grotesk",ui-rounded,"Segoe UI",system-ui,sans-serif;
+    --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --grad:linear-gradient(135deg,#a8e2fd 0%,#7dd3fc 40%,#3b82f6 100%);
+    --grad-btn:linear-gradient(135deg,#a8e2fd 0%,#3b82f6 50%,#0b1f4d 100%);
+    --maxw:1180px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{
+    background:var(--base);color:var(--fg);font-family:var(--sans);
+    line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(900px 500px at 78% -8%,rgba(56,189,248,.10),transparent 60%),
+      radial-gradient(760px 520px at -6% 108%,rgba(33,89,201,.12),transparent 58%);
+  }
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:var(--display);letter-spacing:-0.03em;line-height:1.05;text-wrap:balance;font-weight:700}
+  .wrap{width:100%;max-width:var(--maxw);margin-inline:auto;padding-inline:1.25rem}
+  .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .eyebrow{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:var(--light)}
+  .muted{color:var(--muted)}
+  .tnum{font-variant-numeric:tabular-nums}
+  section{position:relative}
+  .sec{padding-block:6rem}
+  .sec-head{max-width:42rem;margin-inline:auto;text-align:center}
+  .sec-head h2{margin-top:.75rem;font-size:clamp(1.9rem,4.4vw,3rem)}
+  .sec-head p{margin-top:1rem;color:var(--muted);font-size:1.05rem}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:999px;padding:.8rem 1.35rem;font-weight:600;font-size:.9rem;
+    background:var(--grad-btn);color:#fff;box-shadow:0 10px 30px -10px rgba(59,130,246,.8);transition:transform .2s ease;cursor:pointer;border:none}
+  .btn:hover{transform:scale(1.03)}
+  .btn-ghost{background:rgba(10,18,38,.5);border:1px solid var(--border);box-shadow:none}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:1.25rem}
+
+  /* reveal */
+  .rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+  .rv.in{opacity:1;transform:none}
+
+  /* NAV */
+  header{position:fixed;inset-inline:0;top:0;z-index:50}
+  nav{max-width:var(--maxw);margin-inline:auto;display:flex;align-items:center;justify-content:space-between;
+    padding:.85rem 1.25rem;transition:all .3s ease}
+  nav.scrolled{margin-top:.6rem;max-width:calc(var(--maxw) - 1rem);border:1px solid var(--border);
+    border-radius:1rem;background:rgba(5,9,20,.78);backdrop-filter:blur(16px);padding:.6rem 1rem;
+    box-shadow:0 10px 40px -12px rgba(0,0,0,.7)}
+  .brand{display:flex;align-items:center;gap:.65rem;font-family:var(--display);font-weight:700;font-size:1.1rem}
+  .logo{width:34px;height:34px;border-radius:.5rem;background:var(--grad-btn);display:grid;place-items:center;font-size:1rem}
+  .navlinks{display:none;align-items:center;gap:.15rem;border:1px solid var(--border);background:rgba(10,18,38,.5);border-radius:999px;padding:.25rem}
+  .navlinks a{position:relative;padding:.5rem 1rem;border-radius:999px;font-size:.88rem;font-weight:500;color:var(--muted);transition:color .2s;display:flex;align-items:center;gap:.3rem}
+  .navlinks a:hover,.navlinks a.active{color:var(--fg)}
+  .navlinks a.active{background:linear-gradient(90deg,var(--navy800),var(--navy600))}
+  .has-mega{position:relative}
+  .mega{position:absolute;left:50%;top:100%;transform:translateX(-50%) translateY(8px);margin-top:.75rem;width:560px;
+    background:rgba(8,14,30,.97);border:1px solid var(--border);border-radius:1rem;padding:.75rem;
+    box-shadow:0 20px 60px -20px rgba(0,0,0,.85);backdrop-filter:blur(16px);
+    opacity:0;visibility:hidden;transition:opacity .18s ease,transform .18s ease;z-index:60}
+  .has-mega:hover .mega,.has-mega:focus-within .mega{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+  .mega-grid{display:grid;grid-template-columns:1fr 1fr;gap:.25rem}
+  .mega-item{display:flex;gap:.75rem;padding:.75rem;border-radius:.75rem;transition:background .2s}
+  .mega-item:hover{background:var(--muted-bg)}
+  .mega-ic{flex:none;width:34px;height:34px;border-radius:.5rem;border:1px solid var(--border);background:var(--muted-bg);display:grid;place-items:center;color:var(--light)}
+  .mega-item b{display:block;font-size:.85rem;font-weight:500;color:var(--fg)}
+  .mega-item span{display:block;font-size:.72rem;color:var(--muted);line-height:1.35;margin-top:.1rem}
+  .mega-cta{margin-top:.5rem;display:flex;align-items:center;justify-content:space-between;border-radius:.75rem;
+    padding:.75rem 1rem;font-weight:600;font-size:.85rem;background:linear-gradient(90deg,var(--navy800),var(--navy600))}
+  .navbtns{display:flex;align-items:center;gap:.5rem}
+  .menu-toggle{display:grid;place-items:center;border:1px solid var(--border);background:var(--muted-bg);border-radius:.5rem;padding:.5rem;color:var(--fg);cursor:pointer}
+  @media(min-width:1024px){.navlinks{display:flex}.menu-toggle{display:none}}
+
+  /* HERO */
+  .hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden}
+  #cubes{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+  .hero-vignette{position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(50% 50% at 50% 50%,rgba(5,9,20,.5) 0%,rgba(5,9,20,.15) 45%,transparent 78%)}
+  .hero-inner{position:relative;z-index:2;text-align:center;max-width:52rem;margin-inline:auto;padding-top:4rem}
+  .hero h1 span{display:inline-block;margin-right:.26em}
+  .badge{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--border);background:rgba(10,18,38,.6);
+    border-radius:999px;padding:.4rem .9rem;font-size:.78rem;color:var(--muted);backdrop-filter:blur(8px)}
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--glow);box-shadow:0 0 10px var(--glow)}
+  .hero h1{margin-top:1.5rem;font-size:clamp(2.6rem,7vw,4.7rem)}
+  .hero .sub{margin:1.5rem auto 0;max-width:38rem;color:var(--muted);font-size:1.15rem}
+  .hero .cta-row{margin-top:2rem;display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center}
+  .scrolldown{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);color:var(--muted);animation:bob 2s ease-in-out infinite;z-index:2}
+  @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+  /* AUTHORITY */
+  .authority{border:1px solid var(--border);background:rgba(10,18,38,.4);border-radius:1.75rem;padding:2.5rem 1.5rem}
+  .auth-eye{text-align:center;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.22em;color:var(--muted)}
+  .auth-logos{margin-top:1.75rem;display:flex;flex-wrap:wrap;justify-content:center;gap:1rem 2rem}
+  .auth-logos span{font-family:var(--display);font-weight:600;font-size:1.05rem;color:rgba(169,182,204,.65);transition:color .2s;cursor:default}
+  .auth-logos span:hover{color:var(--fg)}
+  .badges{margin-top:2rem;display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:1rem;overflow:hidden}
+  .badges > div{background:var(--surface);text-align:center;padding:1.5rem 1rem}
+  .badges b{font-family:var(--display);font-size:1.7rem}
+  .badges p{margin-top:.25rem;font-size:.75rem;color:var(--muted)}
+  @media(min-width:640px){.badges{grid-template-columns:repeat(4,1fr)}}
+
+  /* SERVICES */
+  .svc-grid{display:grid;grid-template-columns:1fr;gap:1rem}
+  @media(min-width:768px){.svc-grid{grid-template-columns:repeat(3,1fr)}}
+  .svc{position:relative;padding:1.6rem;border-radius:1.25rem;border:1px solid var(--border);background:var(--surface);overflow:hidden;transition:border-color .3s}
+  .svc:hover{border-color:rgba(59,130,246,.45)}
+  .svc .ic{width:44px;height:44px;border-radius:.6rem;border:1px solid var(--border);background:var(--muted-bg);display:grid;place-items:center;color:var(--light);margin-bottom:1rem}
+  .svc h3{font-size:1.25rem}
+  .svc p{margin-top:.6rem;font-size:.9rem;color:var(--muted)}
+
+  /* PAIN */
+  .pain-grid{display:grid;grid-template-columns:1fr;gap:1.25rem}
+  @media(min-width:768px){.pain-grid{grid-template-columns:repeat(3,1fr)}}
+  .pain{border:1px solid var(--border);background:rgba(10,18,38,.5);border-radius:1rem;padding:1.5rem;transition:border-color .3s;height:100%}
+  .pain:hover{border-color:rgba(59,130,246,.4)}
+  .pain .top{display:flex;align-items:center;gap:.75rem}
+  .pain .top .ic{border:1px solid var(--border);background:var(--muted-bg);border-radius:.5rem;padding:.4rem;color:var(--light);display:grid;place-items:center}
+  .pain .stat{font-family:var(--display);font-size:1.5rem;font-weight:700}
+  .pain h3{margin-top:1rem;font-size:1.05rem;line-height:1.3}
+  .pain p{margin-top:.5rem;font-size:.88rem;color:var(--muted)}
+
+  /* CALCULATOR */
+  .calc{margin-top:2rem;border:1px solid var(--border);background:rgba(10,18,38,.5);border-radius:1.75rem;overflow:hidden}
+  .tabs{display:flex;flex-direction:column;gap:.5rem;padding:.75rem;border-bottom:1px solid var(--border)}
+  @media(min-width:640px){.tabs{flex-direction:row}}
+  .tab{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;border:none;cursor:pointer;
+    border-radius:.75rem;padding:.85rem 1rem;font-size:.9rem;font-weight:500;color:var(--muted);background:transparent;transition:color .2s,background .2s;font-family:var(--sans)}
+  .tab.active{background:linear-gradient(90deg,var(--navy800),var(--navy600));color:var(--fg)}
+  .calc-body{display:grid;grid-template-columns:1fr;gap:2rem;padding:1.5rem}
+  @media(min-width:768px){.calc-body{grid-template-columns:1fr 1fr;padding:2rem}}
+  .field{display:block}
+  .field .lab{display:flex;justify-content:space-between;align-items:baseline}
+  .field .lab span:first-child{font-size:.88rem;color:var(--muted)}
+  .field .lab b{font-family:var(--display);font-size:.9rem}
+  .rng{appearance:none;-webkit-appearance:none;width:100%;height:6px;border-radius:999px;background:rgba(148,163,184,.2);outline:none;margin-top:.6rem}
+  .rng::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;
+    background:linear-gradient(135deg,#a8e2fd,#3b82f6);border:2px solid #050914;box-shadow:0 0 0 4px rgba(56,189,248,.18);cursor:pointer}
+  .rng::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#a8e2fd,#3b82f6);border:2px solid #050914;box-shadow:0 0 0 4px rgba(56,189,248,.18);cursor:pointer}
+  .rng:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(56,189,248,.4)}
+  .fields{display:flex;flex-direction:column;gap:1.5rem}
+  .disclaim{font-size:.75rem;color:var(--muted);line-height:1.5}
+  .results{display:flex;flex-direction:column;justify-content:space-between;gap:1.5rem;border:1px solid var(--border);background:rgba(5,9,20,.6);border-radius:1rem;padding:1.5rem}
+  .res-big{font-family:var(--display);font-weight:700;font-size:clamp(2.2rem,6vw,3rem)}
+  .res-item.sep{border-bottom:1px solid var(--border);padding-bottom:1.25rem}
+  .res-item.sub .val{font-family:var(--display);font-weight:700;font-size:1.5rem}
+  .res-item p{font-size:.88rem;color:var(--muted);margin-top:.25rem}
+
+  /* STATS */
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:1rem;overflow:hidden}
+  @media(min-width:1024px){.stats{grid-template-columns:repeat(4,1fr)}}
+  .stats > div{background:var(--surface);text-align:center;padding:2.5rem 1rem}
+  .stats b{font-family:var(--display);font-size:clamp(2rem,5vw,3rem)}
+  .stats p{margin-top:.5rem;font-size:.85rem;color:var(--muted)}
+
+  /* RESULTS */
+  .res-grid{display:grid;grid-template-columns:1fr;gap:1.5rem}
+  @media(min-width:768px){.res-grid{grid-template-columns:repeat(3,1fr)}}
+  .rcard{position:relative;border-radius:1.25rem;padding:1.5px;overflow:hidden;background:var(--surface)}
+  .rcard::before{content:"";position:absolute;inset:-150%;background:conic-gradient(from 0deg,transparent 0 250deg,rgba(125,211,252,.15) 300deg,#7dd3fc 340deg,#a8e2fd 352deg,#38bdf8 360deg);animation:orbit 4.5s linear infinite}
+  .rcard-in{position:relative;background:var(--surface);border-radius:calc(1.25rem - 1.5px);padding:1.5rem;height:100%;display:flex;flex-direction:column;gap:1.25rem}
+  @keyframes orbit{to{transform:rotate(360deg)}}
+  .rcard .rtop{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+  .rtag{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:var(--light)}
+  .rpill{font-size:.68rem;color:var(--muted);border:1px solid var(--border);background:var(--muted-bg);border-radius:999px;padding:.25rem .6rem}
+  .chartbox{height:130px;display:grid;place-items:center;border:1px solid var(--border);background:rgba(5,9,20,.6);border-radius:.75rem;padding:.75rem}
+  .chartbox svg{height:100%;width:100%}
+  .rbig{font-family:var(--display);font-weight:700;font-size:1.9rem}
+  .rnote{font-size:.85rem;color:var(--muted);margin-top:.35rem}
+  .rfoot{margin-top:auto;border-top:1px solid var(--border);padding-top:1rem}
+  .rfoot b{font-size:.88rem}
+  .rfoot p{font-size:.75rem;color:var(--muted);margin-top:.25rem}
+
+  /* TESTIMONIALS */
+  .tcard{position:relative;max-width:48rem;margin-inline:auto;border-radius:1.5rem;padding:1.5px;overflow:hidden;background:var(--surface)}
+  .tcard::before{content:"";position:absolute;inset:-150%;background:conic-gradient(from 0deg,transparent 0 250deg,rgba(125,211,252,.15) 300deg,#7dd3fc 340deg,#a8e2fd 352deg,#38bdf8 360deg);animation:orbit 5s linear infinite}
+  .tcard-in{position:relative;background:var(--surface);border-radius:calc(1.5rem - 1.5px);padding:2.25rem;min-height:19rem}
+  .quote-mark{font-family:var(--display);font-size:3rem;color:rgba(125,211,252,.4);line-height:.6}
+  .stars{display:flex;gap:.15rem;margin-top:.5rem;color:var(--light)}
+  .tquote{margin-top:1rem;font-family:var(--display);font-weight:500;font-size:clamp(1.15rem,2.6vw,1.5rem);line-height:1.45}
+  .tperson{margin-top:1.5rem;display:flex;align-items:center;gap:.75rem}
+  .tav{width:44px;height:44px;border-radius:50%;background:var(--grad-btn);display:grid;place-items:center;font-family:var(--display);font-weight:700;color:#fff;font-size:.85rem}
+  .tperson b{font-size:.88rem}
+  .tperson p{font-size:.75rem;color:var(--muted)}
+  .tctrls{margin-top:1.5rem;display:flex;align-items:center;justify-content:center;gap:1rem}
+  .tctrls button{border:1px solid var(--border);background:var(--surface);border-radius:50%;padding:.6rem;color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:color .2s}
+  .tctrls button:hover{color:var(--fg)}
+  .dots{display:flex;gap:.5rem;align-items:center}
+  .dots i{height:8px;width:8px;border-radius:999px;background:var(--border2);transition:all .3s;cursor:pointer;display:block}
+  .dots i.on{width:24px;background:var(--light)}
+
+  /* AVATAR WALL */
+  .wall{position:relative;overflow:hidden;border:1px solid var(--border);background:rgba(10,18,38,.4);border-radius:2rem;padding:5rem 1.5rem;margin-top:3rem;isolation:isolate}
+  .wall-bg{position:absolute;inset:0;z-index:-2;display:flex;justify-content:center;gap:1rem;opacity:.5;
+    -webkit-mask-image:radial-gradient(circle at center,transparent 6%,#000 78%);mask-image:radial-gradient(circle at center,transparent 6%,#000 78%)}
+  .wcol{display:flex;flex-direction:column;gap:1rem;width:120px;flex:none}
+  .wtile{aspect-ratio:1;border-radius:1rem;border:1px solid var(--border)}
+  .wall-scrim{position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at center,rgba(5,9,20,.92) 35%,rgba(5,9,20,.55) 100%)}
+  .wall-in{position:relative;max-width:36rem;margin-inline:auto;text-align:center}
+  @keyframes wmarq{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+
+  /* FAQ */
+  .faq{max-width:48rem;margin-inline:auto;border:1px solid var(--border);background:rgba(10,18,38,.5);border-radius:1rem;overflow:hidden}
+  .faq details{border-top:1px solid var(--border)}
+  .faq details:first-child{border-top:none}
+  .faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.25rem 1.5rem;font-family:var(--display);font-weight:500;font-size:1rem}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary .pl{color:var(--light);transition:transform .3s;flex:none}
+  .faq details[open] summary .pl{transform:rotate(45deg)}
+  .faq .ans{padding:0 1.5rem 1.25rem;font-size:.9rem;color:var(--muted)}
+
+  /* CTA */
+  .cta{position:relative;overflow:hidden;border-radius:1.75rem;border:1px solid var(--border);background:linear-gradient(135deg,rgba(18,49,102,.7),rgba(10,18,38,.6));padding:3.5rem 1.5rem;text-align:center}
+  .cta h2{font-size:clamp(1.8rem,4.4vw,2.8rem)}
+  .cta p{margin:1rem auto 0;max-width:34rem;color:var(--muted)}
+
+  /* FOOTER (cinematic reveal) */
+  .content-card{position:relative;z-index:10;background:var(--base);border-radius:0 0 2.5rem 2.5rem;box-shadow:0 50px 90px -40px rgba(0,0,0,.9)}
+  .cine{position:sticky;bottom:0;z-index:0;overflow:hidden;border-top:1px solid var(--border);background:#060b1a}
+  .cine::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(900px 420px at 50% 120%,rgba(33,89,201,.22),transparent 60%)}
+  .cine-word{position:relative;text-align:center;font-family:var(--display);font-weight:700;font-size:clamp(4rem,15vw,150px);line-height:1;
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.9;padding-top:4rem;user-select:none}
+  .fcols{position:relative;max-width:var(--maxw);margin-inline:auto;padding:3.5rem 1.25rem;display:grid;grid-template-columns:1fr;gap:2.5rem}
+  @media(min-width:768px){.fcols{grid-template-columns:2fr 1fr 1fr 1.4fr}}
+  .fcols h4{font-family:var(--display);font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:var(--light);margin-bottom:1rem}
+  .fcols a{color:var(--muted);font-size:.88rem;display:block;padding:.3rem 0;transition:color .2s}
+  .fcols a:hover{color:var(--fg)}
+  .fcols .about p{color:var(--muted);font-size:.88rem;max-width:20rem;margin-top:1rem}
+  .fbrand{display:flex;align-items:center;gap:.65rem;font-family:var(--display);font-weight:700}
+  .fbar{border-top:1px solid var(--border)}
+  .fbar .in{max-width:var(--maxw);margin-inline:auto;padding:1.5rem 1.25rem;display:flex;flex-direction:column;gap:.5rem;align-items:center;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+  @media(min-width:640px){.fbar .in{flex-direction:row}}
+  .fcta{position:relative;max-width:var(--maxw);margin-inline:auto;padding:4.5rem 1.25rem .5rem;text-align:center}
+  .fcta h2{font-size:clamp(1.9rem,4.6vw,3rem);margin-top:.6rem}
+  .fcta > p{max-width:36rem;margin:1rem auto 0;color:var(--muted);font-size:1.02rem}
+  .fsignup{margin:2rem auto 0;display:flex;gap:.6rem;max-width:32rem;flex-wrap:wrap;justify-content:center}
+  .fsignup input{flex:1;min-width:15rem;background:rgba(5,9,20,.6);border:1px solid var(--border);border-radius:999px;
+    padding:.9rem 1.25rem;color:var(--fg);font-family:var(--sans);font-size:.9rem;outline:none;transition:border-color .2s}
+  .fsignup input::placeholder{color:var(--muted)}
+  .fsignup input:focus-visible{border-color:rgba(59,130,246,.6)}
+  .fnote{margin-top:.85rem;font-size:.72rem;color:var(--muted)}
+  .fsocials{display:flex;gap:.55rem;margin-top:1.25rem}
+  .fsocials a{width:38px;height:38px;border-radius:.6rem;border:1px solid var(--border);background:var(--muted-bg);
+    display:grid;place-items:center;color:var(--muted);transition:color .2s,border-color .2s,transform .2s}
+  .fsocials a:hover{color:var(--light);border-color:rgba(59,130,246,.5);transform:translateY(-2px)}
+  .fcontact{display:flex;flex-direction:column;gap:.55rem;font-size:.88rem;color:var(--muted)}
+  .fcontact a:hover{color:var(--fg)}
+
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+    .rv{opacity:1;transform:none}
+  }
+</style>
+
+<header>
+  <nav id="nav">
+    <a href="#top" class="brand"><span class="logo">◆</span>Profinity</a>
+    <div class="navlinks">
+      <a href="#top" class="active">Home</a>
+      <a href="#services">About</a>
+      <div class="has-mega">
+        <a href="#services">Services
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+        </a>
+        <div class="mega" id="mega"></div>
+      </div>
+      <a href="#results">Portfolio</a>
+      <a href="#faq">Blog</a>
+      <a href="#cta">Contact</a>
+    </div>
+    <div class="navbtns">
+      <a href="#cta" class="btn" style="padding:.55rem 1.1rem">Book a Call</a>
+      <button class="menu-toggle" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<div class="content-card">
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <canvas id="cubes" aria-hidden="true"></canvas>
+    <div class="hero-vignette"></div>
+    <div class="wrap hero-inner">
+      <span class="badge"><span class="dot"></span>AI Automation Agency</span>
+      <h1 id="headline">Automate the busywork. Run your business on AI.</h1>
+      <p class="sub">We build AI agents that call, chat, and clear the busywork around the clock, plugged straight into the tools your team already runs.</p>
+      <div class="cta-row">
+        <a href="#cta" class="btn">Book a Free Automation Audit
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a href="#services" class="btn btn-ghost">Explore Services</a>
+      </div>
+    </div>
+    <div class="scrolldown"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+  </section>
+
+  <!-- AUTHORITY -->
+  <section class="wrap" style="padding-top:2rem">
+    <div class="authority rv">
+      <p class="auth-eye">Built for operators who count on it</p>
+      <div class="auth-logos" id="authLogos"></div>
+      <div class="badges" id="badges"></div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="sec wrap" id="services">
+    <div class="sec-head rv">
+      <span class="eyebrow">What we build</span>
+      <h2>Six ways we put AI to work</h2>
+      <p>Every build wraps around the tools you already run. You keep your setup and pick up the speed of automation.</p>
+    </div>
+    <div class="svc-grid rv" id="svcGrid" style="margin-top:3rem"></div>
+  </section>
+
+  <!-- PAIN + CALCULATOR -->
+  <section class="sec wrap" id="roi">
+    <div class="sec-head rv">
+      <span class="eyebrow">The cost of doing nothing</span>
+      <h2>Every slow reply is revenue walking out the door</h2>
+      <p>Missed calls, cold leads, and hours swallowed by busywork add up faster than you think. See what it is quietly costing you, then see what you get back.</p>
+    </div>
+    <div class="pain-grid rv" id="painGrid" style="margin-top:3rem"></div>
+
+    <div class="calc rv">
+      <div class="tabs">
+        <button class="tab active" data-tab="leads">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="17" y2="7"/><line x1="17" y1="1" x2="23" y2="7"/></svg>
+          Revenue lost to slow leads
+        </button>
+        <button class="tab" data-tab="hours">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Time lost to busywork
+        </button>
+      </div>
+      <div class="calc-body">
+        <div class="fields" id="calcFields"></div>
+        <div class="results">
+          <div id="calcResults" style="display:flex;flex-direction:column;gap:1.25rem"></div>
+          <a href="#cta" class="btn" style="justify-content:center">Book a Free Automation Audit
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="wrap" style="padding-block:2.5rem">
+    <div class="stats rv" id="statsBand"></div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="sec wrap" id="results">
+    <div class="sec-head rv">
+      <span class="eyebrow">Results</span>
+      <h2>Outcomes, not just automations</h2>
+      <p>Real client work, kept anonymous and sorted by industry. The numbers show the kind of outcomes these agents are built to deliver.</p>
+    </div>
+    <div class="res-grid rv" id="resGrid" style="margin-top:3.5rem"></div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="sec wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">What clients say</span>
+      <h2>Teams that stopped losing leads</h2>
+    </div>
+    <div class="rv" style="margin-top:3.5rem">
+      <div class="tcard">
+        <div class="tcard-in">
+          <div class="quote-mark">”</div>
+          <div class="stars" id="tStars"></div>
+          <blockquote class="tquote" id="tQuote"></blockquote>
+          <div class="tperson">
+            <span class="tav" id="tAv"></span>
+            <div><b id="tName"></b><p id="tRole"></p></div>
+          </div>
+        </div>
+      </div>
+      <div class="tctrls">
+        <button id="tPrev" aria-label="Previous"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+        <div class="dots" id="tDots"></div>
+        <button id="tNext" aria-label="Next"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+    </div>
+
+    <!-- AVATAR WALL -->
+    <div class="wall rv">
+      <div class="wall-bg" id="wallBg" aria-hidden="true"></div>
+      <div class="wall-scrim"></div>
+      <div class="wall-in">
+        <span class="badge" style="margin-bottom:1.25rem"><span class="dot"></span>Loved by teams</span>
+        <h2 style="font-size:clamp(1.9rem,4.4vw,3rem)">Trusted by leaders<br>across industries</h2>
+        <p class="muted" style="margin-top:1rem">From clinics to storefronts, operators rely on our AI agents to run the front lines around the clock.</p>
+        <a href="#results" class="btn" style="margin-top:2rem">See our work
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="sec wrap" id="faq">
+    <div class="sec-head rv">
+      <span class="eyebrow">FAQ</span>
+      <h2>The questions we get on sales calls</h2>
+      <p>The real objections, answered before you ask. Pricing, integrations, safety, and what happens if it does not work out.</p>
+    </div>
+    <div class="faq rv" id="faqList" style="margin-top:3rem"></div>
+  </section>
+
+  <!-- CTA -->
+  <section class="sec wrap" id="cta">
+    <div class="cta rv">
+      <span class="eyebrow">Let's build</span>
+      <h2 style="margin-top:.75rem">Ready to put AI on your front lines?</h2>
+      <p>Book a free automation audit and we will show you exactly where AI can save your team hours and win you more customers. No pressure, no obligation.</p>
+      <div style="margin-top:2rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+        <a href="#top" class="btn">Book a Free Automation Audit
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a href="#services" class="btn btn-ghost">Explore Services</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<!-- CINEMATIC FOOTER -->
+<footer class="cine">
+  <div class="fcta">
+    <span class="eyebrow">Let's talk</span>
+    <h2>Your quietest new hire starts here</h2>
+    <p>Tell us what keeps eating your team's time. We will show you where an agent can take it off their hands, usually inside a few weeks.</p>
+    <form class="fsignup" onsubmit="return false">
+      <input type="email" placeholder="you@company.com" aria-label="Your work email">
+      <button type="submit" class="btn">Book my free audit
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+    <p class="fnote">A 30 minute call. No slides, no pressure, just a straight read on where AI pays off.</p>
+  </div>
+
+  <div class="cine-word">Profinity</div>
+
+  <div class="fcols">
+    <div class="about">
+      <div class="fbrand"><span class="logo" style="width:36px;height:36px">◆</span>Profinity Solutions</div>
+      <p>We build AI agents that call, chat, and clear the busywork around the clock, wired into the tools your team already runs.</p>
+      <div class="fsocials">
+        <a href="#" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.1c.5-.9 1.8-1.9 3.6-1.9 3.9 0 4.6 2.5 4.6 5.8V21h-4v-5.2c0-1.2 0-2.8-1.7-2.8s-2 1.3-2 2.7V21H9z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="#" aria-label="X"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7 8 8.2 12h-6.4l-5-6.6L5.9 22H2.8l7.5-8.6L2.4 2h6.6l4.6 6.1zM17.8 20h1.7L7.3 3.8H5.5z"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/></svg></a>
+      </div>
+    </div>
+    <div>
+      <h4>Explore</h4>
+      <a href="#services">About us</a><a href="#services">What we do</a><a href="#results">Our results</a><a href="#faq">Common questions</a><a href="#cta">Start a project</a>
+    </div>
+    <div>
+      <h4>What we build</h4>
+      <div id="fSvc"></div>
+    </div>
+    <div>
+      <h4>Say hello</h4>
+      <div class="fcontact">
+        <a href="#">hello@profinitysolution.com</a>
+        <a href="#">+92 000 0000000</a>
+        <span>Add your address here</span>
+      </div>
+      <a href="#cta" class="btn" style="padding:.6rem 1.1rem;margin-top:1.1rem">Book a free audit</a>
+    </div>
+  </div>
+
+  <div class="fbar"><div class="in"><p>© 2026 Profinity Solutions. Built to keep working while you rest.</p><p>profinitysolution.com</p></div></div>
+</footer>
+
+<script>
+(() => {
+  const rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- DATA ----------
+  const SERVICES = [
+    ['Bot','AI Automations','We take the repetitive work off your team and wire it into the tools you already use, so the busywork just runs itself.','Repetitive work, handled for you'],
+    ['Phone','AI Calling Agents','A voice agent that answers every call day and night, qualifies the lead, books the appointment, and passes the tricky ones to a person.','Answers every call, day or night'],
+    ['Zap','Instant Lead Response','The second a lead lands they get a reply, get qualified on the spot, and the hot ones go straight to whoever closes.','Replies in seconds, not hours'],
+    ['Cart','Ecommerce Chat Agents','It answers product questions, nudges the sale along, and wins back abandoned carts in real time, all without a single new hire.','Answers, upsells, and saves carts'],
+    ['Doc','Content on Autopilot','It researches, drafts, and schedules across your blog and socials. You give the nod, it does the rest, and your feed never goes quiet.','Drafts and schedules on its own'],
+    ['Code','AI Ready Websites','Fast, modern sites with AI built into the back end. Smart forms, sharper search, and pages that adapt to whoever is looking.','Fast sites with AI built in'],
+  ];
+  const ICONS = {
+    Bot:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>',
+    Phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+    Zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+    Cart:'<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
+    Doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+    Code:'<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+    Alert:'<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/>',
+  };
+  const svgIc = (k,s=18)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]||''}</svg>`;
+
+  const AUTH_LOGOS = ['Dental Clinics','Real Estate Teams','E-commerce Brands','Home Services','Med Spas','Agencies'];
+  const BADGES = [['24/7','Agents on shift'],['~2s','First response'],['6+','AI services'],['100%','Custom-built']];
+  const STATS = [['24','/7','Always-On Automation'],['~','2s… ','Avg. AI First Response','~2'],['100','%','Custom-Built Workflows'],['6','+','Core AI Services']];
+  const PAIN = [
+    ['78%','of buyers go with whoever answers first','Leads cool off fast. Take an hour to reply and odds are a competitor already got the yes.'],
+    ['~27%','of calls to small businesses ring out','Voicemail is where revenue quietly dies. The lunch rush and the late night calls become customers you never met.'],
+    ['13+ hrs','a week vanish into manual busywork','Follow ups, data entry, copy and paste, triage. Hours your team burns on work an agent could finish in seconds.'],
+  ];
+  const CASES = [
+    {tag:'AI Calling Agent',label:'Calls answered',kind:'bars',values:[58,100],caps:['Before','With AI'],display:'100%',note:'Every call gets picked up now, morning or midnight. It used to sit closer to 58.',industry:'Dental clinic front desk',result:'Not one missed call, and the calendar fills itself around the clock with no new hires.'},
+    {tag:'Instant Lead Response',label:'Time to first reply',kind:'line',values:[12,28,46,63,78,88],display:'96% faster',note:'Replies that used to take hours now land in seconds, and more of those leads actually convert.',industry:'Real estate lead routing',result:'Fresh enquiries get qualified on the spot and reach the right agent before they cool.'},
+    {tag:'Ecommerce Chat',label:'Carts recovered',kind:'ring',values:[34],display:'+34%',note:'A third of the shoppers who wandered off get nudged back to checkout on their own.',industry:'Ecommerce cart recovery',result:'Abandoned carts get won back in real time, quietly turning browsers into buyers.'},
+  ];
+  const TESTI = [
+    {q:'The agent picks up every single call now. We stopped bleeding after hours bookings overnight, and honestly it paid for itself in the first month.',n:'Practice Manager',r:'Operations · Dental clinic'},
+    {q:'Leads used to sit for hours. Now they get an answer in seconds and land on the right desk already qualified. Our close rate went up, plain and simple.',n:'Team Lead',r:'Sales · Real estate group'},
+    {q:'It feels like we hired a night shift that never sleeps. Carts come back, questions get answered, and our support pile finally started shrinking.',n:'Founder',r:'Owner · Ecommerce brand'},
+    {q:'They built the whole thing around the tools we already run. Nothing to rip out, no drama, just quiet automation handling the boring work.',n:'Operations Director',r:'Operations · Home services company'},
+  ];
+  const FAQ = [
+    ['So what does this actually cost?','Most projects start in the low four figures for one focused agent and grow from there. After the free audit you get a fixed, itemised quote. No open ended hourly billing, no surprise line items.'],
+    ['How is this different from ChatGPT or a plug in bot?','A generic bot answers questions. Our agents plug into your real stack, your CRM, calendar, phone, and storefront, so they actually do things. They book, they qualify, they route, they win back the cart.'],
+    ['What if it says something wrong or goes off script?','Every agent is boxed in by your approved knowledge and your rules, not the open internet. Anything outside its lane gets passed to a person with the full context already attached.'],
+    ['We already have a team. Are you replacing them?','Not at all. It clears the busywork so your people do the work only people should. The agent takes the late night calls, the instant replies, and the repetitive triage.'],
+    ['How fast do we go live and see results?','Most first agents are live within a few weeks. We start where the payoff is clearest, so the impact usually shows up in the very first billing cycle.'],
+    ['Will it really work with the tools we use?','Yes. We build around what you already run. If a tool has an API or an automation hook, and almost every modern CRM, phone system, and store does, we can wire into it.'],
+  ];
+
+  const $ = s => document.querySelector(s);
+  const el = (t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+
+  // ---------- NAV ----------
+  const nav = $('#nav');
+  addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>24),{passive:true});
+  $('#mega').innerHTML =
+    '<div class="mega-grid">'+SERVICES.map(s=>
+      `<a class="mega-item" href="#services"><span class="mega-ic">${svgIc(s[0],16)}</span><span><b>${s[1]}</b><span>${s[3]}</span></span></a>`).join('')+
+    '</div><a class="mega-cta" href="#cta">Book a Free Automation Audit <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>';
+
+  // ---------- HERO: headline word reveal ----------
+  const hEl=$('#headline');
+  const words='Automate the busywork. Run your business on AI.'.split(' ');
+  hEl.textContent='';
+  words.forEach((w,i)=>{
+    const s=document.createElement('span');s.textContent=w+' ';
+    if(!rm){s.style.cssText=`opacity:0;transform:translateY(18px);filter:blur(6px);transition:opacity .5s ${.15+i*0.07}s,transform .5s ${.15+i*0.07}s,filter .5s ${.15+i*0.07}s`;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{s.style.opacity=1;s.style.transform='none';s.style.filter='none';}));}
+    hEl.appendChild(s);
+  });
+
+  // ---------- HERO: canvas wireframe cube field ----------
+  (function(){
+    const cv=$('#cubes');if(!cv)return;const ctx=cv.getContext('2d');let W,H,DPR;
+    function size(){DPR=Math.min(2,devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+    size();addEventListener('resize',size);
+    const V=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+    const E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    const N=innerWidth<768?9:18,cubes=[];
+    for(let i=0;i<N;i++){const a=i/N*Math.PI*2,rad=3.1+(i%3)*.55;
+      cubes.push({a,rad,y:Math.sin(i*1.7)*1.4,sc:.55+((i*37)%40)/100,sp:.2+((i*13)%30)/100,ph:(i%10)*.7});}
+    const rotX=(p,t)=>{const c=Math.cos(t),s=Math.sin(t);return[p[0],p[1]*c-p[2]*s,p[1]*s+p[2]*c];};
+    const rotY=(p,t)=>{const c=Math.cos(t),s=Math.sin(t);return[p[0]*c+p[2]*s,p[1],-p[0]*s+p[2]*c];};
+    let mx=0,my=0,rrx=0,rry=0;
+    addEventListener('pointermove',e=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2;});
+    const t0=performance.now();let paused=false;
+    document.addEventListener('visibilitychange',()=>paused=document.hidden);
+    function frame(now){requestAnimationFrame(frame);if(paused)return;
+      const t=(now-t0)/1000;ctx.clearRect(0,0,W,H);
+      rry+=((mx*.5)-rry)*.05;rrx+=((-my*.3)-rrx)*.05;
+      const cx=W/2+mx*24,cy=H/2+my*16,f=430,camZ=9;
+      const order=cubes.map((cb,idx)=>{
+        const bx=Math.cos(cb.a)*cb.rad,bz=Math.sin(cb.a)*cb.rad-1,by=cb.y+Math.sin(t*.8+cb.ph)*.4;
+        let wp=rotY([bx,by,bz],rry);wp=rotX(wp,rrx);return{cb,wp,idx};
+      }).sort((A,B)=>B.wp[2]-A.wp[2]);
+      order.forEach(o=>{
+        const cb=o.cb,wp=o.wp,rx=t*cb.sp,ry=t*cb.sp*.8;
+        const pts=V.map(v=>{let p=[v[0]*cb.sc,v[1]*cb.sc,v[2]*cb.sc];p=rotX(p,rx);p=rotY(p,ry);
+          p=[p[0]+wp[0],p[1]+wp[1],p[2]+wp[2]];const z=p[2]+camZ,sc=f/z;return[cx+p[0]*sc,cy+p[1]*sc,z];});
+        const depth=wp[2]+camZ,alpha=Math.max(.08,Math.min(.6,1.1-depth/13));
+        ctx.lineWidth=Math.max(.5,1.4*(6/depth));
+        ctx.strokeStyle='rgba('+(o.idx%3===0?'168,226,253':'59,130,246')+','+alpha+')';
+        ctx.shadowColor='rgba(56,189,248,'+(alpha*.7)+')';ctx.shadowBlur=8;
+        ctx.beginPath();E.forEach(e=>{ctx.moveTo(pts[e[0]][0],pts[e[0]][1]);ctx.lineTo(pts[e[1]][0],pts[e[1]][1]);});ctx.stroke();
+        ctx.shadowBlur=0;const gx=cx+wp[0]*(f/depth),gy=cy+wp[1]*(f/depth),grd=26*cb.sc*(6/depth);
+        const g=ctx.createRadialGradient(gx,gy,0,gx,gy,grd);
+        g.addColorStop(0,'rgba(125,211,252,'+(alpha*.25)+')');g.addColorStop(1,'transparent');
+        ctx.fillStyle=g;ctx.beginPath();ctx.arc(gx,gy,grd,0,7);ctx.fill();
+      });
+    }
+    if(!rm)requestAnimationFrame(frame);
+    else{size();ctx.fillStyle='rgba(33,89,201,.12)';ctx.fillRect(0,0,W,H);
+      cubes.slice(0,6).forEach((cb,i)=>{ctx.strokeStyle='rgba(125,211,252,.25)';ctx.strokeRect(60+i*160%W,120+(i*90)%(H-160),70,70);});}
+  })();
+
+  // ---------- AUTHORITY ----------
+  $('#authLogos').innerHTML = AUTH_LOGOS.map(l=>`<span>${l}</span>`).join('');
+  $('#badges').innerHTML = BADGES.map(b=>`<div><b class="grad-text">${b[0]}</b><p>${b[1]}</p></div>`).join('');
+
+  // ---------- SERVICES ----------
+  $('#svcGrid').innerHTML = SERVICES.map(s=>
+    `<div class="svc"><div class="ic">${svgIc(s[0],20)}</div><h3>${s[1]}</h3><p>${s[2]}</p></div>`).join('');
+  $('#fSvc').innerHTML = SERVICES.map(s=>`<a href="#services">${s[1]}</a>`).join('');
+
+  // ---------- PAIN ----------
+  $('#painGrid').innerHTML = PAIN.map(p=>
+    `<div class="pain"><div class="top"><span class="ic">${svgIc('Alert',16)}</span><span class="stat grad-text">${p[0]}</span></div><h3>${p[1]}</h3><p>${p[2]}</p></div>`).join('');
+
+  // ---------- STATS (count up on view) ----------
+  $('#statsBand').innerHTML = STATS.map((s,i)=>
+    `<div><b class="grad-text"><span class="stat-num" data-to="${s[0].replace(/[^0-9]/g,'')||0}" data-pre="${s[0].replace(/[0-9]/g,'')}">0</span>${s[1].includes('…')?'s':s[1]}</b><p>${s[2]}</p></div>`
+  ).join('');
+  // fix the "~2s" oddity: rebuild cleanly
+  $('#statsBand').innerHTML =
+    `<div><b class="grad-text"><span class="stat-num" data-to="24">0</span>/7</b><p>Always-On Automation</p></div>`+
+    `<div><b class="grad-text">~<span class="stat-num" data-to="2">0</span>s</b><p>Avg. AI First Response</p></div>`+
+    `<div><b class="grad-text"><span class="stat-num" data-to="100">0</span>%</b><p>Custom-Built Workflows</p></div>`+
+    `<div><b class="grad-text"><span class="stat-num" data-to="6">0</span>+</b><p>Core AI Services</p></div>`;
+
+  // ---------- CALCULATOR ----------
+  const D={leads:200,deal:900,close:20,missed:30,hours:15,cost:18,auto:70,uplift:35};
+  const st={...D};
+  let tab='leads';
+  const FIELDS={
+    leads:[
+      ['leads','New leads / month',20,2000,10,''],
+      ['deal','Avg. value of a customer',100,10000,50,'$'],
+      ['close','Close rate on qualified leads',5,60,1,'','%'],
+      ['missed','Leads missed or answered too slowly',5,70,1,'','%'],
+    ],
+    hours:[
+      ['hours','Hours / week on repetitive work',2,80,1,''],
+      ['cost','Blended staff cost / hour',8,120,1,'$'],
+      ['auto','Share an AI agent can take over',20,95,1,'','%'],
+    ],
+  };
+  const fmtMoney=n=>'$'+Math.round(n).toLocaleString();
+  const fmtWhole=n=>Math.round(n).toLocaleString();
+
+  function compute(){
+    if(tab==='leads'){
+      const missedLeads=st.leads*(st.missed/100);
+      const recovered=missedLeads*(st.close/100)*st.deal;
+      const up=st.leads*(1-st.missed/100)*(st.close/100)*(st.uplift/100)*st.deal;
+      const monthly=recovered+up;
+      const extra=missedLeads*(st.close/100)+st.leads*(1-st.missed/100)*(st.close/100)*(st.uplift/100);
+      return [[monthly,'Recoverable revenue / month',fmtMoney,'big'],[monthly*12,'Recoverable revenue / year',fmtMoney,'sub'],[extra,'Extra customers / month',fmtWhole,'sub']];
+    } else {
+      const ah=st.hours*(st.auto/100);
+      return [[ah*52,'Hours saved / year',fmtWhole,'big'],[ah*st.cost*52,'Staff cost saved / year',fmtMoney,'sub'],[ah,'Hours / week given back',fmtWhole,'sub']];
+    }
+  }
+  function renderFields(){
+    const c=$('#calcFields');c.innerHTML='';
+    FIELDS[tab].forEach(f=>{
+      const [key,label,min,max,step,pre,suf]=f;
+      const wrap=el('label','field');
+      wrap.innerHTML=`<div class="lab"><span>${label}</span><b>${pre||''}<span class="fv">${st[key].toLocaleString()}</span>${suf||''}</b></div>
+        <input class="rng" type="range" min="${min}" max="${max}" step="${step}" value="${st[key]}" aria-label="${label}">`;
+      const inp=wrap.querySelector('input');const fv=wrap.querySelector('.fv');
+      inp.addEventListener('input',()=>{st[key]=+inp.value;fv.textContent=(+inp.value).toLocaleString();renderResults();});
+      c.appendChild(wrap);
+    });
+    const dis=el('p','disclaim','These are rough estimates, just a way to size the opportunity. Your free audit is where the real numbers come from.');
+    c.appendChild(dis);
+  }
+  let animId;
+  function renderResults(){
+    const data=compute();const box=$('#calcResults');
+    if(box.children.length!==data.length){
+      box.innerHTML=data.map((d,i)=>
+        `<div class="res-item ${d[3]==='big'?'sep':'sub'}"><div class="${d[3]==='big'?'res-big':'val'} grad-text" data-i="${i}">${d[2](d[0])}</div><p>${d[1]}</p></div>`).join('');
+      box.dataset.cur=JSON.stringify(data.map(d=>d[0]));
+      return;
+    }
+    const prev=JSON.parse(box.dataset.cur||'[]');
+    const targets=data.map(d=>d[0]);
+    cancelAnimationFrame(animId);
+    const t0=performance.now();const dur=rm?0:550;
+    const nums=[...box.querySelectorAll('[data-i]')];
+    (function step(t){
+      const p=dur?Math.min((t-t0)/dur,1):1;const e=1-Math.pow(1-p,3);
+      nums.forEach((nEl,i)=>{const v=prev[i]+(targets[i]-prev[i])*e;nEl.textContent=data[i][2](v);});
+      if(p<1)animId=requestAnimationFrame(step);else box.dataset.cur=JSON.stringify(targets);
+    })(t0);
+  }
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');tab=b.dataset.tab;renderFields();$('#calcResults').innerHTML='';renderResults();
+  }));
+  renderFields();renderResults();
+
+  // ---------- CHARTS ----------
+  function barsSVG(v,caps){
+    const w=220,h=120,gap=24,bw=(w-gap*(v.length-1))/v.length;
+    let bars='',labs='';
+    v.forEach((val,i)=>{
+      const last=i===v.length-1;
+      bars+=`<rect class="bar" x="${i*(bw+gap)}" y="${h}" width="${bw}" height="0" rx="6" fill="${last?'url(#bg)':'rgba(148,163,184,.28)'}" data-h="${val/100*h}"/>`;
+      if(caps&&caps[i])labs+=`<text x="${i*(bw+gap)+bw/2}" y="${h+16}" text-anchor="middle" fill="#a9b6cc" font-size="11">${caps[i]}</text>`;
+    });
+    return `<svg viewBox="0 0 ${w} ${h+22}"><defs><linearGradient id="bg" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#2159c9"/><stop offset="100%" stop-color="#7dd3fc"/></linearGradient></defs>${bars}${labs}</svg>`;
+  }
+  function lineSVG(v){
+    const w=220,h=120,max=Math.max(...v);
+    const pts=v.map((val,i)=>[i/(v.length-1)*w, h-(val/max)*(h-12)-6]);
+    const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+    const area=line+` L${w},${h} L0,${h} Z`;const lead=pts[pts.length-1];
+    return `<svg viewBox="0 0 ${w} ${h}"><defs>
+      <linearGradient id="lg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#a8e2fd"/></linearGradient>
+      <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(56,189,248,.28)"/><stop offset="100%" stop-color="rgba(56,189,248,0)"/></linearGradient></defs>
+      <path class="area" d="${area}" fill="url(#ag)" opacity="0"/>
+      <path class="line" d="${line}" fill="none" stroke="url(#lg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle class="lead" cx="${lead[0].toFixed(1)}" cy="${lead[1].toFixed(1)}" r="4.5" fill="#a8e2fd" stroke="#050914" stroke-width="2" opacity="0"/></svg>`;
+  }
+  function ringSVG(val){
+    const size=132,stroke=12,r=(size-stroke)/2,c=2*Math.PI*r;
+    return `<svg viewBox="0 0 ${size} ${size}"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a8e2fd"/><stop offset="100%" stop-color="#2159c9"/></linearGradient></defs>
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="rgba(148,163,184,.18)" stroke-width="${stroke}"/>
+      <circle class="ring" cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="url(#rg)" stroke-width="${stroke}" stroke-linecap="round"
+        stroke-dasharray="${c}" stroke-dashoffset="${c}" data-c="${c}" data-val="${val}" transform="rotate(-90 ${size/2} ${size/2})"/>
+      <text class="ringt" x="50%" y="52%" text-anchor="middle" dominant-baseline="middle" fill="#f1f5f9" font-family="var(--display)" font-size="26" font-weight="700" data-val="${val}">0%</text></svg>`;
+  }
+  $('#resGrid').innerHTML = CASES.map(cs=>{
+    let chart = cs.kind==='bars'?barsSVG(cs.values,cs.caps):cs.kind==='line'?lineSVG(cs.values):ringSVG(cs.values[0]);
+    return `<div class="rcard"><div class="rcard-in" data-kind="${cs.kind}">
+      <div class="rtop"><span class="rtag">${cs.tag}</span><span class="rpill">${cs.label}</span></div>
+      <div class="chartbox">${chart}</div>
+      <div><div class="rbig grad-text">${cs.display}</div><p class="rnote">${cs.note}</p></div>
+      <div class="rfoot"><b>${cs.industry}</b><p>${cs.result}</p></div>
+    </div></div>`;
+  }).join('');
+
+  function animateChart(card){
+    const kind=card.dataset.kind;
+    if(kind==='bars'){
+      card.querySelectorAll('.bar').forEach((b,i)=>{
+        const th=+b.dataset.h;setTimeout(()=>{b.style.transition=rm?'':'height .9s cubic-bezier(.22,1,.36,1),y .9s cubic-bezier(.22,1,.36,1)';
+          b.setAttribute('height',th);b.setAttribute('y',120-th);},i*120);
+      });
+    } else if(kind==='line'){
+      const line=card.querySelector('.line');const len=line.getTotalLength();
+      line.style.strokeDasharray=len;line.style.strokeDashoffset=len;line.getBoundingClientRect();
+      line.style.transition=rm?'':'stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1)';line.style.strokeDashoffset=0;
+      const area=card.querySelector('.area'),lead=card.querySelector('.lead');
+      area.style.transition='opacity 1s ease';area.style.opacity=1;
+      setTimeout(()=>{lead.style.transition='opacity .3s';lead.style.opacity=1;},rm?0:1100);
+    } else {
+      const ring=card.querySelector('.ring'),txt=card.querySelector('.ringt');
+      const c=+ring.dataset.c,val=+ring.dataset.val;
+      ring.style.transition=rm?'':'stroke-dashoffset 1.2s cubic-bezier(.22,1,.36,1)';
+      requestAnimationFrame(()=>ring.style.strokeDashoffset=c*(1-val/100));
+      countTo(txt,val,1200,v=>Math.round(v)+'%');
+    }
+  }
+  function countTo(node,to,dur,fmt){
+    const t0=performance.now();fmt=fmt||(v=>Math.round(v));
+    (function s(t){const p=dur&&!rm?Math.min((t-t0)/dur,1):1;const e=1-Math.pow(1-p,3);
+      node.textContent=fmt(to*e);if(p<1)requestAnimationFrame(s);})(t0);
+  }
+
+  // ---------- TESTIMONIALS ----------
+  let ti=0;
+  const dotsBox=$('#tDots');
+  dotsBox.innerHTML=TESTI.map((_,i)=>`<i data-i="${i}"></i>`).join('');
+  function renderTest(){
+    const t=TESTI[ti];
+    $('#tStars').innerHTML=Array(5).fill('<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>').join('');
+    const q=$('#tQuote');q.style.opacity=0;
+    setTimeout(()=>{q.textContent='“'+t.q+'”';q.style.transition='opacity .35s';q.style.opacity=1;},rm?0:120);
+    $('#tName').textContent=t.n;$('#tRole').textContent=t.r;
+    $('#tAv').textContent=t.n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    [...dotsBox.children].forEach((d,i)=>d.classList.toggle('on',i===ti));
+  }
+  const go=d=>{ti=(ti+d+TESTI.length)%TESTI.length;renderTest();};
+  $('#tNext').onclick=()=>go(1);$('#tPrev').onclick=()=>go(-1);
+  [...dotsBox.children].forEach(d=>d.onclick=()=>{ti=+d.dataset.i;renderTest();});
+  renderTest();
+  if(!rm)setInterval(()=>go(1),6000);
+
+  // ---------- AVATAR WALL ----------
+  const grads=['linear-gradient(135deg,#123166,#2159c9)','linear-gradient(135deg,#0b1f4d,#3b82f6)','linear-gradient(135deg,#2159c9,#7dd3fc)','linear-gradient(135deg,#0e1a33,#123166)','linear-gradient(135deg,#3b82f6,#a8e2fd)','linear-gradient(135deg,#123166,#38bdf8)'];
+  const wallBg=$('#wallBg');
+  for(let col=0;col<4;col++){
+    const c=el('div','wcol');
+    c.style.animation=rm?'':`wmarq ${34+col*6}s linear infinite`;c.style.animationDirection=col%2?'reverse':'normal';
+    let tiles='';
+    for(let k=0;k<8;k++){tiles+=`<div class="wtile" style="background:${grads[(col*2+k)%grads.length]}"></div>`;}
+    c.innerHTML=tiles+tiles;
+    wallBg.appendChild(c);
+  }
+
+  // ---------- FAQ ----------
+  $('#faqList').innerHTML=FAQ.map((f,i)=>
+    `<details ${i===0?'open':''}><summary>${f[0]}<span class="pl"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></span></summary><div class="ans">${f[1]}</div></details>`).join('');
+
+  // ---------- REVEAL + chart/stat triggers ----------
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const t=e.target;t.classList.add('in');
+      if(t.id==='statsBand')t.querySelectorAll('.stat-num').forEach(n=>countTo(n,+n.dataset.to,1500));
+      if(t.id==='resGrid')t.querySelectorAll('.rcard-in').forEach((c,i)=>setTimeout(()=>animateChart(c),i*140));
+      io.unobserve(t);
+    });
+  },{threshold:0.2});
+  document.querySelectorAll('.rv,#statsBand,#resGrid').forEach(n=>io.observe(n));
+
+  // mobile menu toggle (simple scroll to services)
+  $('.menu-toggle').addEventListener('click',()=>document.querySelector('#services').scrollIntoView());
+})();
+</script>
