@@ -1,0 +1,7 @@
+Drop your logo here as:  logo.jpeg
+
+The whole site (nav, footer, favicon, social share image) references
+/logo.jpeg. Save your Profinity infinity logo as `logo.jpeg` in this
+`public/` folder. Recommended: a square image, ~512x512 or larger.
+
+Once added you can delete this text file.

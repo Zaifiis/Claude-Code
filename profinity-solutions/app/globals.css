@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* shadcn-style tokens mapped to the Profinity dark palette */
+  --background: #050914;
+  --foreground: #f1f5f9;
+  --border: rgba(148, 163, 184, 0.14);
+  --input: rgba(148, 163, 184, 0.2);
+  --muted: #0e1a33;
+  --muted-foreground: #a9b6cc;
+  --primary: #3b82f6;
+  --primary-foreground: #f1f5f9;
+  --accent: #123166;
+  --accent-foreground: #a8e2fd;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #050914;
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Ambient page background glow */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 500px at 78% -8%, rgba(56, 189, 248, 0.1), transparent 60%),
+    radial-gradient(760px 520px at -6% 108%, rgba(33, 89, 201, 0.12), transparent 58%);
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, #a8e2fd 0%, #7dd3fc 40%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .container-x {
+    width: 100%;
+    max-width: 1180px;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  .glass {
+    background: rgba(10, 18, 38, 0.6);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #050914; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#123166, #2159c9);
+  border-radius: 20px;
+  border: 2px solid #050914;
+}
+
+/* MovingDotCard — a glowing dot with a trailing gradient orbiting the border */
+.moving-dot-glow {
+  position: absolute;
+  inset: -150%;
+  z-index: 0;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 250deg,
+    rgba(125, 211, 252, 0.15) 300deg,
+    #7dd3fc 340deg,
+    #a8e2fd 352deg,
+    #38bdf8 360deg
+  );
+  animation: orbit 4.5s linear infinite;
+  pointer-events: none;
+}
+@keyframes orbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pin-ping {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  30% { opacity: 1; }
+  60%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
+/* GlowingEffect — the rotating gradient arc that rides the border */
+.glow-arc {
+  position: absolute;
+  inset: calc(-1 * var(--glow-border-width, 1px));
+  border-radius: inherit;
+  border: var(--glow-border-width, 1px) solid transparent;
+  background:
+    radial-gradient(circle, #7dd3fc 10%, transparent 20%),
+    radial-gradient(circle at 40% 40%, #38bdf8 5%, transparent 15%),
+    radial-gradient(circle at 60% 60%, #3b82f6 10%, transparent 20%),
+    repeating-conic-gradient(
+      from 236deg at 50% 50%,
+      #a8e2fd 0%, #7dd3fc 12.5%, #3b82f6 25%, #2159c9 37.5%, #a8e2fd 50%
+    );
+  background-attachment: fixed;
+  opacity: var(--active, 0);
+  transition: opacity 0.35s ease;
+  filter: blur(var(--blur, 0px));
+  -webkit-mask:
+    linear-gradient(#0000, #0000),
+    conic-gradient(
+      from calc((var(--start, 0) - var(--spread, 20)) * 1deg),
+      #0000 0deg, #fff, #0000 calc(var(--spread, 20) * 2deg)
+    );
+  -webkit-mask-clip: padding-box, border-box;
+  -webkit-mask-composite: source-in;
+  mask:
+    linear-gradient(#0000, #0000),
+    conic-gradient(
+      from calc((var(--start, 0) - var(--spread, 20)) * 1deg),
+      #0000 0deg, #fff, #0000 calc(var(--spread, 20) * 2deg)
+    );
+  mask-clip: padding-box, border-box;
+  mask-composite: intersect;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
