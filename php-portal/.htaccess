@@ -1,0 +1,24 @@
+# Content OS portal — Apache/LiteSpeed config (Hostinger honours .htaccess).
+
+DirectoryIndex index.php
+
+# Never serve PHP includes, config or SQL directly.
+<FilesMatch "\.(sql)$">
+  Require all denied
+</FilesMatch>
+<Files "config.php">
+  Require all denied
+</Files>
+
+# Block the whole includes directory.
+RedirectMatch 403 ^/?.*/inc/.*$
+
+# Basic hardening.
+Options -Indexes
+ServerSignature Off
+
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
