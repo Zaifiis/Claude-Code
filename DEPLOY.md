@@ -6,10 +6,12 @@ site. Hostinger offers two ways to run Node, both covered below.
 
 > **Requirements on the host**
 > - **Node.js 20.9+** (Next.js 16 requirement — pick this in hPanel/VPS).
+>   Use Node **20 or 22**, for which `better-sqlite3` ships a prebuilt binary.
 > - The database is created and seeded automatically on first run.
-> - **Build on the server** (or on the same OS/architecture). `better-sqlite3`
->   is a native module; a binary built on your laptop may not match Hostinger's
->   Linux. Running `npm install` on the server compiles the right one.
+> - **Run `npm install` on the server** (not by uploading a local
+>   `node_modules`). `better-sqlite3` is a native module, but on Linux x64 with
+>   Node 20/22 it downloads a **prebuilt binary** — no compiler or build tools
+>   required. Installing on the host guarantees the binary matches the machine.
 
 ---
 
@@ -91,11 +93,11 @@ Available on Premium, Business and Cloud web-hosting plans.
 5. **Restart** the application from the panel. Passenger runs `server.js`, which
    boots the built Next.js server.
 
-> **If `better-sqlite3` fails to install/compile** on your shared plan (some
-> shared environments restrict native builds), switch the data layer to
-> Hostinger's included **MySQL** — the schema in
-> [`lib/db/schema.ts`](lib/db/schema.ts) ports directly. Ask and this can be
-> wired up.
+> **Database note:** on Node 20/22 (Linux x64) `better-sqlite3` installs a
+> prebuilt binary, so no build tools are needed. In the rare case a shared plan
+> blocks it, the data layer can be switched to Hostinger's included **MySQL** —
+> the schema in [`lib/db/schema.ts`](lib/db/schema.ts) ports directly. Ask and
+> this can be wired up.
 
 ---
 
