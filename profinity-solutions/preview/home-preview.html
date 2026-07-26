@@ -16,7 +16,7 @@
   html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
   body{
     background:var(--base);color:var(--fg);font-family:var(--sans);
-    line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+    line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:clip;
   }
   body::before{
     content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
@@ -219,26 +219,34 @@
   .cta h2{font-size:clamp(1.8rem,4.4vw,2.8rem)}
   .cta p{margin:1rem auto 0;max-width:34rem;color:var(--muted)}
 
-  /* FOOTER (cinematic reveal) */
-  .content-card{position:relative;z-index:10;background:var(--base);border-radius:0 0 2.5rem 2.5rem;box-shadow:0 50px 90px -40px rgba(0,0,0,.9)}
-  .cine{position:sticky;bottom:0;z-index:0;overflow:hidden;border-top:1px solid var(--border);background:#060b1a}
-  .cine::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(900px 420px at 50% 120%,rgba(33,89,201,.22),transparent 60%)}
-  .cine-word{position:relative;text-align:center;font-family:var(--display);font-weight:700;font-size:clamp(4rem,15vw,150px);line-height:1;
-    background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.9;padding-top:4rem;user-select:none}
-  .fcols{position:relative;max-width:var(--maxw);margin-inline:auto;padding:3.5rem 1.25rem;display:grid;grid-template-columns:1fr;gap:2.5rem}
+  /* FOOTER — FlowArt scroll reveal (pinned CTA, footer rotates up) */
+  .content-card{position:relative;z-index:10;background:var(--base)}
+  .flow{position:relative}
+  .flow-panel{position:relative;min-height:100vh;width:100%;overflow:clip;display:flex;border-top:1px solid var(--border)}
+  .flow-cta{position:sticky;top:0;z-index:1;background:linear-gradient(160deg,#0b1f4d 0%,#0a1226 58%,#050914 100%)}
+  .flow-cta::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(1100px 520px at 15% -10%,rgba(56,189,248,.16),transparent 60%)}
+  .flow-foot{z-index:2;background:#060b1a}
+  .flow-foot::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(1000px 460px at 50% 118%,rgba(33,89,201,.22),transparent 60%)}
+  .flow-inner{position:relative;min-height:100vh;width:100%;display:flex;flex-direction:column;justify-content:space-between;gap:1.5rem;
+    padding:clamp(3.5rem,8vw,5rem) 5vw 3rem;transform-origin:bottom left;will-change:transform;backface-visibility:hidden}
+  .flow-row{position:relative;display:flex;align-items:center;justify-content:space-between;max-width:var(--maxw);margin-inline:auto;width:100%}
+  .flow-cta-main{position:relative;max-width:var(--maxw);margin-inline:auto;width:100%}
+  .flow-cta-main h2{font-family:var(--display);font-weight:700;font-size:clamp(2.2rem,7vw,5rem);line-height:.98;letter-spacing:-.03em;max-width:16ch}
+  .flow-cta-main > p{max-width:34rem;margin-top:1.25rem;color:var(--muted);font-size:1.05rem}
+  .flow-foot-bottom{position:relative;max-width:var(--maxw);margin-inline:auto;width:100%}
+  .cine-word{position:relative;text-align:center;font-family:var(--display);font-weight:700;font-size:clamp(3.2rem,15vw,170px);line-height:1;
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.9;user-select:none}
+  .fcols{position:relative;display:grid;grid-template-columns:1fr;gap:2.5rem;border-top:1px solid var(--border);padding-top:3rem}
   @media(min-width:768px){.fcols{grid-template-columns:2fr 1fr 1fr 1.4fr}}
   .fcols h4{font-family:var(--display);font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:var(--light);margin-bottom:1rem}
   .fcols a{color:var(--muted);font-size:.88rem;display:block;padding:.3rem 0;transition:color .2s}
   .fcols a:hover{color:var(--fg)}
-  .fcols .about p{color:var(--muted);font-size:.88rem;max-width:20rem;margin-top:1rem}
+  .fcols .about > p{color:var(--muted);font-size:.88rem;max-width:22rem;margin-top:1rem}
   .fbrand{display:flex;align-items:center;gap:.65rem;font-family:var(--display);font-weight:700}
-  .fbar{border-top:1px solid var(--border)}
-  .fbar .in{max-width:var(--maxw);margin-inline:auto;padding:1.5rem 1.25rem;display:flex;flex-direction:column;gap:.5rem;align-items:center;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+  .fbar{margin-top:2.5rem;border-top:1px solid var(--border)}
+  .fbar .in{display:flex;flex-direction:column;gap:.5rem;align-items:center;justify-content:space-between;font-size:.75rem;color:var(--muted);padding-top:1.5rem}
   @media(min-width:640px){.fbar .in{flex-direction:row}}
-  .fcta{position:relative;max-width:var(--maxw);margin-inline:auto;padding:4.5rem 1.25rem .5rem;text-align:center}
-  .fcta h2{font-size:clamp(1.9rem,4.6vw,3rem);margin-top:.6rem}
-  .fcta > p{max-width:36rem;margin:1rem auto 0;color:var(--muted);font-size:1.02rem}
-  .fsignup{margin:2rem auto 0;display:flex;gap:.6rem;max-width:32rem;flex-wrap:wrap;justify-content:center}
+  .fsignup{margin-top:1.75rem;display:flex;gap:.6rem;max-width:32rem;flex-wrap:wrap}
   .fsignup input{flex:1;min-width:15rem;background:rgba(5,9,20,.6);border:1px solid var(--border);border-radius:999px;
     padding:.9rem 1.25rem;color:var(--fg);font-family:var(--sans);font-size:.9rem;outline:none;transition:border-color .2s}
   .fsignup input::placeholder{color:var(--muted)}
@@ -437,55 +445,66 @@
 </main>
 </div>
 
-<!-- CINEMATIC FOOTER -->
-<footer class="cine">
-  <div class="fcta">
-    <span class="eyebrow">Let's talk</span>
-    <h2>Your quietest new hire starts here</h2>
-    <p>Tell us what keeps eating your team's time. We will show you where an agent can take it off their hands, usually inside a few weeks.</p>
-    <form class="fsignup" onsubmit="return false">
-      <input type="email" placeholder="you@company.com" aria-label="Your work email">
-      <button type="submit" class="btn">Book my free audit
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </button>
-    </form>
-    <p class="fnote">A 30 minute call. No slides, no pressure, just a straight read on where AI pays off.</p>
-  </div>
-
-  <div class="cine-word">Profinity</div>
-
-  <div class="fcols">
-    <div class="about">
-      <div class="fbrand"><span class="logo" style="width:36px;height:36px">◆</span>Profinity Solutions</div>
-      <p>We build AI agents that call, chat, and clear the busywork around the clock, wired into the tools your team already runs.</p>
-      <div class="fsocials">
-        <a href="#" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.1c.5-.9 1.8-1.9 3.6-1.9 3.9 0 4.6 2.5 4.6 5.8V21h-4v-5.2c0-1.2 0-2.8-1.7-2.8s-2 1.3-2 2.7V21H9z"/></svg></a>
-        <a href="#" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
-        <a href="#" aria-label="X"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7 8 8.2 12h-6.4l-5-6.6L5.9 22H2.8l7.5-8.6L2.4 2h6.6l4.6 6.1zM17.8 20h1.7L7.3 3.8H5.5z"/></svg></a>
-        <a href="#" aria-label="YouTube"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/></svg></a>
+<!-- FLOWART FOOTER: pinned CTA panel, footer rotates up over it -->
+<div class="flow" id="flow">
+  <section class="flow-panel flow-cta" aria-label="Book a call">
+    <div class="flow-inner">
+      <div class="flow-row">
+        <span class="eyebrow">Let's talk</span>
+        <span class="muted" style="font-size:.85rem">profinitysolution.com</span>
+      </div>
+      <div class="flow-cta-main">
+        <h2>Your quietest new hire starts here.</h2>
+        <p>Tell us what keeps eating your team's time. We will show you where an agent takes it off their hands, usually inside a few weeks.</p>
+        <form class="fsignup" onsubmit="return false">
+          <input type="email" placeholder="you@company.com" aria-label="Your work email">
+          <button type="submit" class="btn">Book my free audit
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </form>
+        <p class="fnote">A 30 minute call. No slides, no pressure, just a straight read on where AI pays off.</p>
       </div>
     </div>
-    <div>
-      <h4>Explore</h4>
-      <a href="#services">About us</a><a href="#services">What we do</a><a href="#results">Our results</a><a href="#faq">Common questions</a><a href="#cta">Start a project</a>
-    </div>
-    <div>
-      <h4>What we build</h4>
-      <div id="fSvc"></div>
-    </div>
-    <div>
-      <h4>Say hello</h4>
-      <div class="fcontact">
-        <a href="#">hello@profinitysolution.com</a>
-        <a href="#">+92 000 0000000</a>
-        <span>Add your address here</span>
-      </div>
-      <a href="#cta" class="btn" style="padding:.6rem 1.1rem;margin-top:1.1rem">Book a free audit</a>
-    </div>
-  </div>
+  </section>
 
-  <div class="fbar"><div class="in"><p>© 2026 Profinity Solutions. Built to keep working while you rest.</p><p>profinitysolution.com</p></div></div>
-</footer>
+  <section class="flow-panel flow-foot" aria-label="Site footer">
+    <div class="flow-inner" id="flowFootInner">
+      <div class="cine-word">Profinity</div>
+      <div class="flow-foot-bottom">
+        <div class="fcols">
+          <div class="about">
+            <div class="fbrand"><span class="logo" style="width:36px;height:36px">◆</span>Profinity Solutions</div>
+            <p>We build AI agents that call, chat, and clear the busywork around the clock, wired into the tools your team already runs.</p>
+            <div class="fsocials">
+              <a href="#" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.1c.5-.9 1.8-1.9 3.6-1.9 3.9 0 4.6 2.5 4.6 5.8V21h-4v-5.2c0-1.2 0-2.8-1.7-2.8s-2 1.3-2 2.7V21H9z"/></svg></a>
+              <a href="#" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+              <a href="#" aria-label="X"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7 8 8.2 12h-6.4l-5-6.6L5.9 22H2.8l7.5-8.6L2.4 2h6.6l4.6 6.1zM17.8 20h1.7L7.3 3.8H5.5z"/></svg></a>
+              <a href="#" aria-label="YouTube"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/></svg></a>
+            </div>
+          </div>
+          <div>
+            <h4>Explore</h4>
+            <a href="#services">About us</a><a href="#services">What we do</a><a href="#results">Our results</a><a href="#faq">Common questions</a><a href="#cta">Start a project</a>
+          </div>
+          <div>
+            <h4>What we build</h4>
+            <div id="fSvc"></div>
+          </div>
+          <div>
+            <h4>Say hello</h4>
+            <div class="fcontact">
+              <a href="#">hello@profinitysolution.com</a>
+              <a href="#">+92 000 0000000</a>
+              <span>Add your address here</span>
+            </div>
+            <a href="#cta" class="btn" style="padding:.6rem 1.1rem;margin-top:1.1rem">Book a free audit</a>
+          </div>
+        </div>
+        <div class="fbar"><div class="in"><p>© 2026 Profinity Solutions. Built to keep working while you rest.</p><p>profinitysolution.com</p></div></div>
+      </div>
+    </div>
+  </section>
+</div>
 
 <script>
 (() => {
@@ -820,5 +839,28 @@
 
   // mobile menu toggle (simple scroll to services)
   $('.menu-toggle').addEventListener('click',()=>document.querySelector('#services').scrollIntoView());
+
+  // ---------- FLOWART FOOTER: rotate the footer panel up as it scrolls in ----------
+  // Mirrors the GSAP ScrollTrigger template: the CTA panel is pinned (CSS sticky)
+  // while this panel rotates from 30deg to 0 between "top at viewport bottom" and
+  // "top at 25% from the top", pivoting on its bottom-left corner.
+  const flowFoot = document.querySelector('.flow-foot');
+  const flowInner = $('#flowFootInner');
+  if (flowFoot && flowInner) {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      if (rm) { flowInner.style.transform = 'none'; return; }
+      const vh = window.innerHeight;
+      const top = flowFoot.getBoundingClientRect().top;
+      const start = vh, end = vh * 0.25;
+      let p = (start - top) / (start - end);
+      p = Math.max(0, Math.min(1, p));
+      flowInner.style.transform = 'rotate(' + (30 * (1 - p)) + 'deg)';
+    };
+    addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    addEventListener('resize', update);
+    update();
+  }
 })();
 </script>
