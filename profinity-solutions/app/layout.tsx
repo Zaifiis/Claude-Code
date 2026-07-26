@@ -3,7 +3,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { SITE_CONFIG } from '@/lib/site-config';
 import { Nav } from '@/components/ui/gradient-menu';
-import { FlowFooter } from '@/components/sections/flow-footer';
+import { SiteFooter } from '@/components/sections/site-footer';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -53,9 +53,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-base font-sans text-foreground antialiased">
         <Nav />
         <main>{children}</main>
-        {/* Footer built on the FlowArt scroll template: a pinned CTA panel that
-            the footer rotates up over as you reach the bottom of the page. */}
-        <FlowFooter />
+        {/* Home keeps the cinematic FlowArt footer; every other route gets a
+            compact static footer that only appears at the very end. */}
+        <SiteFooter />
       </body>
     </html>
   );
