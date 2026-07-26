@@ -23,6 +23,7 @@ export function ServicesBento() {
             icon={<Icon className="h-5 w-5" />}
             title={s.name}
             description={s.short}
+            href={`/services/${s.slug}`}
           />
         );
       })}

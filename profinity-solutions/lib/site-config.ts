@@ -9,11 +9,14 @@ import {
 } from 'lucide-react';
 
 export type Service = {
-  id: string;
+  id: string; // anchor id on the /services overview page (kept stable)
+  slug: string; // URL slug for the dedicated page: /services/<slug>
   icon: LucideIcon;
   name: string;
-  short: string; // the 2-sentence marketing copy
+  short: string; // the 1–2 sentence card / hero copy
   whatYouGet: string[]; // expanded bullets derived from the copy
+  overview: string[]; // 1–2 paragraphs for the dedicated page
+  howItWorks: { title: string; body: string }[]; // 3-step explainer
 };
 
 export type CaseMetric = {
@@ -104,80 +107,140 @@ export const NAV_LINKS = [
 export const SERVICES: Service[] = [
   {
     id: 'ai-automations',
+    slug: 'ai-automations',
     icon: Bot,
     name: 'AI Automations',
     short:
-      'Custom AI automation workflows that eliminate repetitive manual work across your business, from lead intake to order processing. Every workflow is built around your existing tools, so your team gets the speed of automation without disrupting how you already work.',
+      'We take the repetitive work off your team and wire it into the tools you already use, so the busywork just runs itself.',
     whatYouGet: [
       'Workflows mapped to your real processes, from lead intake to order processing',
       'Built around the tools you already use — no rip-and-replace',
       'Repetitive manual tasks removed so your team focuses on higher-value work',
       'Reliable, monitored automations that scale as you grow',
     ],
+    overview: [
+      'Most teams lose hours every week to work that never needed a human — copying data between tools, chasing follow-ups, nudging a lead from one stage to the next. We find that work, map it, and hand it to automations that run quietly in the background.',
+      'Everything is built around the tools you already run. Nothing gets ripped out, nobody has to learn a new system. The busywork just stops landing on your team’s desk.',
+    ],
+    howItWorks: [
+      { title: 'We map the work', body: 'We trace where the manual, repeatable work actually lives — intake, follow-up, data entry, handoffs.' },
+      { title: 'We wire it in', body: 'We connect your existing tools and build the workflow around them, so it fits how you already operate.' },
+      { title: 'It runs itself', body: 'Once it’s live we monitor and tune it, so the busywork keeps running without anyone watching over it.' },
+    ],
   },
   {
     id: 'ai-calling-agents',
+    slug: 'ai-calling-agents',
     icon: PhoneCall,
     name: 'AI Calling Agents',
     short:
-      'AI calling agents handle inbound and outbound calls around the clock, qualifying leads, booking appointments, and answering common questions in a natural voice. They never miss a call and hand off complex conversations to your team seamlessly.',
+      'A voice agent that answers every call day and night, qualifies the lead, books the appointment, and passes the tricky ones to a person.',
     whatYouGet: [
       'Inbound and outbound calls handled 24/7 in a natural voice',
       'Leads qualified and appointments booked automatically',
       'Common questions answered instantly, day or night',
       'Seamless handoff to your team for complex conversations',
     ],
+    overview: [
+      'Every missed call is a customer who called someone else. A voice agent answers on the first ring at 2pm or 2am, sounds natural, and actually gets things done — qualifying the caller, booking them in, and answering the questions you field a hundred times a week.',
+      'When a call needs a real person, it hands off cleanly with the full context, so nobody has to repeat themselves. Your team stops living on the phone and starts spending time where it counts.',
+    ],
+    howItWorks: [
+      { title: 'It picks up', body: 'Inbound or outbound, day or night, the agent answers in a natural voice — no hold music, no voicemail.' },
+      { title: 'It qualifies and books', body: 'It asks the right questions, qualifies the lead, and books straight into your calendar.' },
+      { title: 'It hands off', body: 'Anything complex goes to your team with the full conversation attached.' },
+    ],
   },
   {
     id: 'speed-to-lead-chatbots',
+    slug: 'instant-lead-response',
     icon: Zap,
-    name: 'Speed-to-Lead Chatbots',
+    name: 'Instant Lead Response',
     short:
-      'The moment a lead comes in, our chatbots respond in seconds instead of hours, qualifying them and routing hot leads straight to your sales team. Faster first response means higher conversion and fewer leads lost to competitors.',
+      'The second a lead lands they get a reply, get qualified on the spot, and the hot ones go straight to whoever closes.',
     whatYouGet: [
       'Instant first response — seconds, not hours',
       'Automatic lead qualification the moment they arrive',
       'Hot leads routed straight to your sales team',
       'Higher conversion and fewer leads lost to competitors',
     ],
+    overview: [
+      'Leads go cold fast, and the business that replies first usually wins. These days “first” means seconds, not hours. The moment someone fills in a form or sends a message, they get a real reply — not an autoresponder — and get qualified on the spot.',
+      'The hot ones are routed straight to whoever closes, already warmed up and with context attached. No lead sits in an inbox waiting for someone to notice it.',
+    ],
+    howItWorks: [
+      { title: 'It replies instantly', body: 'The second a lead arrives, they get a genuine first response — seconds, not hours.' },
+      { title: 'It qualifies on the spot', body: 'A few smart questions sort the serious buyers from the tyre-kickers automatically.' },
+      { title: 'It routes the hot ones', body: 'Qualified leads go straight to the right closer with everything they need to pick up the conversation.' },
+    ],
   },
   {
     id: 'ecommerce-ai-chat',
+    slug: 'ecommerce-chat-agents',
     icon: ShoppingCart,
-    name: 'E-commerce AI Chat Agents',
+    name: 'Ecommerce Chat Agents',
     short:
-      'AI chat agents live on your storefront, answering product questions, recommending items, and recovering abandoned carts in real time. They work 24/7 to turn browsers into buyers without adding headcount to support.',
+      'It answers product questions, nudges the sale along, and wins back abandoned carts in real time, all without a single new hire.',
     whatYouGet: [
       'Product questions answered in real time, right on your storefront',
       'Smart product recommendations that lift average order value',
       'Abandoned carts recovered automatically',
       'Round-the-clock support without adding headcount',
     ],
+    overview: [
+      'Shoppers have questions right when they’re about to buy — and if nobody answers, they leave. A chat agent lives on your storefront, answers product questions instantly, recommends the right item, and gently nudges the sale over the line.',
+      'It also catches the ones slipping away, stepping in to win back abandoned carts in real time. All of it runs around the clock without adding a single person to your support team.',
+    ],
+    howItWorks: [
+      { title: 'It answers instantly', body: 'Product questions, sizing, shipping, stock — answered the moment a shopper asks, right on the page.' },
+      { title: 'It nudges the sale', body: 'Smart recommendations and timely prompts move browsers toward checkout.' },
+      { title: 'It recovers carts', body: 'When someone’s about to leave, it steps in to bring the cart back — automatically.' },
+    ],
   },
   {
     id: 'content-automation',
+    slug: 'content-on-autopilot',
     icon: FileText,
-    name: 'Content Automation AI Agents',
+    name: 'Content on Autopilot',
     short:
-      'AI agents that research, draft, and schedule content across your blog and social channels, keeping your brand visible without your team spending hours writing. You review and approve — the agent handles the rest.',
+      'It researches, drafts, and schedules across your blog and socials. You give the nod, it does the rest, and your feed never goes quiet.',
     whatYouGet: [
       'Research, drafting, and scheduling handled end to end',
       'Consistent presence across your blog and social channels',
       'A review-and-approve step keeps you in full control',
       'Hours of writing time given back to your team',
     ],
+    overview: [
+      'Staying visible means publishing consistently, and consistency is exactly what busy teams drop first. An agent handles the grind — researching topics, drafting posts, and scheduling them across your blog and social channels.',
+      'You stay in control with a simple review-and-approve step. You give the nod, it does the rest, and your feed never goes quiet — without anyone burning an afternoon writing.',
+    ],
+    howItWorks: [
+      { title: 'It researches', body: 'The agent tracks what your audience cares about and lines up topics worth publishing.' },
+      { title: 'It drafts', body: 'It writes posts in your voice, ready for a quick review — not a blank page.' },
+      { title: 'You approve, it ships', body: 'One nod and it schedules everything across your blog and socials on cadence.' },
+    ],
   },
   {
     id: 'ai-web-development',
+    slug: 'ai-ready-websites',
     icon: Code2,
-    name: 'AI-Connected Web Development',
+    name: 'AI Ready Websites',
     short:
-      "Websites and web apps with AI tools wired directly into the backend, from smart forms to AI-assisted search and personalization. Your site doesn't just look modern, it works smarter.",
+      'Fast, modern sites with AI built into the back end. Smart forms, sharper search, and pages that adapt to whoever is looking.',
     whatYouGet: [
       'Modern, fast websites and web apps built to convert',
       'AI wired into the backend — smart forms, search, personalization',
       'Experiences tailored to each visitor',
       'A site that works smarter, not just looks the part',
+    ],
+    overview: [
+      'A modern site should do more than look good — it should work. We build fast, polished websites and web apps with AI wired into the back end, so the site actively helps you convert instead of just sitting there.',
+      'That means forms that qualify as people fill them in, search that actually understands what visitors mean, and pages that adapt to whoever is looking. It’s a site built to sell, not just to be seen.',
+    ],
+    howItWorks: [
+      { title: 'We design and build', body: 'A fast, modern site or web app built to convert, on a stack that’s easy to grow.' },
+      { title: 'We wire in the AI', body: 'Smart forms, AI-assisted search, and personalization built into the back end.' },
+      { title: 'It adapts and improves', body: 'Pages respond to each visitor, and we keep tuning for results after launch.' },
     ],
   },
 ];
@@ -209,7 +272,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     id: 'real-estate-routing',
     industry: 'Real estate — lead routing',
-    service: 'Speed-to-Lead Chatbot',
+    service: 'Instant Lead Response',
     result: 'New enquiries qualified in seconds and routed to the right agent instantly.',
     video: '', // TODO
     metric: {
@@ -223,7 +286,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     id: 'ecommerce-cart',
     industry: 'E-commerce brand — cart recovery',
-    service: 'E-commerce AI Chat Agent',
+    service: 'Ecommerce Chat Agent',
     result: 'Abandoned carts recovered in real time, turning browsers into buyers.',
     video: '', // TODO
     metric: {
@@ -395,7 +458,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
   },
   {
     id: 'realestate',
-    serviceName: 'Speed-to-Lead Chatbots',
+    serviceName: 'Instant Lead Response',
     title: 'Real estate lead routing',
     stats: [
       { value: '~2s', label: 'First Reply' },
@@ -405,7 +468,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
   },
   {
     id: 'ecommerce',
-    serviceName: 'E-commerce AI Chat Agents',
+    serviceName: 'Ecommerce Chat Agents',
     title: 'Storefront cart recovery',
     stats: [
       { value: '24/7', label: 'On the Store' },
@@ -425,7 +488,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
   },
   {
     id: 'content',
-    serviceName: 'Content Automation AI Agents',
+    serviceName: 'Content on Autopilot',
     title: 'Always-on content engine',
     stats: [
       { value: '5x', label: 'More Output' },
@@ -435,7 +498,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
   },
   {
     id: 'web',
-    serviceName: 'AI-Connected Web Development',
+    serviceName: 'AI Ready Websites',
     title: 'AI-powered storefront',
     stats: [
       { value: 'AI', label: 'Smart Search' },

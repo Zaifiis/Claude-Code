@@ -6,7 +6,7 @@ import { ServicesSubnav } from '@/components/sections/services-subnav';
 import { CtaBanner } from '@/components/sections/cta-banner';
 import { Reveal } from '@/components/reveal';
 import MovingDotCard from '@/components/ui/moving-dot-card';
-import { SERVICES, SITE_CONFIG } from '@/lib/site-config';
+import { SERVICES } from '@/lib/site-config';
 
 export const metadata: Metadata = {
   title: 'Services',
@@ -48,10 +48,10 @@ export default function ServicesPage() {
                     </h2>
                     <p className="mt-4 text-muted-foreground">{service.short}</p>
                     <Link
-                      href={SITE_CONFIG.primaryCta.href}
+                      href={`/services/${service.slug}`}
                       className="group mt-7 inline-flex items-center gap-2 rounded-full border border-border bg-muted px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-brand-blue/50"
                     >
-                      Talk to us about {service.name}
+                      Explore {service.name}
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </div>

@@ -104,7 +104,7 @@ export function Nav() {
                             return (
                               <Link
                                 key={s.id}
-                                href={`/services#${s.id}`}
+                                href={`/services/${s.slug}`}
                                 className="group/mega flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-muted"
                               >
                                 <span className="mt-0.5 flex-none rounded-lg border border-border bg-muted p-2 text-brand-light">
