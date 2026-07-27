@@ -1,21 +1,36 @@
 # Content OS portal — Apache/LiteSpeed config (Hostinger honours .htaccess).
+# Every directive is guarded so an unsupported one can't 500 the whole site.
 
 DirectoryIndex index.php
 
-# Never serve PHP includes, config or SQL directly.
-<FilesMatch "\.(sql)$">
-  Require all denied
+# Never serve config or SQL files directly.
+<FilesMatch "\.sql$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
 </FilesMatch>
 <Files "config.php">
-  Require all denied
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
 </Files>
 
-# Block the whole includes directory.
-RedirectMatch 403 ^/?.*/inc/.*$
+# Block direct access to the includes directory.
+<IfModule mod_alias.c>
+  RedirectMatch 403 ^/?.*/inc/.*$
+</IfModule>
 
-# Basic hardening.
-Options -Indexes
-ServerSignature Off
+<IfModule mod_autoindex.c>
+  Options -Indexes
+</IfModule>
 
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"
