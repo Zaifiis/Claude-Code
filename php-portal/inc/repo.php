@@ -79,7 +79,7 @@ function content_list(array $opts = []): array
     $order = $opts['order'] ?? 'updated_at DESC';
     $allowedOrder = [
         'updated_at DESC', 'created_at DESC', 'scheduled_at ASC', 'published_at DESC',
-        "FIELD(priority,'urgent','high','medium','low'), updated_at DESC",
+        PRIORITY_ORDER_SQL,
     ];
     if (!in_array($order, $allowedOrder, true)) {
         $order = 'updated_at DESC';
@@ -238,7 +238,7 @@ function set_content_tags(string $contentId, array $tagNames): void
 {
     db()->prepare('DELETE FROM content_tags WHERE content_id = ?')->execute([$contentId]);
     foreach ($tagNames as $name) {
-        db()->prepare('INSERT IGNORE INTO content_tags (content_id, tag_id) VALUES (?,?)')
+        db()->prepare(sql_insert_ignore() . ' INTO content_tags (content_id, tag_id) VALUES (?,?)')
             ->execute([$contentId, tag_id($name)]);
     }
 }
@@ -247,7 +247,7 @@ function set_reference_tags(string $refId, array $tagNames): void
 {
     db()->prepare('DELETE FROM reference_tags WHERE reference_id = ?')->execute([$refId]);
     foreach ($tagNames as $name) {
-        db()->prepare('INSERT IGNORE INTO reference_tags (reference_id, tag_id) VALUES (?,?)')
+        db()->prepare(sql_insert_ignore() . ' INTO reference_tags (reference_id, tag_id) VALUES (?,?)')
             ->execute([$refId, tag_id($name)]);
     }
 }

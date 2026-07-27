@@ -3,8 +3,8 @@
 
 DirectoryIndex index.php
 
-# Never serve config or SQL files directly.
-<FilesMatch "\.sql$">
+# Never serve config, SQL or database files directly.
+<FilesMatch "\.(sql|sqlite|sqlite3|db)$">
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>

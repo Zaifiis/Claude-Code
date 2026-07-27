@@ -2,32 +2,37 @@
 /**
  * Content OS — configuration.
  *
- * EDIT THE VALUES BELOW after you create a MySQL database in Hostinger hPanel
- * (Databases -> Management). On Hostinger shared hosting the host is almost
- * always "localhost". Everything else (schema creation, seeding, the login
- * account) happens automatically on first visit.
+ * DEFAULT: SQLite. You do NOT need to create any database, user or password.
+ * Just upload the files and open the site — a database file is created
+ * automatically inside the (protected) `data/` folder on first visit.
  *
- * You can also leave these as-is and instead set the matching environment
- * variables (DB_HOST, DB_NAME, DB_USER, DB_PASS) in hPanel — env values win.
+ * Only switch to MySQL if you specifically want to: set 'db_driver' => 'mysql'
+ * and fill in the MySQL section from hPanel -> Databases.
  */
 
 return [
-    // --- MySQL connection (from hPanel -> Databases) -----------------------
+    // --- Which engine to use: 'sqlite' (zero-setup) or 'mysql' --------------
+    'db_driver' => getenv('DB_DRIVER') ?: 'sqlite',
+
+    // --- SQLite (used when db_driver = sqlite) -----------------------------
+    // Where the database file lives. Default: a protected folder next to the
+    // app. Nothing to configure.
+    'sqlite_path' => getenv('SQLITE_PATH') ?: __DIR__ . '/data/content-os.sqlite',
+
+    // --- MySQL (only used when db_driver = mysql) --------------------------
     'db_host' => getenv('DB_HOST') ?: 'localhost',
-    'db_name' => getenv('DB_NAME') ?: 'u000000000_contentos',
-    'db_user' => getenv('DB_USER') ?: 'u000000000_contentos',
-    'db_pass' => getenv('DB_PASS') ?: 'CHANGE_ME',
+    'db_name' => getenv('DB_NAME') ?: '',
+    'db_user' => getenv('DB_USER') ?: '',
+    'db_pass' => getenv('DB_PASS') ?: '',
     'db_charset' => 'utf8mb4',
 
     // --- App ---------------------------------------------------------------
-    // Shown in the header and browser title.
     'app_name' => 'Content OS',
 
     // The login account is created automatically on first run with these
-    // credentials. CHANGE the password after your first login (Settings page),
-    // or change it here before first run. Email is just a label.
-    'owner_name'  => 'You',
-    'owner_email' => 'you@example.com',
+    // credentials. CHANGE the password after your first login (Settings page).
+    'owner_name'  => 'zaifiis',
+    'owner_email' => 'hyfa3647@gmail.com',
     'default_password' => 'changeme',
 
     // Set true temporarily if a blank page appears, to see the real error.

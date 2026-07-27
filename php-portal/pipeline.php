@@ -2,7 +2,7 @@
 require __DIR__ . '/inc/bootstrap.php';
 require_login();
 
-$all = content_list(['order' => "FIELD(priority,'urgent','high','medium','low'), updated_at DESC"]);
+$all = content_list(['order' => PRIORITY_ORDER_SQL]);
 $byStatus = array_fill_keys(STATUS_ORDER, []);
 foreach ($all as $it) {
     $byStatus[$it['status']][] = $it;

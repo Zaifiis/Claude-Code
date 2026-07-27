@@ -1,17 +1,26 @@
-# Content OS — PHP + MySQL portal
+# Content OS — PHP portal (zero-setup)
 
 A self-contained content-operations portal (dashboard, pipeline, ideas, scripts,
-calendar, reference library, analytics) that runs on **plain PHP + MySQL** — no
-Node.js, no build step, no command line. Built to run on **Hostinger shared
-hosting (Premium / Business / Cloud plans with hPanel)**.
+calendar, reference library, analytics) that runs on **plain PHP** — no Node.js,
+no build step, no command line. Built for **Hostinger shared hosting** (any plan
+with hPanel).
 
 > Why this exists: the sibling Next.js app needs a persistent Node.js server,
 > which Hostinger only offers on Business/Cloud plans. This PHP version runs on
-> the PHP + MySQL that **every** Hostinger web-hosting plan includes, including
-> Premium. Same features, different engine.
+> the PHP that **every** Hostinger web-hosting plan includes, including Premium.
 
-It has been tested end-to-end against MySQL/MariaDB: schema creation, seeding,
-login, content CRUD, status changes, metrics, and reference embedding all pass.
+## Just upload it — no database setup needed
+
+By default the app uses **SQLite**, a file-based database built into PHP. You do
+**not** create any database, user, password or prefix in hPanel. Upload the
+files, open the site, and it creates its database file automatically inside the
+(web-protected) `data/` folder and seeds starter content.
+
+Prefer MySQL? It's fully supported — see "Using MySQL instead" below.
+
+Tested end-to-end on **both** SQLite and MySQL/MariaDB: schema creation,
+seeding, login, content CRUD, status changes, metrics, and reference embedding
+all pass.
 
 ---
 
@@ -28,74 +37,78 @@ login, content CRUD, status changes, metrics, and reference embedding all pass.
 - **Full CRUD** on content and references, plus archive/restore/delete.
 - Auto-creating schema + realistic starter content on first run.
 
-Requirements: **PHP 8.1+** with `pdo_mysql` (Hostinger default) and a MySQL
-database. Nothing else.
+Requirements: **PHP 8.0+** with `pdo_sqlite` (Hostinger default — nothing to
+install). No database server needed in the default mode.
 
 ---
 
-## Deploy to Hostinger (hPanel) — ~5 minutes
+## Deploy to Hostinger (hPanel) — ~2 minutes, no database step
 
-### 1. Create a MySQL database
-hPanel → **Databases → Management**. Create a database and a user (hPanel shows
-them prefixed, e.g. `u123456789_contentos`). Note the **database name**, **user**
-and **password**. Assign the user to the database (All Privileges).
+### 1. Upload the files
+hPanel → **File Manager** → open **`public_html`** → **Upload** the zip →
+right-click it → **Extract**. (Extract into `public_html` for the whole domain,
+or into a subfolder like `public_html/content` — links auto-adjust.)
 
-### 2. Upload the files
-hPanel → **File Manager**. Upload the **contents of this `php-portal/` folder**
-into where you want the site to live:
-- whole site at your domain root → upload into `public_html/`
-- under a subfolder → e.g. `public_html/content/` (the app auto-detects the
-  subfolder, links still work).
-
-You can drag-and-drop the files, or upload a zip and **Extract** it in File
-Manager. (You don't need `preview-*.png` — those are just screenshots.)
-
-### 3. Enter your database details
-Edit **`config.php`** in File Manager and set:
-
-```php
-'db_host' => 'localhost',              // Hostinger: always localhost
-'db_name' => 'u123456789_contentos',   // from step 1
-'db_user' => 'u123456789_contentos',   // from step 1
-'db_pass' => 'your-db-password',       // from step 1
-```
-
-### 4. Open the site
-Visit your domain (or the subfolder URL). On the first visit the app creates all
-tables and seeds starter content automatically, then shows the login screen.
+### 2. Open the site
+Visit your domain. On the first visit the app creates its SQLite database file
+and seeds starter content automatically, then shows the login.
 
 - **Default password:** `changeme`
-- Sign in, go to **Settings**, and set a real password immediately.
+- Sign in → **Settings** → set a real password immediately.
+- Delete `_diag.php` and the uploaded `.zip` from `public_html` afterwards.
 
-That's it — no build, no terminal, no Node.
+That's the whole thing — **no database to create, no config to edit, no
+terminal, no Node.**
+
+> If you see "Storage folder not writable": in File Manager, right-click the
+> `data` folder → Permissions → set it to **755** (or 775). That's the only
+> thing SQLite can trip on.
+
+---
+
+## Using MySQL instead (optional)
+
+Only if you specifically want your data in MySQL (e.g. to browse it in
+phpMyAdmin):
+
+1. hPanel → **Databases → Management** → create a database + user. Copy the
+   **full** name and user (they include a `u123456789_` prefix) and the password.
+2. Edit **`config.php`**:
+   ```php
+   'db_driver' => 'mysql',
+   'db_host'   => 'localhost',
+   'db_name'   => 'u123456789_yourdb',   // full name incl. prefix
+   'db_user'   => 'u123456789_youruser', // full user incl. prefix
+   'db_pass'   => 'your-db-password',
+   ```
+3. Open the site — it creates the tables and seeds automatically.
 
 ---
 
 ## Notes
 
-- **Security:** `config.php`, the `inc/` folder and `.sql` files are blocked from
-  direct web access by the included `.htaccess` (honoured by Hostinger's
-  LiteSpeed). Forms are CSRF-protected and all output is escaped.
-- **Environment variables (optional):** instead of editing `config.php` you can
-  set `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS` in hPanel; those win over the
-  file values.
-- **Blank page after upload?** Temporarily set `APP_DEBUG=1` (env var) or
-  `'debug' => true` in `config.php` to see the real error — almost always a
-  database credential typo.
-- **Backups:** your data lives entirely in the MySQL database. Back it up from
-  hPanel → Databases → phpMyAdmin → Export.
+- **Diagnostics:** if anything fails, open **`/_diag.php`** — it prints the exact
+  cause (PHP version, storage/DB status) and how to fix it. Delete it after.
+- **Security:** the `data/` folder (SQLite file), `config.php`, `inc/`, and
+  `.sql`/`.sqlite` files are all blocked from direct web access by the included
+  `.htaccess` files. Forms are CSRF-protected and all output is escaped.
+- **Blank page?** Set `'debug' => true` in `config.php` to see the real error.
+- **Backups (SQLite):** download the file `data/content-os.sqlite` from File
+  Manager — that single file *is* your entire database.
+- **Backups (MySQL):** hPanel → Databases → phpMyAdmin → Export.
 
 ## File map
 
 ```
-config.php        ← the only file you edit
+config.php        Engine choice (SQLite default) — usually no edits needed
 index.php         Dashboard          pipeline.php   Kanban board
 inbox.php         Inbox              ideas.php      Ideas
 scripts.php       Scripts            calendar.php   Schedule
 references.php    Library + CRUD     analytics.php  Metrics
 content.php       Item detail        edit.php       Create / edit form
 search.php        Search             settings.php   Profile + password
-login.php logout.php                 .htaccess      Hardening
-inc/              bootstrap, db, schema.sql, seed, repo, constants, helpers, layout
+login.php logout.php                 _diag.php      Setup diagnostics (delete after)
+data/             SQLite database lives here (web-protected)
+inc/              bootstrap, db, schema.sqlite.sql, schema.sql, seed, repo, constants, helpers, layout
 assets/style.css  All styling (no framework, no build)
 ```

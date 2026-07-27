@@ -61,7 +61,7 @@ function seed_database(PDO $pdo, array $cfg): void
             $parsed['thumbnail_url'], $parsed['embed_url'], $r['notes'], $daysAgo(random_int(4, 40)),
         ]);
         foreach ($r['tags'] ?? [] as $t) {
-            $pdo->prepare('INSERT IGNORE INTO reference_tags (reference_id, tag_id) VALUES (?,?)')
+            $pdo->prepare(sql_insert_ignore() . ' INTO reference_tags (reference_id, tag_id) VALUES (?,?)')
                 ->execute([$id, $tag($t)]);
         }
         $refIdByUrl[$r['url']] = $id;
@@ -236,12 +236,12 @@ function seed_database(PDO $pdo, array $cfg): void
         ]);
 
         foreach ($it['tags'] ?? [] as $t) {
-            $pdo->prepare('INSERT IGNORE INTO content_tags (content_id, tag_id) VALUES (?,?)')
+            $pdo->prepare(sql_insert_ignore() . ' INTO content_tags (content_id, tag_id) VALUES (?,?)')
                 ->execute([$id, $tag($t)]);
         }
         foreach ($it['refs'] ?? [] as $url) {
             if (isset($refIdByUrl[$url])) {
-                $pdo->prepare('INSERT IGNORE INTO content_references (content_id, reference_id) VALUES (?,?)')
+                $pdo->prepare(sql_insert_ignore() . ' INTO content_references (content_id, reference_id) VALUES (?,?)')
                     ->execute([$id, $refIdByUrl[$url]]);
             }
         }

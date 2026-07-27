@@ -59,6 +59,9 @@ const STATUS_ORDER = [
 
 const PRIORITY_RANK = ['urgent' => 0, 'high' => 1, 'medium' => 2, 'low' => 3];
 
+/** Portable ORDER BY expression for priority (works in both SQLite and MySQL). */
+const PRIORITY_ORDER_SQL = "CASE priority WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END, updated_at DESC";
+
 /** Statuses considered "in production" for dashboard stats. */
 const IN_PRODUCTION_STATUSES = ['research', 'scripting', 'ready_to_record', 'recording', 'editing'];
 const READY_STATUSES = ['ready_to_post', 'scheduled'];

@@ -40,17 +40,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach ($fields as $f) {
             $vals[$f] = max(0, (int) ($_POST[$f] ?? 0));
         }
-        db()->prepare(
-            'INSERT INTO performance_metrics (content_id, views, likes, comments, shares, saves, leads, updated_at)
-             VALUES (:c,:views,:likes,:comments,:shares,:saves,:leads,:u)
-             ON DUPLICATE KEY UPDATE views=:views2, likes=:likes2, comments=:comments2, shares=:shares2, saves=:saves2, leads=:leads2, updated_at=:u2'
-        )->execute([
-            'c' => $id, 'u' => now_sql(), 'u2' => now_sql(),
-            'views' => $vals['views'], 'likes' => $vals['likes'], 'comments' => $vals['comments'],
-            'shares' => $vals['shares'], 'saves' => $vals['saves'], 'leads' => $vals['leads'],
-            'views2' => $vals['views'], 'likes2' => $vals['likes'], 'comments2' => $vals['comments'],
-            'shares2' => $vals['shares'], 'saves2' => $vals['saves'], 'leads2' => $vals['leads'],
-        ]);
+        // Portable upsert (works on both SQLite and MySQL): update if the row
+        // exists, otherwise insert.
+        $exists = db()->prepare('SELECT 1 FROM performance_metrics WHERE content_id = ?');
+        $exists->execute([$id]);
+        if ($exists->fetchColumn()) {
+            db()->prepare(
+                'UPDATE performance_metrics SET views=?, likes=?, comments=?, shares=?, saves=?, leads=?, updated_at=? WHERE content_id=?'
+            )->execute([$vals['views'], $vals['likes'], $vals['comments'], $vals['shares'], $vals['saves'], $vals['leads'], now_sql(), $id]);
+        } else {
+            db()->prepare(
+                'INSERT INTO performance_metrics (content_id, views, likes, comments, shares, saves, leads, updated_at)
+                 VALUES (?,?,?,?,?,?,?,?)'
+            )->execute([$id, $vals['views'], $vals['likes'], $vals['comments'], $vals['shares'], $vals['saves'], $vals['leads'], now_sql()]);
+        }
         flash('Metrics saved.');
     }
     redirect(base_url('content.php?id=' . urlencode($id)));
