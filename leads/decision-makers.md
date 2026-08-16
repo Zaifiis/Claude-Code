@@ -25,6 +25,24 @@ yourself — see "Getting the rest" at the bottom.
 | 50 | BlueVillas Collection | **Christos Gkekas** | Founder & CEO | 600+ villas across Mykonos, Santorini, Paros, Crete. Founded 2011 |
 | 31 | WeHost Dubai | **Chadi** (surname unconfirmed) | Principal | Only a first name is published — confirm surname on LinkedIn before using |
 
+## Additional Bali operators found via dorking
+
+Not in the original 50 — surfaced while searching for founder names, and they
+fit the ICP well enough to work. All are founder-led Bali property businesses
+with a hospitality or villa-management arm.
+
+| Company | Decision-maker | Role | Note |
+|---|---|---|---|
+| Kibarer Property | **Alban Kibarer** | Founder | 17+ years in Bali eco-luxury real estate and hospitality; owns a 30-villa eco-resort |
+| Alex Villas Group | **Alex Shtefan** | Founder | Bali developer, 150+ units built, Canggu-based. New builds = zero existing marketing assets |
+| Bali Realty | **Nathan Ryan** | Owner | Seminyak-area properties |
+| Seacrest Bali | **Vasily Pronin** | Founder | Bali real estate and property advisory |
+| Taman Bali Management | **Ari Wartini** | Founder | Also founder of Taman Bali Villa |
+| Casago Orlando | **Manuel & Alfonso** (surnames unconfirmed) | Franchise owners | Started as Orlando homeowners, grew into the franchise. Corporate: Steve Schwab founded Casago 2001, Joseph Riley President |
+
+Alex Shtefan is the sharpest angle of these: a developer with 150+ units built
+has a continuous pipeline of brand-new villas that have no video at all.
+
 ## Ownership changes — retier these
 
 Three leads are no longer owner-operated. They now sit behind procurement, which
