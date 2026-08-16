@@ -1,0 +1,502 @@
+<title>Villa Prospect Board</title>
+<style>
+/* ============ tokens ============ */
+:root{
+  --ground:#F4F7F7; --surface:#FFFFFF; --surface-2:#EAF0F0;
+  --line:#D3DFDF; --line-soft:#E4ECEC;
+  --ink:#10242A; --ink-2:#3D585F; --ink-3:#6D878D;
+  --accent:#0B6E6E; --accent-ink:#FFFFFF; --accent-soft:#DBEDEB;
+  --hot:#9C5A0B; --hot-soft:#F6E6D0;
+  --steady:#3F5D68; --steady-soft:#DEE8EB;
+  --wa:#187346; --wa-soft:#DAEDE2;
+  --mail:#28527F; --mail-soft:#DDE6F2;
+  --call:#63397E; --call-soft:#EADEF1;
+  --shadow:0 1px 2px rgba(16,36,42,.05), 0 10px 28px -20px rgba(16,36,42,.35);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0A1517; --surface:#0F1E21; --surface-2:#15272B;
+    --line:#243C3E; --line-soft:#1A3033;
+    --ink:#E7EFEF; --ink-2:#A8BFC2; --ink-3:#7A9498;
+    --accent:#4EBFB3; --accent-ink:#04201E; --accent-soft:#10312F;
+    --hot:#E0A253; --hot-soft:#3A2A14;
+    --steady:#9DB4BD; --steady-soft:#1E3238;
+    --wa:#5FC08C; --wa-soft:#12301F;
+    --mail:#7FAAE0; --mail-soft:#152840;
+    --call:#B991D6; --call-soft:#2A1C35;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -20px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0A1517; --surface:#0F1E21; --surface-2:#15272B;
+  --line:#243C3E; --line-soft:#1A3033;
+  --ink:#E7EFEF; --ink-2:#A8BFC2; --ink-3:#7A9498;
+  --accent:#4EBFB3; --accent-ink:#04201E; --accent-soft:#10312F;
+  --hot:#E0A253; --hot-soft:#3A2A14;
+  --steady:#9DB4BD; --steady-soft:#1E3238;
+  --wa:#5FC08C; --wa-soft:#12301F;
+  --mail:#7FAAE0; --mail-soft:#152840;
+  --call:#B991D6; --call-soft:#2A1C35;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -20px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--sans); font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px; margin:0 auto; padding:0 20px 80px}
+
+/* ============ masthead ============ */
+.mast{padding:52px 0 30px; border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:var(--mono); font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent); margin:0 0 14px;
+}
+h1{
+  font-family:var(--serif); font-weight:600; font-size:clamp(34px,5.2vw,52px);
+  line-height:1.05; margin:0 0 16px; text-wrap:balance; letter-spacing:-.01em;
+}
+.dek{
+  font-size:17px; color:var(--ink-2); max-width:62ch; margin:0;
+  line-height:1.6;
+}
+.dek strong{color:var(--ink); font-weight:600}
+
+/* ============ summary strip ============ */
+.stats{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px; background:var(--line); border:1px solid var(--line);
+  border-radius:12px; overflow:hidden; margin:28px 0 0;
+}
+.stat{background:var(--surface); padding:16px 18px}
+.stat .n{
+  font-family:var(--mono); font-size:26px; font-weight:600;
+  font-variant-numeric:tabular-nums; letter-spacing:-.02em; display:block;
+}
+.stat .l{
+  font-size:11.5px; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--ink-3); margin-top:3px; display:block;
+}
+
+/* ============ controls ============ */
+.controls{
+  position:sticky; top:0; z-index:20; background:var(--ground);
+  padding:20px 0 14px; margin-top:34px;
+  border-bottom:1px solid var(--line-soft);
+}
+.ctl-row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.ctl-row + .ctl-row{margin-top:11px}
+.srch{
+  flex:1 1 240px; min-width:200px; font-family:var(--sans); font-size:14px;
+  padding:9px 13px; border:1px solid var(--line); border-radius:8px;
+  background:var(--surface); color:var(--ink);
+}
+.srch::placeholder{color:var(--ink-3)}
+.srch:focus-visible{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent)}
+.lbl{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-3); margin-right:2px;
+}
+.chip{
+  font-family:var(--sans); font-size:13px; padding:6px 12px;
+  border:1px solid var(--line); border-radius:100px; background:var(--surface);
+  color:var(--ink-2); cursor:pointer; transition:background .12s,color .12s,border-color .12s;
+}
+.chip:hover{border-color:var(--accent); color:var(--ink)}
+.chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.chip[aria-pressed="true"]{
+  background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:500;
+}
+.count{
+  font-family:var(--mono); font-size:12px; color:var(--ink-3);
+  font-variant-numeric:tabular-nums; margin-left:auto;
+}
+
+/* ============ lead grid ============ */
+.grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr));
+  gap:14px; margin-top:22px;
+}
+.card{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:16px 17px 14px;
+  box-shadow:var(--shadow); display:flex; flex-direction:column; gap:10px;
+  border-left:3px solid var(--steady);
+}
+.card.t-A{border-left-color:var(--hot)}
+.card-top{display:flex; gap:10px; align-items:flex-start}
+.rank{
+  font-family:var(--mono); font-size:11px; color:var(--ink-3);
+  font-variant-numeric:tabular-nums; padding-top:3px; min-width:20px;
+}
+.co{
+  font-family:var(--serif); font-size:19px; font-weight:600; line-height:1.2;
+  margin:0; letter-spacing:-.005em; flex:1;
+}
+.tier{
+  font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.08em;
+  padding:3px 7px; border-radius:4px; white-space:nowrap; align-self:flex-start;
+  background:var(--steady-soft); color:var(--steady);
+}
+.tier.A{background:var(--hot-soft); color:var(--hot)}
+.meta{font-size:13px; color:var(--ink-2); margin:0}
+.meta .sep{color:var(--ink-3); padding:0 5px}
+.port{
+  font-family:var(--mono); font-size:11px; color:var(--ink); font-weight:600;
+}
+.contacts{display:flex; flex-direction:column; gap:5px; padding:9px 0; border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft)}
+.c-line{display:flex; align-items:center; gap:7px; font-size:12.5px; font-family:var(--mono); word-break:break-all}
+.c-line a{color:var(--accent); text-decoration:none; border-bottom:1px solid transparent}
+.c-line a:hover{border-bottom-color:var(--accent)}
+.c-line a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.c-tag{
+  font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:600;
+  padding:2px 5px; border-radius:3px; flex-shrink:0;
+}
+.c-tag.e{background:var(--mail-soft); color:var(--mail)}
+.c-tag.p{background:var(--wa-soft); color:var(--wa)}
+.c-tag.w{background:var(--surface-2); color:var(--ink-3)}
+.why{font-size:13px; color:var(--ink-2); margin:0; line-height:1.5}
+.card-foot{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:2px}
+.pill{
+  font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; font-weight:600;
+  padding:3px 8px; border-radius:100px;
+}
+.pill.wa{background:var(--wa-soft); color:var(--wa)}
+.pill.mail{background:var(--mail-soft); color:var(--mail)}
+.pill.call{background:var(--call-soft); color:var(--call)}
+.status{font-size:11px; color:var(--ink-3); margin-left:auto; text-align:right}
+.empty{
+  grid-column:1/-1; text-align:center; padding:50px 20px; color:var(--ink-3);
+  font-family:var(--serif); font-size:18px;
+}
+
+/* ============ prose sections ============ */
+.sec{margin-top:64px; padding-top:34px; border-top:1px solid var(--line)}
+.sec h2{
+  font-family:var(--serif); font-size:28px; font-weight:600; margin:0 0 8px;
+  letter-spacing:-.01em; text-wrap:balance;
+}
+.sec > p{max-width:66ch; color:var(--ink-2); margin:0 0 20px}
+.sec h3{
+  font-family:var(--mono); font-size:11px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--accent); margin:30px 0 10px; font-weight:600;
+}
+.icp{
+  background:var(--accent-soft); border-left:3px solid var(--accent);
+  padding:18px 22px; border-radius:0 var(--radius) var(--radius) 0; margin:0 0 24px;
+  font-family:var(--serif); font-size:19px; line-height:1.45; color:var(--ink);
+}
+.cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px}
+.box{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:15px 17px;
+}
+.box h4{
+  font-size:14px; margin:0 0 6px; font-weight:600; display:flex; gap:8px; align-items:baseline;
+}
+.box h4 .tag{font-family:var(--mono); font-size:10px; color:var(--ink-3); letter-spacing:.08em}
+.box p{margin:0; font-size:13px; color:var(--ink-2); line-height:1.5}
+.tblwrap{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:520px}
+th,td{padding:10px 14px; text-align:left; border-bottom:1px solid var(--line-soft); vertical-align:top}
+th{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:600; background:var(--surface-2);
+}
+tr:last-child td{border-bottom:none}
+td.num{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--ink-2)}
+.script{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px 19px; font-size:14px; line-height:1.6; color:var(--ink-2);
+}
+.script p{margin:0 0 11px}
+.script p:last-child{margin-bottom:0}
+.script .sub{
+  font-family:var(--mono); font-size:12px; color:var(--ink); background:var(--surface-2);
+  padding:6px 9px; border-radius:5px; display:inline-block; margin-bottom:12px;
+}
+.script em{color:var(--accent); font-style:normal; font-weight:600}
+.note{
+  font-size:13px; color:var(--ink-2); background:var(--surface-2);
+  border-radius:var(--radius); padding:15px 18px; margin-top:22px; line-height:1.55;
+}
+.note strong{color:var(--ink)}
+ul.tight{margin:0; padding-left:19px; color:var(--ink-2); font-size:13.5px}
+ul.tight li{margin-bottom:6px}
+ul.tight li::marker{color:var(--accent)}
+footer{
+  margin-top:60px; padding-top:22px; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--ink-3); line-height:1.6;
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important}
+}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Prospecting worksheet · 50 targets</p>
+  <h1>Villa Prospect Board</h1>
+  <p class="dek">Fifty vacation-rental and villa management companies that already own professional photography, sell on visual appeal, and are small enough that <strong>the founder answers the message</strong>. Built for a remote AI walkthrough service at $150 a video.</p>
+
+  <div class="stats" id="stats"></div>
+</header>
+
+<section class="controls">
+  <div class="ctl-row">
+    <input class="srch" id="q" type="search" placeholder="Search company, city, or angle…" aria-label="Search leads">
+    <span class="count" id="count"></span>
+  </div>
+  <div class="ctl-row">
+    <span class="lbl">Market</span>
+    <span id="mkt"></span>
+  </div>
+  <div class="ctl-row">
+    <span class="lbl">Channel</span>
+    <span id="chan"></span>
+    <span class="lbl" style="margin-left:14px">Tier</span>
+    <span id="tier"></span>
+  </div>
+</section>
+
+<div class="grid" id="grid"></div>
+
+<section class="sec">
+  <h2>Who you are actually selling to</h2>
+  <div class="icp">Owner-operated vacation-rental and villa management companies, 15&ndash;150 properties, in visually-driven leisure destinations &mdash; where the founder still personally approves marketing spend.</div>
+
+  <h3>Why this profile holds together</h3>
+  <div class="cols">
+    <div class="box"><h4>They own your raw material</h4><p>Every managed villa already has a professional photo set. You need no new assets &mdash; the job starts the moment they say yes.</p></div>
+    <div class="box"><h4>The pain repeats</h4><p>Every property they onboard needs marketing assets. That turns a one-time sale into a per-property retainer.</p></div>
+    <div class="box"><h4>The owner is the buyer</h4><p>At this size there is no marketing department. The founder reads the WhatsApp and decides the same day.</p></div>
+    <div class="box"><h4>$150 is under the thinking threshold</h4><p>For a firm billing 20&ndash;30% on dozens of properties, this is a line item, not a capital decision.</p></div>
+    <div class="box"><h4>They already believe in video</h4><p>They are measured on booking conversion. You are not educating them on why video matters &mdash; only on why yours is cheap.</p></div>
+    <div class="box"><h4>They are reachable</h4><p>Every contact here is a business line the company publishes itself, for the express purpose of being contacted.</p></div>
+  </div>
+
+  <h3>Who to leave alone</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Segment</th><th>Why skip it</th></tr></thead>
+      <tbody>
+        <tr><td>Solo hosts (1&ndash;3 listings)</td><td>One-time $150 purchase. Acquisition cost exceeds lifetime value &mdash; and reaching them means scraping personal data, which is the wrong game to be in.</td></tr>
+        <tr><td>Vacasa, Sonder, Awaze, Evolve</td><td>Procurement, legal review, vendor onboarding. Your price point does not survive a vendor-onboarding form.</td></tr>
+        <tr><td>Long-term residential managers</td><td>No video budget. Their listings rent themselves.</td></tr>
+        <tr><td>Hotels and resorts</td><td>Brand guidelines, agency of record, existing content contract. Wrong door.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec">
+  <h2>Why these markets, in this order</h2>
+  <p>Ranked on villa density, whether the owner is directly reachable, USD-equivalent budget, how content-driven bookings are, and channel friction from Pakistan.</p>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Rank</th><th>Market</th><th>The case for it</th><th>Channel</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td><strong>Bali</strong></td><td>The densest concentration of small owner-run villa managers anywhere. Bookings are Instagram-led, so video is understood as revenue. Rates quoted in USD. Three hours ahead of you.</td><td class="num">WhatsApp</td></tr>
+        <tr><td class="num">2</td><td><strong>Dubai</strong></td><td>Huge licensed holiday-homes sector, savage competition on listing quality, highest budgets in this tier. AED is USD-pegged. One hour ahead of you.</td><td class="num">WhatsApp</td></tr>
+        <tr><td class="num">3</td><td><strong>Thailand</strong></td><td>Bali dynamics with larger portfolios per firm. Inter Property Phuket alone runs 500+ properties.</td><td class="num">Email &rarr; call</td></tr>
+        <tr><td class="num">4</td><td><strong>US Sunbelt</strong></td><td>Biggest absolute budgets &mdash; where $150 looks cheapest. But email-first, more gatekeeping, 10&ndash;12h gap. Your high-value tier, not your volume tier.</td><td class="num">Email</td></tr>
+        <tr><td class="num">5</td><td><strong>Europe / AU</strong></td><td>Real budgets, but GDPR and the Spam Act mean sender identity and a working opt-out are mandatory. Slower, more formal.</td><td class="num">Email</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><strong>Split your first 50 sends</strong> roughly 60% Bali + Thailand + Dubai (fast cash, WhatsApp, no deliverability risk), 30% US (higher ticket, slower), 10% Europe and Australia (compliance overhead, best margins).</div>
+</section>
+
+<section class="sec">
+  <h2>What to actually send</h2>
+
+  <h3>WhatsApp &mdash; Bali, Thailand, Dubai</h3>
+  <div class="script">
+    <p>Hi [Name] &mdash; I saw [Villa Name] on your site, beautiful property.</p>
+    <p>I turn villa photos into 30-second walkthrough videos for Airbnb and Instagram. No filming, no visit &mdash; I just use the photos you already have. Around $150 per villa.</p>
+    <p><em>I made one from your listing photos so you can judge it. Want me to send it?</em></p>
+  </div>
+  <div class="note">Under 60 words, and no attachment on message one &mdash; attachments trigger blocks. Asking permission to send converts better than dumping a link, and it will not get you reported.</div>
+
+  <h3>Email &mdash; US, Europe, Australia</h3>
+  <div class="script">
+    <p class="sub">Subject: [Villa Name] &mdash; 30-second walkthrough, no filming needed</p>
+    <p>Hi [Name],</p>
+    <p>I made a short walkthrough video from the photos already on your [Villa Name] listing &mdash; no shoot, no site visit. It is 28 seconds: [link]</p>
+    <p>If it is useful, I can do the rest of your portfolio at $150 per property.</p>
+    <p>If not, tell me and I will not follow up.</p>
+    <p>[Your name] &mdash; [company], [city]<br>Reply STOP to opt out.</p>
+  </div>
+  <div class="note">Those last two lines are not optional in the EU, UK or Australia. They also lift reply rates, because a visible exit signals a real business.</div>
+
+  <h3>The part that matters more than the list</h3>
+  <div class="note"><strong>Build the sample before you send.</strong> You have Runway and Kling, and their photos are public on their own websites. A 30-second video built from <em>their</em> villa converts at a completely different rate than any description of what you could do. Do this for the first ten leads before you touch the other forty. At $150 a unit your bottleneck is not lead volume &mdash; it is proof.</div>
+</section>
+
+<section class="sec">
+  <h2>First ninety days</h2>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Days</th><th>Phase</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1&ndash;7</td><td><strong>Proof</strong></td><td>Pick ten Tier A Bali leads. Build a free walkthrough for each from their public photos.</td></tr>
+        <tr><td class="num">8&ndash;21</td><td><strong>First revenue</strong></td><td>Send all ten by WhatsApp. Expect 3&ndash;5 replies, 1&ndash;2 paying. Price the first two at $99 to buy testimonials.</td></tr>
+        <tr><td class="num">22&ndash;45</td><td><strong>Volume</strong></td><td>Work leads 1&ndash;36 across Bali, Thailand and Dubai. You now have samples and testimonials.</td></tr>
+        <tr><td class="num">46&ndash;75</td><td><strong>Ticket size</strong></td><td>Move to US leads 37&ndash;48 with a portfolio behind you. Same product, quote $250&ndash;400 &mdash; that market supports it.</td></tr>
+        <tr><td class="num">76&ndash;90</td><td><strong>Retainers</strong></td><td>Return to anyone who bought once: <em>every new villa you take on, we do the walkthrough, $150, 48-hour turnaround.</em> This is where the business actually is.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><strong>Do not stay at $150.</strong> Use the cheap price to buy proof in Bali, then charge US rates for identical work. The same video that is an impulse buy in Canggu is a $400 line item in Destin.</div>
+</section>
+
+<section class="sec">
+  <h2>Before your first send</h2>
+  <p>Every contact here is a business address the company publishes on its own site. No personal data of private individuals was collected. But the details were read from search results rather than the live pages, so treat this as a verified-target list with unverified contact strings.</p>
+  <ul class="tight">
+    <li>Open each site and confirm the email or phone still matches. The <em>status</em> line on each card tells you what was published.</li>
+    <li>For cards marked <em>site only</em>, pull the address from their contact page &mdash; about twenty of them.</li>
+    <li>Find the founder's name on the About page or LinkedIn. A named greeting roughly doubles reply rates over "Hi there".</li>
+    <li>Run emails through a verifier before any bulk send. One bounce-heavy send can permanently damage your sending domain.</li>
+    <li>Send from a separate domain to your main one. Warm it two to three weeks, then cap at 30&ndash;40 per inbox per day.</li>
+  </ul>
+  <div class="note">Roughly ninety minutes of verification for all fifty. Do not skip it &mdash; it is the difference between a working list and a burned domain.</div>
+</section>
+
+<footer>
+  Contact details sourced from public search results, August 2026. Portfolio sizes are stated by the companies themselves where published, otherwise estimated from their listed service areas. Tier A marks leads with both published contact details and clear buying power; Tier B are verified targets needing a contact lookup.
+</footer>
+
+</div>
+
+<script>
+const L=[
+{n:1,co:"Villa Management Bali",t:"A",m:"Bali",c:"Indonesia",r:"Canggu · Seminyak · Uluwatu · Sanur",p:"Mid",e:"contact@villa-management-bali.com",ph:"+62 813 3733 4871",ch:"wa",s:"Email + WhatsApp published",w:"Balinese-founded owner-operated firm across seven villa zones. The owner answers the WhatsApp."},
+{n:2,co:"Bali Villa Manager",t:"A",m:"Bali",c:"Indonesia",r:"Kerobokan · Umalas · Seminyak",p:"Mid",e:"info@balivillamanager.com",ph:"+62 821 1159 8787",ch:"wa",s:"Email + phone published",w:"Named villas already carry pro photo sets — ideal Runway input. Published office address, real operation."},
+{n:3,co:"Nagisa Bali Group",t:"A",m:"Bali",c:"Indonesia",r:"Seminyak · Canggu · Ubud · Jimbaran",p:"Large",e:"info@nagisa-bali.com",ph:"+62 361 490 165",ch:"mail",s:"Email + phone + address published",w:"Sells villa management AND marketing — content is already a budgeted line. Multi-industry group, repeat orders."},
+{n:4,co:"BaliSuperHost",t:"A",m:"Bali",c:"Indonesia",r:"Ubud · Canggu · Seminyak · Uluwatu",p:"569 villas",e:"",ph:"",ch:"wa",s:"HQ address published — pull email from site",w:"569 villas managed. Largest single volume target here. Five percent of portfolio is 28 videos."},
+{n:5,co:"Bali Familia Villa Management",t:"A",m:"Bali",c:"Indonesia",r:"Uluwatu · Bali-wide",p:"Small–Mid",e:"",ph:"+62 822 3074 2545",ch:"wa",s:"Phone published",w:"Small owner-run daily-rental manager. No procurement, fast yes. Ideal first-three-clients target."},
+{n:6,co:"Optimum Bali",t:"A",m:"Bali",c:"Indonesia",r:"Seminyak · Canggu · Umalas · Ubud",p:"Large",e:"",ph:"",ch:"wa",s:"Site only — pull contact",w:"Trading since 2009, island-wide. Runs rentals AND sales, so a walkthrough sells for both — doubles your value prop."},
+{n:7,co:"House of Reservations",t:"A",m:"Bali",c:"Indonesia",r:"Seminyak · Canggu · Ubud · Nusa Dua",p:"Large",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"Markets its villas as photoshoot locations — already sells visual content. The warmest possible angle for a video pitch."},
+{n:8,co:"Orivista",t:"A",m:"Bali",c:"Indonesia",r:"Seminyak · Canggu · Ubud · Uluwatu",p:"52 villas",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"52 luxury villas, stated publicly. Publishes a market blog — a marketing-aware buyer who understands content ROI."},
+{n:9,co:"Betterplace Bali",t:"A",m:"Bali",c:"Indonesia",r:"Canggu · Uluwatu · Ubud · Sanur",p:"Mid–Large",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"Runs an active content blog, so they already invest in marketing. Six zones including Berawa and Pererenan."},
+{n:10,co:"Balid Villa Management",t:"A",m:"Bali",c:"Indonesia",r:"Uluwatu · Jimbaran · Pecatu",p:"Small–Mid",e:"",ph:"",ch:"wa",s:"Site only — pull contact",w:"Focused on the Bukit, Bali's fastest-growing luxury zone. New builds constantly need launch content."},
+{n:11,co:"Bali Home Immo",t:"A",m:"Bali",c:"Indonesia",r:"Pererenan · Canggu · Bali-wide",p:"Mid–Large",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"Management AND construction — brand-new villas with zero marketing assets. The single best trigger for a video order."},
+{n:12,co:"Triang Villas",t:"A",m:"Bali",c:"Indonesia",r:"Berawa · Pererenan · Canggu",p:"Mid",e:"",ph:"",ch:"wa",s:"Site only — pull contact",w:"Rental plus sales in Bali's hottest zones. Sales listings need walkthroughs even more than rentals do."},
+{n:13,co:"My Villa Management",t:"B",m:"Bali",c:"Indonesia",r:"Umalas · Canggu",p:"Small–Mid",e:"",ph:"",ch:"wa",s:"Address published — pull contact",w:"Umalas boutique operator. Small enough that the owner reads every message that arrives."},
+{n:14,co:"VPM Bali",t:"B",m:"Bali",c:"Indonesia",r:"Bali-wide",p:"Mid",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"Pure-play property management. Content is the obvious gap in their owner-acquisition pitch."},
+{n:15,co:"Bali Coconut Living",t:"B",m:"Bali",c:"Indonesia",r:"Umalas · Canggu",p:"Mid",e:"",ph:"",ch:"wa",s:"Site only — pull contact",w:"Long-term plus villa management. Long-stay listings convert hard on video — an under-served niche for you."},
+{n:16,co:"Secluded Bali Villas",t:"B",m:"Bali",c:"Indonesia",r:"Bali-wide",p:"Small–Mid",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"The whole brand promise is 'secluded' — inherently visual, and it needs video to land."},
+{n:17,co:"Balitecture",t:"B",m:"Bali",c:"Indonesia",r:"Canggu · Uluwatu",p:"Small–Mid",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"Architecture firm that also manages. Architects already sell renders — AI walkthroughs are a natural upsell."},
+{n:18,co:"Bali Luxury Villas",t:"B",m:"Bali",c:"Indonesia",r:"Seminyak · Umalas",p:"Large · since 1999",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"Operating since 1999 with 71+ Seminyak villas listed. Deep legacy photo library ready to convert."},
+{n:19,co:"Gajah Bali Villas",t:"B",m:"Bali",c:"Indonesia",r:"Bali-wide",p:"Small–Mid",e:"",ph:"",ch:"mail",s:"Contact page published — pull details",w:"Boutique villa collection. Small portfolio means one owner decision and a fast answer."},
+{n:20,co:"Inter Property Phuket",t:"A",m:"Thailand",c:"Thailand",r:"Phuket · Koh Samui",p:"500+ properties",e:"info@interpropertyphuket.com",ph:"+66 64 589 7990",ch:"mail",s:"Email + phone + two offices published",w:"500+ properties across seven countries. Runs a guaranteed-income program, so they are measured on booking performance."},
+{n:21,co:"Mr Property Siam",t:"A",m:"Thailand",c:"Thailand",r:"Koh Samui · Bophut",p:"Mid",e:"",ph:"",ch:"wa",s:"Contact page published — pull details",w:"Offers free owner consultations — actively courting new owners, so it needs pitch assets right now."},
+{n:22,co:"Horizon Homes Samui",t:"A",m:"Thailand",c:"Thailand",r:"Koh Samui",p:"Mid–Large",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"One of the oldest managers on Samui, trading since 2010. Established portfolio, stable budget."},
+{n:23,co:"Estate Samui Properties",t:"B",m:"Thailand",c:"Thailand",r:"Koh Samui",p:"Mid",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"Explicitly sells villa marketing and booking management — video slots into an existing service line."},
+{n:24,co:"SP Villa Management",t:"B",m:"Thailand",c:"Thailand",r:"Koh Samui",p:"Small–Mid",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"French-language operation on Samui. Boutique, owner-run, quick decisions."},
+{n:25,co:"LUXE Samui",t:"B",m:"Thailand",c:"Thailand",r:"Koh Samui",p:"Mid",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"Luxury positioning with a dedicated guest-experience team. High content standards, willing to pay for quality."},
+{n:26,co:"Siam Luxury Villas",t:"B",m:"Thailand",c:"Thailand",r:"Phuket · Koh Samui",p:"Mid",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"Rentals and real estate across two islands. Every video you make has a dual use case."},
+{n:27,co:"Property Management Phuket",t:"B",m:"Thailand",c:"Thailand",r:"Phuket · Koh Samui",p:"Mid",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"Positions around enhancing real estate value — a walkthrough is a direct, provable add to that pitch."},
+{n:28,co:"Thailand Retreats",t:"B",m:"Thailand",c:"Thailand",r:"Phuket · Samui · Krabi",p:"Large",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"ABTA member with a large multi-island luxury portfolio. Bigger ticket, longer cycle — worth one email."},
+{n:29,co:"Deluxe Holiday Homes",t:"A",m:"Dubai",c:"UAE",r:"Dubai",p:"Large",e:"",ph:"+971 4 392 0202",ch:"call",s:"Phone published — email on site",w:"One of Dubai's largest licensed holiday-home operators. This market competes on listing quality and the budgets are real."},
+{n:30,co:"Elite LUX Holiday Homes",t:"A",m:"Dubai",c:"UAE",r:"Dubai",p:"Mid–Large",e:"info@eliteluxhomes.ae",ph:"+971 4 818 2300",ch:"mail",s:"Email + phone published",w:"Direct info@ published. The Elite/LUX positioning means they must look premium in every listing — an easy sell."},
+{n:31,co:"WeHost Dubai",t:"A",m:"Dubai",c:"UAE",r:"Dubai",p:"Mid",e:"info@wehostdubai.com",ph:"+971 52 107 3481",ch:"wa",s:"Email + mobile published",w:"Mobile number published, so WhatsApp-reachable. Mid-size, founder-led, no procurement layer."},
+{n:32,co:"Welhome",t:"A",m:"Dubai",c:"UAE",r:"Dubai",p:"Mid–Large",e:"",ph:"+971 56 110 6007",ch:"wa",s:"WhatsApp published",w:"WhatsApp published outright. Fast-growing Dubai manager — exactly the owner-picks-up-the-phone profile."},
+{n:33,co:"MyStay Rental",t:"B",m:"Dubai",c:"UAE",r:"Dubai",p:"Mid",e:"",ph:"+971 56 935 7070",ch:"wa",s:"Mobile published",w:"Luxury and monthly rentals. Longer stays are sold on lifestyle imagery — the walkthrough is the natural format."},
+{n:34,co:"Frank Porter",t:"B",m:"Dubai",c:"UAE",r:"Dubai · Barsha Heights",p:"Large",e:"",ph:"",ch:"mail",s:"Office address published — contact page on site",w:"Well-funded Airbnb manager. Bigger ticket, and they have a marketing lead to route you to."},
+{n:35,co:"Suiteable",t:"B",m:"Dubai",c:"UAE",r:"Dubai",p:"Small–Mid",e:"",ph:"",ch:"mail",s:"Site only — pull contact",w:"Newer boutique operator — the hungriest tier, most likely to try a cheap high-impact content test."},
+{n:36,co:"DAIFY Holiday Homes",t:"B",m:"Dubai",c:"UAE",r:"Dubai",p:"Small–Mid",e:"",ph:"",ch:"wa",s:"Site only — pull contact",w:"Self-describes as a nominated top Dubai agency — reputation-conscious, invests in presentation."},
+{n:37,co:"360 Blue",t:"A",m:"USA",c:"USA",r:"30A · Destin, Florida",p:"Large",e:"management@360blue.com",ph:"+1 850-598-8360",ch:"mail",s:"Direct department email + phone published",w:"management@ is a routed inbox, not a generic form. Emerald Coast luxury — the highest per-video budget on this list."},
+{n:38,co:"Ocean Reef Resorts",t:"A",m:"USA",c:"USA",r:"Seacrest Beach · 30A, Florida",p:"Large",e:"Todd@OceanReefResorts.com",ph:"+1 850-837-3935",ch:"mail",s:"Named personal email + phone published",w:"A named individual's work email, published on their own site. The highest-quality direct line in this entire list."},
+{n:39,co:"Sea Breeze Management",t:"A",m:"USA",c:"USA",r:"Santa Rosa Beach, Florida",p:"Mid",e:"gordon.tarver@seabreeze-fl.com",ph:"+1 850-534-0024",ch:"mail",s:"Named personal email + phone published",w:"Named decision-maker's direct work email. Mid-size, so he personally signs off on marketing spend."},
+{n:40,co:"Southern Resorts",t:"A",m:"USA",c:"USA",r:"Destin, Florida",p:"Large",e:"stay@southernresorts.com",ph:"+1 800-737-2322",ch:"mail",s:"Email + toll-free published",w:"Large Destin operator with a high-volume portfolio and a strong marketing budget behind it."},
+{n:41,co:"Cabins of the Smoky Mountains",t:"A",m:"USA",c:"USA",r:"Gatlinburg · Pigeon Forge, TN",p:"200+ cabins",e:"",ph:"+1 866-347-6659",ch:"call",s:"Toll-free published",w:"Largest cabin agency in the Smokies. Runs a dedicated owner-acquisition page — content is how they win owners."},
+{n:42,co:"Bliss Vacations",t:"B",m:"USA",c:"USA",r:"Gatlinburg, TN",p:"Mid",e:"",ph:"+1 865-900-6514",ch:"call",s:"Phone published",w:"Owner-operated Gatlinburg manager, small enough for a direct owner conversation."},
+{n:43,co:"Elk Springs Resort",t:"B",m:"USA",c:"USA",r:"Gatlinburg, TN",p:"Mid–Large",e:"",ph:"+1 865-233-2390",ch:"call",s:"Phone published",w:"Premium cabin resort. Luxury cabins sell on interiors, which is exactly what the walkthrough format shows."},
+{n:44,co:"Stony Brook Cabins",t:"B",m:"USA",c:"USA",r:"Gatlinburg, TN",p:"Mid",e:"",ph:"+1 800-633-5652",ch:"call",s:"Named contact + extension published",w:"A named contact handles cabin-owner relations — the exact person who commissions owner-facing marketing."},
+{n:45,co:"Casago Orlando",t:"A",m:"USA",c:"USA",r:"Kissimmee · Orlando, Florida",p:"Large",e:"",ph:"+1 407-777-2224",ch:"call",s:"Phone + address published",w:"Franchise-model manager beside Disney. High listing turnover means a recurring video need."},
+{n:46,co:"Wonder Vacation Homes",t:"A",m:"USA",c:"USA",r:"Kissimmee · Orlando, Florida",p:"Mid–Large",e:"",ph:"+1 321-284-9858",ch:"wa",s:"Phone + WhatsApp published",w:"Publishes a WhatsApp number — rare for a US operator, and a far warmer channel than cold email."},
+{n:47,co:"Florida Vacation Homes",t:"B",m:"USA",c:"USA",r:"Kissimmee, Florida",p:"Mid",e:"reservations@solararesortflorida.com",ph:"+1 407-641-2695",ch:"mail",s:"Email + phone published",w:"Resort-community rentals near Disney. Standardised homes mean you can template the style and scale fast."},
+{n:48,co:"Hi-Desert Dwellings",t:"B",m:"USA",c:"USA",r:"Joshua Tree, California",p:"Small–Mid",e:"hddinquiry@gmail.com",ph:"",ch:"mail",s:"Email published",w:"A Gmail inbox means a tiny owner-run shop where the founder reads everything. Joshua Tree is the most design-forward STR market in the US."},
+{n:49,co:"A Perfect Stay · Byron Bay",t:"A",m:"Australia",c:"Australia",r:"Byron Bay, NSW",p:"Large",e:"pm@aperfectstay.com.au",ph:"+61 2 6684 7728",ch:"mail",s:"Department email + phone + address published",w:"Byron's leading luxury holiday-let agency. AUD budgets are strong and the market is entirely Instagram-driven."},
+{n:50,co:"BlueVillas Collection",t:"A",m:"Greece",c:"Greece",r:"Santorini · Mykonos",p:"Large",e:"info@bluevillascollection.com",ph:"+30 210 483 6802",ch:"mail",s:"Email + two lines + address published",w:"Luxury Greek island villas — the most visually saleable product category there is. A separate reservations line shows real scale."}
+];
+
+const CH={wa:"WhatsApp",mail:"Email",call:"Call first"};
+let fM="all", fC="all", fT="all", fQ="";
+
+const el=i=>document.getElementById(i);
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+/* summary strip */
+(function(){
+  const withE=L.filter(x=>x.e).length;
+  const withP=L.filter(x=>x.ph).length;
+  const wa=L.filter(x=>x.ch==="wa").length;
+  const a=L.filter(x=>x.t==="A").length;
+  el("stats").innerHTML=[
+    [L.length,"Targets"],[a,"Tier A"],[withE,"Direct email"],
+    [withP,"Direct phone"],[wa,"WhatsApp-first"],[6,"Markets"]
+  ].map(([n,l])=>`<div class="stat"><span class="n">${n}</span><span class="l">${l}</span></div>`).join("");
+})();
+
+/* filter chips */
+function chips(host,opts,get,set){
+  el(host).innerHTML=opts.map(o=>
+    `<button class="chip" data-v="${o[0]}" aria-pressed="${get()===o[0]}">${o[1]}</button>`
+  ).join(" ");
+  el(host).addEventListener("click",e=>{
+    const b=e.target.closest(".chip"); if(!b) return;
+    set(b.dataset.v); render();
+    [...el(host).children].forEach(c=>c.setAttribute("aria-pressed",c.dataset.v===get()));
+  });
+}
+const markets=["Bali","Dubai","Thailand","USA","Australia","Greece"];
+chips("mkt",[["all","All"],...markets.map(m=>[m,m])],()=>fM,v=>fM=v);
+chips("chan",[["all","Any"],["wa","WhatsApp"],["mail","Email"],["call","Call"]],()=>fC,v=>fC=v);
+chips("tier",[["all","All"],["A","A"],["B","B"]],()=>fT,v=>fT=v);
+
+el("q").addEventListener("input",e=>{fQ=e.target.value.toLowerCase().trim(); render();});
+
+function card(x){
+  const wa=x.ph?x.ph.replace(/[^0-9]/g,""):"";
+  const lines=[];
+  if(x.e) lines.push(`<div class="c-line"><span class="c-tag e">mail</span><a href="mailto:${x.e}">${esc(x.e)}</a></div>`);
+  if(x.ph) lines.push(`<div class="c-line"><span class="c-tag p">${x.ch==="wa"?"wa":"tel"}</span><a href="${x.ch==="wa"?`https://wa.me/${wa}`:`tel:+${wa}`}" target="_blank" rel="noopener">${esc(x.ph)}</a></div>`);
+  if(!lines.length) lines.push(`<div class="c-line"><span class="c-tag w">todo</span><span style="color:var(--ink-3)">Pull contact from their site</span></div>`);
+  return `<article class="card t-${x.t}">
+    <div class="card-top">
+      <span class="rank">${String(x.n).padStart(2,"0")}</span>
+      <h3 class="co">${esc(x.co)}</h3>
+      <span class="tier ${x.t}">TIER ${x.t}</span>
+    </div>
+    <p class="meta">${esc(x.r)}<span class="sep">·</span><span class="port">${esc(x.p)}</span></p>
+    <div class="contacts">${lines.join("")}</div>
+    <p class="why">${esc(x.w)}</p>
+    <div class="card-foot">
+      <span class="pill ${x.ch}">${CH[x.ch]}</span>
+      <span class="status">${esc(x.s)}</span>
+    </div>
+  </article>`;
+}
+
+function render(){
+  const out=L.filter(x=>
+    (fM==="all"||x.m===fM) && (fC==="all"||x.ch===fC) && (fT==="all"||x.t===fT) &&
+    (!fQ || (x.co+" "+x.r+" "+x.w+" "+x.c).toLowerCase().includes(fQ))
+  );
+  el("grid").innerHTML = out.length
+    ? out.map(card).join("")
+    : `<p class="empty">No leads match those filters.</p>`;
+  el("count").textContent=`${out.length} of ${L.length} shown`;
+}
+render();
+</script>
