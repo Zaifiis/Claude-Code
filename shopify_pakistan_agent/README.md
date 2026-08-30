@@ -11,12 +11,14 @@ config, `outputs/` for results, optional cron/Task Scheduler wiring.
 
 ## How it works
 
-1. **Discover candidates.** If you set `SERPAPI_KEY` in `.env`, it runs a
-   handful of search queries (`"Powered by Shopify" Pakistan`, `site:myshopify.com
-   Pakistan`, per-niche variants) through SerpAPI — a paid search API, used
-   instead of scraping Google's results page directly, which violates
-   Google's ToS and gets you blocked fast. Without a key, it falls back to
-   whatever domains you've added to `seed_domains.csv`.
+1. **Discover candidates.** By default it runs a handful of search queries
+   (`"Powered by Shopify" Pakistan`, `site:myshopify.com Pakistan`,
+   per-niche variants) through [`ddgs`](https://pypi.org/project/ddgs/) —
+   free, MIT-licensed, no API key or signup, searches DuckDuckGo. If you set
+   `SERPAPI_KEY` in `.env` it uses SerpAPI instead (paid, but can be more
+   reliable at higher volume). Either way, it never scrapes Google's results
+   page directly — that violates Google's ToS and gets you blocked fast. If
+   neither is available it falls back to whatever's in `seed_domains.csv`.
 2. **Verify, live, per domain.** For every candidate it fetches the actual
    homepage and checks for real Shopify signatures (`cdn.shopify.com`,
    `Shopify.theme`, etc.) before doing anything else. Nothing in the output
@@ -38,13 +40,17 @@ config, `outputs/` for results, optional cron/Task Scheduler wiring.
 
 ```bash
 cd shopify_pakistan_agent
-cp .env.example .env      # fill in SERPAPI_KEY and/or email settings
+cp .env.example .env      # optional — only needed for SerpAPI or email
 pip install -r requirements.txt
 python agent.py --limit 5 # test small first
 ```
 
-- `SERPAPI_KEY` — optional. Free tier at https://serpapi.com/manage-api-key.
-  Without it, only `seed_domains.csv` is checked.
+Nothing in `.env` is required to get started — `ddgs` (installed via
+`requirements.txt`) needs no key and works out of the box.
+
+- `SERPAPI_KEY` — optional paid upgrade over the default free `ddgs`
+  search, at https://serpapi.com/manage-api-key. Only worth it if `ddgs`
+  gets rate-limited or you want higher-volume/more reliable search.
 - `seed_domains.csv` — add domains you've found manually (Instagram/Facebook
   bios, your own Google searches). The agent verifies each one live, so it's
   fine to add guesses — unverified ones are simply dropped, never reported

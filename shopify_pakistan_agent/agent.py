@@ -35,6 +35,11 @@ from urllib.parse import urlparse
 import requests
 from dotenv import load_dotenv
 
+try:
+    from ddgs import DDGS  # free, no API key — pip install ddgs
+except ImportError:
+    DDGS = None
+
 # ── Config ──────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).parent
 load_dotenv(BASE_DIR / ".env")
@@ -92,9 +97,12 @@ SHOPIFY_SIGNATURES = ["cdn.shopify.com", "shopify.theme", "myshopify.com", "shop
 
 # ── Discovery ────────────────────────────────────────────────────────────────
 def search_candidates() -> list[str]:
-    """Return candidate root domains from SerpAPI search (if configured) plus
-    anything in seed_domains.csv. Nothing here is asserted as a real Shopify
-    store yet — that's verified per-domain in verify_and_scrape()."""
+    """Return candidate root domains from a live web search plus anything in
+    seed_domains.csv. Nothing here is asserted as a real Shopify store yet —
+    that's verified per-domain in verify_and_scrape().
+
+    Uses SerpAPI if you've set SERPAPI_KEY (paid, but often more reliable at
+    volume). Otherwise falls back to ddgs — free, no API key, no signup."""
     domains = set()
 
     if SERPAPI_KEY:
@@ -112,8 +120,19 @@ def search_candidates() -> list[str]:
                         domains.add(root_domain(link))
             except requests.RequestException as e:
                 print(f"[agent] SerpAPI query failed ({query!r}): {e}")
+    elif DDGS is not None:
+        for query in SEARCH_QUERIES:
+            try:
+                for result in DDGS().text(query, max_results=20, region="pk-en"):
+                    link = result.get("href")
+                    if link:
+                        domains.add(root_domain(link))
+            except Exception as e:
+                print(f"[agent] ddgs query failed ({query!r}): {e}")
+            time.sleep(REQUEST_DELAY_SECONDS)
     else:
-        print("[agent] No SERPAPI_KEY set — skipping live search, using seed_domains.csv only.")
+        print("[agent] No search method available — install ddgs (pip install ddgs) or set "
+              "SERPAPI_KEY. Falling back to seed_domains.csv only.")
 
     if SEED_FILE.exists():
         with open(SEED_FILE, newline="", encoding="utf-8") as f:
