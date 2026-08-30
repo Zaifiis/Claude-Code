@@ -33,3 +33,111 @@ walkeaze.com,high confidence — /collections/footwear is classic shopify path. 
 bbabysuleman.com,high confidence — shopify-style /pages/ urls. cosmetics manufacturer w/ Dubai+China offices -- larger end of "medium", judge for fit
 tsmco.com.pk,unconfirmed platform, medium confidence. footwear brand, whatsapp only 10am-8pm
 kraftstore.shop,unconfirmed platform, low confidence. handcrafted furniture brand -- search gave inconsistent domain spellings (kraft.store vs kraftstore.shop) and inconsistent email spelling too -- verify by hand before using
+#
+# Below: ~97 domains pasted in by the user from a store-directory export
+# (looks like storeleads.app or similar -- flag/revenue/spend/product-count
+# columns). None of these were individually researched or confidence-rated
+# the way the ones above were -- they're straight off the directory, so the
+# agent verifying them live (Shopify signatures + real contact info) is
+# doing real work here, not just double-checking. Dropped one row with a
+# 🔞 emoji prefix (betproexchs.com) as out of scope -- reads as a betting
+# exchange, not an ecommerce store to pitch a WhatsApp chat agent to.
+pakola.com.pk,from user-pasted directory export 2026-08-30, unverified
+buyzilla.pk,from user-pasted directory export 2026-08-30, unverified
+shaistajewelry.com,from user-pasted directory export 2026-08-30, unverified
+ilhamperfumes.com,from user-pasted directory export 2026-08-30, unverified
+romastore.pk,from user-pasted directory export 2026-08-30, unverified
+musataha.com,from user-pasted directory export 2026-08-30, unverified
+esmabyittehad.com,from user-pasted directory export 2026-08-30, unverified
+daisyoutfit.com,from user-pasted directory export 2026-08-30, unverified
+tasweer.com.pk,from user-pasted directory export 2026-08-30, unverified
+ausman.pk,from user-pasted directory export 2026-08-30, unverified
+voguealaska.pk,from user-pasted directory export 2026-08-30, unverified
+nisastore.com.pk,from user-pasted directory export 2026-08-30, unverified
+trendsters.pk,from user-pasted directory export 2026-08-30, unverified
+gracehome.com.pk,from user-pasted directory export 2026-08-30, unverified
+daaralhikmah.com,from user-pasted directory export 2026-08-30, unverified
+urbanzar.pk,from user-pasted directory export 2026-08-30, unverified
+portray.pk,from user-pasted directory export 2026-08-30, unverified
+lavishofficials.com,from user-pasted directory export 2026-08-30, unverified
+warsafabric.pk,from user-pasted directory export 2026-08-30, unverified
+nowhere.com.pk,from user-pasted directory export 2026-08-30, unverified
+zafi.pk,from user-pasted directory export 2026-08-30, unverified
+aizalstudio.pk,from user-pasted directory export 2026-08-30, unverified
+bagsheaven.pk,from user-pasted directory export 2026-08-30, unverified
+sijaleesh.com,from user-pasted directory export 2026-08-30, unverified
+thredoo.pk,from user-pasted directory export 2026-08-30, unverified
+catchofficial.com,from user-pasted directory export 2026-08-30, unverified
+royalattire.com.pk,from user-pasted directory export 2026-08-30, unverified
+noira.pk,from user-pasted directory export 2026-08-30, unverified
+fashionwala.pk,from user-pasted directory export 2026-08-30, unverified
+amyra.pk,from user-pasted directory export 2026-08-30, unverified
+hiop.pk,from user-pasted directory export 2026-08-30, unverified
+smartvisuals.pk,from user-pasted directory export 2026-08-30, unverified
+shopnewera.pk,from user-pasted directory export 2026-08-30, unverified
+stitchingstories.pk,from user-pasted directory export 2026-08-30, unverified
+2good.pk,from user-pasted directory export 2026-08-30, unverified
+mleoscollection.pk,from user-pasted directory export 2026-08-30, unverified
+akfashop.pk,from user-pasted directory export 2026-08-30, unverified
+kundanco.uk,from user-pasted directory export 2026-08-30, unverified -- .uk tld, verify it actually serves/targets Pakistan
+carave.pk,from user-pasted directory export 2026-08-30, unverified
+dmestore.pk,from user-pasted directory export 2026-08-30, unverified
+kakacostumes.com,from user-pasted directory export 2026-08-30, unverified
+herbista.pk,from user-pasted directory export 2026-08-30, unverified
+zarment.pk,from user-pasted directory export 2026-08-30, unverified
+ayeshastore.pk,from user-pasted directory export 2026-08-30, unverified
+vaultx.pk,from user-pasted directory export 2026-08-30, unverified
+casecity.pk,from user-pasted directory export 2026-08-30, unverified
+bellaparis.com,from user-pasted directory export 2026-08-30, unverified
+zynaofficial.com,from user-pasted directory export 2026-08-30, unverified
+stora.pk,from user-pasted directory export 2026-08-30, unverified -- flagged US in the export, verify it's actually Pakistan-relevant
+cmsportsltd.com,from user-pasted directory export 2026-08-30, unverified
+payal.pk,from user-pasted directory export 2026-08-30, unverified
+biovance.pk,from user-pasted directory export 2026-08-30, unverified
+aawears.pk,from user-pasted directory export 2026-08-30, unverified
+nasirgarments.com,from user-pasted directory export 2026-08-30, unverified
+spikeya.pk,from user-pasted directory export 2026-08-30, unverified
+angan.pk,from user-pasted directory export 2026-08-30, unverified
+herbalheritage.com.pk,from user-pasted directory export 2026-08-30, unverified
+hameeds.pk,from user-pasted directory export 2026-08-30, unverified
+rgorganics.com,from user-pasted directory export 2026-08-30, unverified
+topwear.pk,from user-pasted directory export 2026-08-30, unverified
+pansaronline.com,from user-pasted directory export 2026-08-30, unverified
+sasta.com.pk,from user-pasted directory export 2026-08-30, unverified
+mythic.pk,from user-pasted directory export 2026-08-30, unverified
+readnwrite.org,from user-pasted directory export 2026-08-30, unverified -- .org tld, verify it's actually a store and not a blog/nonprofit
+itszara.pk,from user-pasted directory export 2026-08-30, unverified
+shopppit.com,from user-pasted directory export 2026-08-30, unverified
+siora.pk,from user-pasted directory export 2026-08-30, unverified
+virsanaturals.pk,from user-pasted directory export 2026-08-30, unverified
+switchtech.com.pk,from user-pasted directory export 2026-08-30, unverified
+amazingmall.pk,from user-pasted directory export 2026-08-30, unverified
+zaaviya.pk,from user-pasted directory export 2026-08-30, unverified
+sachigold.com,from user-pasted directory export 2026-08-30, unverified
+warsakimportedcollection.pk,from user-pasted directory export 2026-08-30, unverified -- flagged MX in the export, verify it's actually Pakistan-relevant
+eleganteve.pk,from user-pasted directory export 2026-08-30, unverified
+artandcart.pk,from user-pasted directory export 2026-08-30, unverified
+vapedistrict.pk,from user-pasted directory export 2026-08-30, unverified -- age-restricted product category (vaping), factor that into outreach if it matters for you
+hafabrics.com.pk,from user-pasted directory export 2026-08-30, unverified
+purus.com.pk,from user-pasted directory export 2026-08-30, unverified -- flagged AE in the export, verify it's actually Pakistan-relevant
+technopolymers.com.pk,from user-pasted directory export 2026-08-30, unverified
+abeez.pk,from user-pasted directory export 2026-08-30, unverified
+haseens.pk,from user-pasted directory export 2026-08-30, unverified
+blisscare.pk,from user-pasted directory export 2026-08-30, unverified
+daneen.store,from user-pasted directory export 2026-08-30, unverified
+onlinebazaar.pk,from user-pasted directory export 2026-08-30, unverified
+masin.pk,from user-pasted directory export 2026-08-30, unverified
+iksignatures.pk,from user-pasted directory export 2026-08-30, unverified
+decorvibe.com.pk,from user-pasted directory export 2026-08-30, unverified
+rsbeautyshop.pk,from user-pasted directory export 2026-08-30, unverified
+eleganxa.pk,from user-pasted directory export 2026-08-30, unverified
+nazaradecor.pk,from user-pasted directory export 2026-08-30, unverified
+lyallpurscrubs.pk,from user-pasted directory export 2026-08-30, unverified
+capelite.pk,from user-pasted directory export 2026-08-30, unverified
+aneelas.pk,from user-pasted directory export 2026-08-30, unverified
+sscollections.pk,from user-pasted directory export 2026-08-30, unverified
+kumari.pk,from user-pasted directory export 2026-08-30, unverified
+lahorimall.pk,from user-pasted directory export 2026-08-30, unverified
+desirefashion.com.pk,from user-pasted directory export 2026-08-30, unverified
+nextry.pk,from user-pasted directory export 2026-08-30, unverified
+mentastic.pk,from user-pasted directory export 2026-08-30, unverified
