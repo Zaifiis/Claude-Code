@@ -1,35 +1,56 @@
 # Shopify Pakistan Leads Agent
 
-Finds Shopify stores in Pakistan, verifies each one live, and pulls whatever
-contact info (email, WhatsApp number, phone) the store has published on its
-own site. Built for prospecting an AI chatbot product (WhatsApp + website,
-late-night chat coverage) — the CSV it produces is a lead list to review
-and reach out to yourself, not an auto-outreach bot.
+Finds **small/local** Shopify stores in Pakistan, verifies each one live, and
+pulls whatever contact info (email, WhatsApp number, phone) the store has
+published on its own site. Built for prospecting an AI chatbot product
+(WhatsApp + website, late-night chat coverage) — the CSV it produces is a
+lead list to review and reach out to yourself, not an auto-outreach bot.
 
 Same pattern as `../linkedin_agent`: a standalone Python script, `.env` for
 config, `outputs/` for results, optional cron/Task Scheduler wiring.
 
+## ICP — who this is (and isn't) trying to find
+
+The target is a small or home-based Pakistani Shopify store: a one- or
+few-person operation, likely already taking orders over WhatsApp DMs,
+without a dedicated support team — the business that actually feels "nobody
+answers customers after 10pm" and can decide to buy on a cold DM without a
+procurement process.
+
+It deliberately excludes national retail chains (Khaadi, Sapphire,
+Outfitters, Limelight, etc., hardcoded in `agent.py`'s
+`ENTERPRISE_BLOCKLIST`) — they usually already run a call center, several
+aren't even on Shopify despite what "top Shopify stores in Pakistan"
+listicles claim (Khaadi and Sapphire both turned out to be Salesforce
+Commerce Cloud on inspection), and they're a slower, worse-fit sale for a
+lean AI WhatsApp agent. Edit that set in `agent.py` if your product
+actually does target bigger accounts.
+
 ## How it works
 
-1. **Discover candidates.** By default it runs a handful of search queries
-   (`"Powered by Shopify" Pakistan`, `site:myshopify.com Pakistan`,
-   per-niche variants) through [`ddgs`](https://pypi.org/project/ddgs/) —
-   free, MIT-licensed, no API key or signup, searches DuckDuckGo. If you set
-   `SERPAPI_KEY` in `.env` it uses SerpAPI instead (paid, but can be more
-   reliable at higher volume). Either way, it never scrapes Google's results
-   page directly — that violates Google's ToS and gets you blocked fast. If
-   neither is available it falls back to whatever's in `seed_domains.csv`.
-2. **Verify, live, per domain.** For every candidate it fetches the actual
-   homepage and checks for real Shopify signatures (`cdn.shopify.com`,
-   `Shopify.theme`, etc.) before doing anything else. Nothing in the output
-   is guessed — a domain only makes it into the CSV if the agent just
-   confirmed it's a Shopify store.
+1. **Discover candidates.** By default it runs a handful of small-business /
+   home-based / boutique / WhatsApp-ordering search queries (see
+   `SEARCH_QUERIES` in `agent.py`) through [`ddgs`](https://pypi.org/project/ddgs/)
+   — free, MIT-licensed, no API key or signup, searches DuckDuckGo. If you
+   set `SERPAPI_KEY` in `.env` it uses SerpAPI instead (paid, but can be
+   more reliable at higher volume). Either way, it never scrapes Google's
+   results page directly — that violates Google's ToS and gets you blocked
+   fast. If neither is available it falls back to whatever's in
+   `seed_domains.csv`. National chains are filtered out before any
+   verification happens.
+2. **Verify, live, per domain.** For every remaining candidate it fetches
+   the actual homepage and checks for real Shopify signatures
+   (`cdn.shopify.com`, `Shopify.theme`, etc.) before doing anything else.
+   Nothing in the output is guessed — a domain only makes it into the CSV
+   if the agent just confirmed it's a Shopify store.
 3. **Scrape published contact info.** For confirmed stores it checks a few
    likely pages (home, `/pages/contact`, `/pages/contact-us`,
    `/policies/contact-information`, `/pages/about-us`) and pulls out an
    email, a WhatsApp number (`wa.me/...` links — a strong signal since
-   you're selling WhatsApp chat), and a Pakistani phone number if present.
-4. **Save a CSV** to `outputs/leads_<date>.csv`, and emails it to you if
+   you're selling WhatsApp chat, *and* the clearest ICP-fit signal there
+   is), and a Pakistani phone number if present.
+4. **Save a CSV** to `outputs/leads_<date>.csv`, sorted so stores with a
+   WhatsApp ordering link come first, and emails it to you if
    `GMAIL_USER`/`GMAIL_APP_PASSWORD`/`NOTIFY_EMAIL` are set in `.env`.
 5. **Optionally draft an opener** (`--draft-messages`) using the local
    `claude` CLI (no API key needed, same trick as `linkedin_agent`) — one

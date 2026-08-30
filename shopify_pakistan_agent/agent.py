@@ -62,16 +62,24 @@ OUTPUTS_DIR.mkdir(exist_ok=True)
 
 TODAY = datetime.date.today()
 
+# ICP = small/local Pakistani Shopify stores, not national retail chains.
+# A chain like Khaadi or Outfitters already has a call center and a support
+# budget line item; a one-person boutique running orders through WhatsApp
+# DMs is exactly who feels the "nobody's answering at 11pm" pain and can
+# actually decide to buy on a cold DM. So queries below lean on
+# small-business / home-based / boutique / WhatsApp-ordering language
+# instead of "top" or "best" (which mostly surfaces the big chains).
 SEARCH_QUERIES = [
-    '"Powered by Shopify" Pakistan online store',
+    '"order on whatsapp" Pakistan shopify online store',
+    "Pakistan home based business online store shopify",
+    "Pakistan small business boutique shopify online store",
+    "Pakistan handmade jewelry shopify online store",
+    "Pakistan candles soap skincare small business shopify store",
+    "Pakistan thrift resell shopify online store",
+    "Pakistan bakery home bakers shopify online store",
+    "Pakistan abaya hijab modest wear small brand shopify store",
     "site:myshopify.com Pakistan",
-    "Pakistan clothing brand shopify online store",
-    "Pakistan beauty cosmetics shopify online store",
-    "Pakistan jewelry shopify online store",
-    "Pakistan footwear shoes shopify online store",
-    "Pakistan home decor shopify online store",
-    "Pakistan electronics gadgets shopify online store",
-    "Karachi Lahore Islamabad online store shopify",
+    "Karachi Lahore Islamabad small business online store shopify",
 ]
 
 DOMAIN_BLOCKLIST = {
@@ -79,6 +87,19 @@ DOMAIN_BLOCKLIST = {
     "linkedin.com", "pinterest.com", "tiktok.com", "wikipedia.org",
     "shopify.com", "apps.shopify.com", "help.shopify.com", "themes.shopify.com",
     "google.com", "amazon.com", "reddit.com", "quora.com", "trustpilot.com",
+}
+
+# Large national/enterprise retail chains — usually have their own support
+# team already (poor ICP fit for a cheap AI WhatsApp agent), and several of
+# them (Khaadi, Sapphire) aren't even on Shopify despite what "top Shopify
+# stores in Pakistan" listicles claim. Skipped outright so a run doesn't
+# burn requests/output slots on them. Remove any of these if you disagree
+# with the call for your product.
+ENTERPRISE_BLOCKLIST = {
+    "khaadi.com", "sapphireonline.pk", "outfitters.com.pk", "limelight.pk",
+    "gulahmedshop.com", "junaidjamshed.com", "alkaramstudio.com",
+    "nishatlinen.com", "breakout.com.pk", "bonanzasatrangi.com",
+    "chenone.com", "generation.com.pk", "khaddi.pk",
 }
 
 EMAIL_NOISE_DOMAINS = {
@@ -142,6 +163,7 @@ def search_candidates() -> list[str]:
                     domains.add(root_domain(d))
 
     domains -= DOMAIN_BLOCKLIST
+    domains -= ENTERPRISE_BLOCKLIST
     return sorted(domains)
 
 
@@ -266,6 +288,10 @@ CSV_FIELDS = ["store_name", "domain", "email", "whatsapp", "phone", "has_whatsap
 
 
 def save_csv(leads: list[dict]) -> Path:
+    # Best ICP signal first: a store already running orders through
+    # WhatsApp is the clearest sign it'll get the pitch immediately.
+    leads = sorted(leads, key=lambda lead: not lead.get("has_whatsapp_widget"))
+
     filename = OUTPUTS_DIR / f"leads_{TODAY.isoformat()}.csv"
     with open(filename, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)

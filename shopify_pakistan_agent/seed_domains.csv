@@ -12,13 +12,10 @@ domain,note
 #     each one yourself before adding it here — don't trust an LLM's list
 #     of company names/domains without checking.
 #
-# Below: candidates researched via web search on 2026-08-30 (see
-# outputs/leads_manual_2026-08-30.csv for what was found about each). Not
-# fetched live at research time — the agent will verify them for real the
-# next time it runs. Two well-known "Pakistan Shopify store" listicle
-# entries, khaadi.com and sapphireonline.pk, were checked and are actually
-# on Salesforce Commerce Cloud, not Shopify — left out on purpose.
-limelight.pk,high confidence — myshopify.com staging subdomain seen
-outfitters.com.pk,high confidence — shopify-style /pages/ urls
-asimjofa.com,medium-high confidence — shopify-style /pages/ urls
-elo.shopping,medium confidence — reported as top PK shopify store, not directly verified
+# Note: national chains (Khaadi, Sapphire, Outfitters, Limelight, etc.) are
+# deliberately NOT seeded here even when confirmed Shopify — they're a poor
+# ICP fit for a cheap AI WhatsApp agent (already have their own support
+# teams) and are hardcoded into agent.py's ENTERPRISE_BLOCKLIST so the
+# agent skips them automatically. Add small/local/home-based store domains
+# here instead — see the "how to find candidates" list above.
+elo.shopping,medium confidence — reported as top PK shopify store, not directly verified. mid-size, not a huge national chain — judgement call, remove if you disagree
