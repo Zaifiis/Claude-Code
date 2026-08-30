@@ -26,3 +26,10 @@ domain,note
 elo.shopping,medium confidence — reported as top PK shopify store, not directly verified. mid-size, not a huge national chain — judgement call, remove if you disagree
 zumorrud.com,high confidence — search confirms "Shopify website". small jewelry brand, strong ICP fit
 suraiya.pk,high confidence — search confirms "operating on Shopify". small modest-wear brand, strong ICP fit
+insignia.com.pk,confirmed shopify per search. medium-size shoes/bags/fragrance chain, Lahore, multiple stores
+allurebeauty.pk,high confidence — shopify-style /pages/ urls. medium multi-brand cosmetics retailer, Karachi
+cosmeticcandy.pk,confirmed shopify-based per search. medium multi-brand makeup retailer
+walkeaze.com,high confidence — /collections/footwear is classic shopify path. medium footwear/bags brand
+bbabysuleman.com,high confidence — shopify-style /pages/ urls. cosmetics manufacturer w/ Dubai+China offices -- larger end of "medium", judge for fit
+tsmco.com.pk,unconfirmed platform, medium confidence. footwear brand, whatsapp only 10am-8pm
+kraftstore.shop,unconfirmed platform, low confidence. handcrafted furniture brand -- search gave inconsistent domain spellings (kraft.store vs kraftstore.shop) and inconsistent email spelling too -- verify by hand before using
