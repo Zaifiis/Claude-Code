@@ -1,0 +1,357 @@
+{
+  "name": "Shopify Pakistan Leads (n8n)",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "id": "8f000001-0000-4000-8000-000000000001",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "REPLACE_WITH_YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Domains"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [220, 0],
+      "id": "8f000001-0000-4000-8000-000000000002",
+      "name": "Read Domains Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Same ICP filter as shopify_pakistan_agent/agent.py's ENTERPRISE_BLOCKLIST --\n// national chains that already have their own support team are a poor fit\n// for a cheap AI WhatsApp agent, so they're dropped before any request is\n// even made. Also normalizes domains (strips protocol/www/path) and dedupes.\nconst ENTERPRISE_BLOCKLIST = new Set([\n  'khaadi.com', 'sapphireonline.pk', 'outfitters.com.pk', 'limelight.pk',\n  'gulahmedshop.com', 'junaidjamshed.com', 'alkaramstudio.com',\n  'nishatlinen.com', 'breakout.com.pk', 'bonanzasatrangi.com',\n  'chenone.com', 'generation.com.pk', 'khaddi.pk',\n]);\n\nfunction rootDomain(input) {\n  let d = String(input || '').trim().toLowerCase();\n  d = d.replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\n  return d;\n}\n\nconst seen = new Set();\nconst out = [];\nfor (const item of $input.all()) {\n  const domain = rootDomain(item.json.domain);\n  if (!domain || domain.startsWith('#')) continue;\n  if (ENTERPRISE_BLOCKLIST.has(domain)) continue;\n  if (seen.has(domain)) continue;\n  seen.add(domain);\n  out.push({ json: { domain } });\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "id": "8f000001-0000-4000-8000-000000000003",
+      "name": "Filter Blocklist"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [660, 0],
+      "id": "8f000001-0000-4000-8000-000000000004",
+      "name": "Loop Domains"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [880, 220],
+      "id": "8f000001-0000-4000-8000-000000000005",
+      "name": "Run Complete"
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $('Loop Domains').item.json.domain }}/robots.txt",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "ShopifyPakistanLeadsBot/1.0 (n8n workflow; contact: REPLACE_WITH_YOUR_EMAIL)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, -80],
+      "id": "8f000001-0000-4000-8000-000000000006",
+      "name": "Fetch robots.txt",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Best-effort robots.txt check -- no npm robots-parser package available\n// in a stock n8n Code node, so this is a small hand-rolled parser: find the\n// \"User-agent: *\" block and check for a bare \"Disallow: /\". Same fallback\n// behavior as agent.py's verify_and_scrape(): if robots.txt is missing or\n// unreachable, default to allowed (most sites don't ship one at all).\nconst domain = $('Loop Domains').item.json.domain;\nconst resp = $input.first().json;\nconst status = resp.statusCode || resp.status || 0;\nconst body = typeof resp.body === 'string' ? resp.body : '';\n\nlet allowed = true;\nif (status >= 200 && status < 300 && body) {\n  const lines = body.toLowerCase().split(/\\r?\\n/).map((l) => l.trim());\n  let inWildcardBlock = false;\n  for (const line of lines) {\n    if (line.startsWith('user-agent:')) {\n      inWildcardBlock = line.includes('*');\n    } else if (inWildcardBlock && line.startsWith('disallow:')) {\n      const path = line.split(':').slice(1).join(':').trim();\n      if (path === '/') allowed = false;\n    }\n  }\n}\n\nreturn [{ json: { domain, allowed } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, -80],
+      "id": "8f000001-0000-4000-8000-000000000007",
+      "name": "Check Robots Allowed"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "8f000001-cond-0001",
+              "leftValue": "={{ $json.allowed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1320, -80],
+      "id": "8f000001-0000-4000-8000-000000000008",
+      "name": "Robots Allowed?"
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $('Loop Domains').item.json.domain }}/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "ShopifyPakistanLeadsBot/1.0 (n8n workflow; contact: REPLACE_WITH_YOUR_EMAIL)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1540, -160],
+      "id": "8f000001-0000-4000-8000-000000000009",
+      "name": "Fetch Homepage",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verify Shopify for real before trusting anything about this domain --\n// same signatures as agent.py's is_shopify(): script/asset hostnames and\n// response headers Shopify stores actually send. Nothing downstream is\n// asserted unless this comes back true.\nconst domain = $('Loop Domains').item.json.domain;\nconst resp = $input.first().json;\nconst status = resp.statusCode || resp.status || 0;\nconst body = typeof resp.body === 'string' ? resp.body : '';\nconst headers = resp.headers || {};\n\nconst lower = body.toLowerCase();\nconst signatures = ['cdn.shopify.com', 'shopify.theme', 'myshopify.com', 'shopifycloud', 'cdn/shop/'];\nconst headerHit = Object.keys(headers).some((h) => /x-shopid|x-sorting-hat|x-shardid/i.test(h));\nconst isShopify = status >= 200 && status < 400 && (signatures.some((s) => lower.includes(s)) || headerHit);\n\nconst titleMatch = body.match(/<title[^>]*>(.*?)<\\/title>/is);\nconst storeName = titleMatch ? titleMatch[1].replace(/\\s+/g, ' ').trim().slice(0, 80) : domain;\n\nreturn [{ json: { domain, isShopify, storeName, homepageHtml: body, headers } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1760, -160],
+      "id": "8f000001-0000-4000-8000-00000000000a",
+      "name": "Check Shopify Signature"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "8f000001-cond-0002",
+              "leftValue": "={{ $json.isShopify }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1980, -160],
+      "id": "8f000001-0000-4000-8000-00000000000b",
+      "name": "Is Shopify?"
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $('Loop Domains').item.json.domain }}/pages/contact-us",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "ShopifyPakistanLeadsBot/1.0 (n8n workflow; contact: REPLACE_WITH_YOUR_EMAIL)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2200, -240],
+      "id": "8f000001-0000-4000-8000-00000000000c",
+      "name": "Fetch Contact Page",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pull contact info + a best-effort tech-stack read off the combined\n// homepage + contact-page HTML. Mirrors agent.py's extract_contacts(),\n// plus the extra tech-stack signals requested: theme, Shopify Plus vs\n// standard, installed apps, analytics tags, CDN. These are all pattern\n// matches on public page source -- nothing here requires logging in,\n// bypassing a paywall, or touching non-public data.\nconst prior = $('Check Shopify Signature').item.json;\nconst domain = prior.domain;\nconst storeName = prior.storeName;\nconst homepageHtml = prior.homepageHtml || '';\nconst homepageHeaders = prior.headers || {};\n\nconst contactResp = $input.first().json;\nconst contactHtml = typeof contactResp.body === 'string' ? contactResp.body : '';\n\nconst combined = homepageHtml + '\\n' + contactHtml;\n\n// --- contact info ---\nconst EMAIL_RE = /[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g;\nconst NOISE_DOMAINS = new Set(['sentry.io', 'wixpress.com', 'example.com', 'schema.org', 'w3.org', 'godaddy.com', 'shopify.com', 'cloudflare.com']);\nconst IMAGE_EXT = /\\.(png|jpe?g|gif|webp|svg)$/i;\n\nconst rawEmails = combined.match(EMAIL_RE) || [];\nconst emails = [...new Set(rawEmails.filter((e) => {\n  const d = (e.split('@')[1] || '').toLowerCase();\n  return !NOISE_DOMAINS.has(d) && !IMAGE_EXT.test(e);\n}))];\nconst preferredEmails = emails.filter((e) => {\n  const local = e.split('@')[0].toLowerCase();\n  return e.toLowerCase().includes(domain) || ['info', 'support', 'contact', 'sales', 'hello', 'help', 'care', 'orders'].includes(local);\n});\nconst email = (preferredEmails.length ? preferredEmails : emails).sort()[0] || '';\n\nconst WA_RE = /(?:wa\\.me\\/|api\\.whatsapp\\.com\\/send\\?phone=)(\\d{7,15})/g;\nconst waMatches = [...combined.matchAll(WA_RE)].map((m) => m[1]);\nconst whatsapp = [...new Set(waMatches)].sort()[0] || '';\n\nconst PK_PHONE_RE = /(?:\\+92|0092)[\\s-]?3\\d{2}[\\s-]?\\d{7}|03\\d{2}[\\s-]?\\d{7}/g;\nconst phoneMatches = combined.match(PK_PHONE_RE) || [];\nconst phone = [...new Set(phoneMatches)].sort()[0] || '';\n\n// --- tech stack ---\nconst themeMatch = combined.match(/\"theme\"\\s*:\\s*\\{[^}]*?\"name\"\\s*:\\s*\"([^\"]+)\"/i)\n  || combined.match(/Shopify\\.theme\\s*=\\s*\\{[^}]*?\"name\"\\s*:\\s*\"([^\"]+)\"/i);\nconst themeName = themeMatch ? themeMatch[1] : '';\n\nconst isShopifyPlus = /shopify[_-]?plus/i.test(combined) || /checkout\\.shopifycs\\.com/i.test(combined);\n\nconst APP_SIGNATURES = {\n  'Klaviyo': /klaviyo/i,\n  'Judge.me': /judge\\.?me/i,\n  'Loox': /loox\\.(io|app)/i,\n  'Yotpo': /yotpo/i,\n  'ReCharge': /rechargepayments|recharge\\.com/i,\n  'Gorgias': /gorgias/i,\n  'Tidio': /tidio/i,\n  'Re:amaze': /reamaze/i,\n  'Zendesk': /zdassets|zendesk/i,\n  'Elfsight': /elfsight/i,\n  'Chaty (WhatsApp widget)': /chaty\\.app|getchaty/i,\n  'Shopify Inbox': /shopify.*inbox|inbox\\.shopifyapps/i,\n  'Privy': /privy\\.com/i,\n  'Justuno': /justuno/i,\n  'Smile.io': /smile\\.io/i,\n  'PageFly': /pagefly/i,\n  'GemPages': /gempages/i,\n  'Rebuy': /rebuyengine/i,\n};\nconst installedApps = Object.entries(APP_SIGNATURES).filter(([, re]) => re.test(combined)).map(([name]) => name);\n\nconst ANALYTICS_SIGNATURES = {\n  'GA4/Google Analytics': /googletagmanager\\.com\\/gtag\\/js|gtag\\(['\"]config/i,\n  'Google Tag Manager': /googletagmanager\\.com\\/gtm\\.js|GTM-[A-Z0-9]+/i,\n  'Meta Pixel': /connect\\.facebook\\.net\\/.*\\/fbevents\\.js|fbq\\(['\"]init/i,\n  'TikTok Pixel': /analytics\\.tiktok\\.com|ttq\\.load/i,\n  'Pinterest Tag': /pintrk\\(/i,\n  'Snapchat Pixel': /sc-static\\.net|snaptr\\(/i,\n};\nconst analyticsTags = Object.entries(ANALYTICS_SIGNATURES).filter(([, re]) => re.test(combined)).map(([name]) => name);\n\nconst cfHeader = Object.keys(homepageHeaders).some((h) => /^cf-ray$/i.test(h)) || /cloudflare/i.test(homepageHeaders['server'] || '');\nconst cdnProvider = cfHeader ? 'Shopify CDN (behind Cloudflare)' : 'Shopify CDN (Fastly)';\n\nreturn [{\n  json: {\n    store_name: storeName,\n    domain,\n    email,\n    whatsapp,\n    phone,\n    has_whatsapp_widget: Boolean(whatsapp),\n    is_shopify_plus: isShopifyPlus,\n    theme_name: themeName,\n    installed_apps: installedApps.join(', '),\n    analytics_tags: analyticsTags.join(', '),\n    cdn_provider: cdnProvider,\n    checked_at: new Date().toISOString(),\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2420, -240],
+      "id": "8f000001-0000-4000-8000-00000000000d",
+      "name": "Extract Leads + Tech Stack"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "REPLACE_WITH_YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": ["domain"],
+          "value": {
+            "store_name": "={{ $json.store_name }}",
+            "domain": "={{ $json.domain }}",
+            "email": "={{ $json.email }}",
+            "whatsapp": "={{ $json.whatsapp }}",
+            "phone": "={{ $json.phone }}",
+            "has_whatsapp_widget": "={{ $json.has_whatsapp_widget }}",
+            "is_shopify_plus": "={{ $json.is_shopify_plus }}",
+            "theme_name": "={{ $json.theme_name }}",
+            "installed_apps": "={{ $json.installed_apps }}",
+            "analytics_tags": "={{ $json.analytics_tags }}",
+            "cdn_provider": "={{ $json.cdn_provider }}",
+            "checked_at": "={{ $json.checked_at }}"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2640, -240],
+      "id": "8f000001-0000-4000-8000-00000000000e",
+      "name": "Append Lead",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2860, -240],
+      "id": "8f000001-0000-4000-8000-00000000000f",
+      "name": "Wait 2s (politeness delay)"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{ "node": "Read Domains Sheet", "type": "main", "index": 0 }]]
+    },
+    "Read Domains Sheet": {
+      "main": [[{ "node": "Filter Blocklist", "type": "main", "index": 0 }]]
+    },
+    "Filter Blocklist": {
+      "main": [[{ "node": "Loop Domains", "type": "main", "index": 0 }]]
+    },
+    "Loop Domains": {
+      "main": [
+        [{ "node": "Run Complete", "type": "main", "index": 0 }],
+        [{ "node": "Fetch robots.txt", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch robots.txt": {
+      "main": [[{ "node": "Check Robots Allowed", "type": "main", "index": 0 }]]
+    },
+    "Check Robots Allowed": {
+      "main": [[{ "node": "Robots Allowed?", "type": "main", "index": 0 }]]
+    },
+    "Robots Allowed?": {
+      "main": [
+        [{ "node": "Fetch Homepage", "type": "main", "index": 0 }],
+        [{ "node": "Loop Domains", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch Homepage": {
+      "main": [[{ "node": "Check Shopify Signature", "type": "main", "index": 0 }]]
+    },
+    "Check Shopify Signature": {
+      "main": [[{ "node": "Is Shopify?", "type": "main", "index": 0 }]]
+    },
+    "Is Shopify?": {
+      "main": [
+        [{ "node": "Fetch Contact Page", "type": "main", "index": 0 }],
+        [{ "node": "Loop Domains", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch Contact Page": {
+      "main": [[{ "node": "Extract Leads + Tech Stack", "type": "main", "index": 0 }]]
+    },
+    "Extract Leads + Tech Stack": {
+      "main": [[{ "node": "Append Lead", "type": "main", "index": 0 }]]
+    },
+    "Append Lead": {
+      "main": [[{ "node": "Wait 2s (politeness delay)", "type": "main", "index": 0 }]]
+    },
+    "Wait 2s (politeness delay)": {
+      "main": [[{ "node": "Loop Domains", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "REPLACE_ON_IMPORT"
+  }
+}
