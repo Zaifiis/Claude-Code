@@ -1,0 +1,13 @@
+domain,note
+# One domain per line, e.g. "examplestore.pk" or "examplestore.com".
+# The agent verifies live whether each one is actually running Shopify and
+# only keeps it in the output if it is — so it's fine to add guesses here.
+#
+# Good ways to find candidates to add:
+#   - Browse Instagram/Facebook for small Pakistani D2C brands (bio link
+#     usually goes straight to their store) and copy the domain.
+#   - Google: "Powered by Shopify" Pakistan <niche you care about>
+#   - Google: site:myshopify.com Pakistan
+#   - Ask ChatGPT/Claude for known Pakistani Shopify brands, then verify
+#     each one yourself before adding it here — don't trust an LLM's list
+#     of company names/domains without checking.
