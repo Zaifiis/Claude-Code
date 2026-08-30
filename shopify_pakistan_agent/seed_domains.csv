@@ -11,3 +11,14 @@ domain,note
 #   - Ask ChatGPT/Claude for known Pakistani Shopify brands, then verify
 #     each one yourself before adding it here — don't trust an LLM's list
 #     of company names/domains without checking.
+#
+# Below: candidates researched via web search on 2026-08-30 (see
+# outputs/leads_manual_2026-08-30.csv for what was found about each). Not
+# fetched live at research time — the agent will verify them for real the
+# next time it runs. Two well-known "Pakistan Shopify store" listicle
+# entries, khaadi.com and sapphireonline.pk, were checked and are actually
+# on Salesforce Commerce Cloud, not Shopify — left out on purpose.
+limelight.pk,high confidence — myshopify.com staging subdomain seen
+outfitters.com.pk,high confidence — shopify-style /pages/ urls
+asimjofa.com,medium-high confidence — shopify-style /pages/ urls
+elo.shopping,medium confidence — reported as top PK shopify store, not directly verified
