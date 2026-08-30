@@ -8,6 +8,11 @@ domain,note
 #     usually goes straight to their store) and copy the domain.
 #   - Google: "Powered by Shopify" Pakistan <niche you care about>
 #   - Google: site:myshopify.com Pakistan
+#   - Browse a Shopify-store directory and filter to Pakistan/small stores:
+#       https://storeleads.app/reports/shopify/PK/top-stores
+#       https://www.eachspy.com/shopify/stores/country/PK/
+#       https://bootleads.com/stores/shopify/pk/
+#     (free to browse; some gate bulk export/contact-enrichment behind a paid plan)
 #   - Ask ChatGPT/Claude for known Pakistani Shopify brands, then verify
 #     each one yourself before adding it here — don't trust an LLM's list
 #     of company names/domains without checking.
@@ -19,3 +24,5 @@ domain,note
 # agent skips them automatically. Add small/local/home-based store domains
 # here instead — see the "how to find candidates" list above.
 elo.shopping,medium confidence — reported as top PK shopify store, not directly verified. mid-size, not a huge national chain — judgement call, remove if you disagree
+zumorrud.com,high confidence — search confirms "Shopify website". small jewelry brand, strong ICP fit
+suraiya.pk,high confidence — search confirms "operating on Shopify". small modest-wear brand, strong ICP fit
