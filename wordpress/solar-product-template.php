@@ -36,11 +36,11 @@ $alts = [
 // ═════════════════════════════════════════════════════════════════════════
 //  CHATBOT (n8n)
 //  1. Import n8n/solar-chatbot-workflow.json into your n8n instance.
-//  2. Add your OpenAI credential to the "OpenAI Chat Model" node and activate
-//     the workflow.
+//  2. Add your OpenRouter and Google Sheets credentials and activate the
+//     workflow.
 //  3. Copy the Webhook node's Production URL and paste it below.
 // ═════════════════════════════════════════════════════════════════════════
-$n8n_chat_webhook_url = 'https://YOUR-N8N-INSTANCE.com/webhook/solar-chatbot';
+$n8n_chat_webhook_url = 'https://n8nmine.cloud/webhook/solar-chatbot';
 
 function snaplyr_stars( $n ) {
     $s = '';
