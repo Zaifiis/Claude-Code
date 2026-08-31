@@ -597,6 +597,13 @@ $displayReviews = array_merge(array_values($photoReviews), $freshReviews, array_
     .cb-images { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
     .cb-image { width: 96px; height: 96px; object-fit: cover; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--border); transition: transform 0.15s, border-color 0.15s; }
     .cb-image:hover { transform: scale(1.05); border-color: var(--primary); }
+    .cb-video-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--primary); color: #fff; font-size: 12px; font-weight: 700;
+      padding: 9px 14px; border-radius: 20px; cursor: pointer; transition: background 0.15s;
+      line-height: 1.4;
+    }
+    .cb-video-btn:hover { background: #245c43; }
     .cb-quick-replies { display: flex; flex-wrap: wrap; gap: 6px; }
     .cb-quick-reply {
       background: #fff; border: 1.5px solid var(--primary); color: var(--primary);
@@ -1631,8 +1638,6 @@ $displayReviews = array_merge(array_values($photoReviews), $freshReviews, array_
       body.scrollTop = body.scrollHeight;
     }
 
-    var IMAGE_URL_RE = /(https?:\/\/\S+?\.(?:webp|jpe?g|png|gif))(?=[\s.,!?]|$)/gi;
-
     function addMessage(text, sender) {
       var el = document.createElement('div');
       el.className = 'cb-msg ' + (sender === 'user' ? 'cb-msg-user' : 'cb-msg-bot');
@@ -1649,32 +1654,45 @@ $displayReviews = array_merge(array_values($photoReviews), $freshReviews, array_
     }
 
     function renderBotMessage(el, text) {
-      var re = new RegExp(IMAGE_URL_RE.source, 'gi');
+      // Unwrap Markdown image/link syntax like ![alt](url) or [text](url) into a bare url
+      text = text.replace(/!?\[[^\]\n]*\]\((https?:\/\/[^\s)]+)\)/gi, '$1');
+
+      var re = /(https?:\/\/[^\s)]+?\.(?:webp|jpe?g|png|gif))/gi;
       var lastIndex = 0;
       var match;
-      var imageUrls = [];
+      var mediaUrls = [];
 
       while ((match = re.exec(text)) !== null) {
         if (match.index > lastIndex) {
           el.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
         }
-        imageUrls.push(match[1]);
+        mediaUrls.push(match[1]);
         lastIndex = re.lastIndex;
       }
       if (lastIndex < text.length) {
         el.appendChild(document.createTextNode(text.slice(lastIndex)));
       }
 
-      if (imageUrls.length) {
+      if (mediaUrls.length) {
         var wrap = document.createElement('div');
         wrap.className = 'cb-images';
-        imageUrls.forEach(function(url, i) {
+        mediaUrls.forEach(function(url, i) {
+          var isGif = /\.gif(?:[?#]|$)/i.test(url);
+          if (isGif) {
+            var btn = document.createElement('span');
+            btn.className = 'cb-video-btn lb-thumb';
+            btn.textContent = '▶️ Click to watch — see how amazing it looks!';
+            btn.setAttribute('data-photos', JSON.stringify(mediaUrls));
+            btn.setAttribute('data-idx', i);
+            wrap.appendChild(btn);
+            return;
+          }
           var img = document.createElement('img');
           img.src = url;
           img.alt = 'Product photo';
           img.loading = 'lazy';
           img.className = 'cb-image lb-thumb';
-          img.setAttribute('data-photos', JSON.stringify(imageUrls));
+          img.setAttribute('data-photos', JSON.stringify(mediaUrls));
           img.setAttribute('data-idx', i);
           wrap.appendChild(img);
         });
