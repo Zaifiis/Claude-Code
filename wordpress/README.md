@@ -46,7 +46,10 @@ Copy the spreadsheet's ID from its URL
    create/select your Google Sheets OAuth2 credential, then click the
    **Document** field and pick your spreadsheet from the dropdown (this
    overwrites the placeholder ID), and confirm the **Sheet** field points at
-   `Leads` / `FAQ` respectively.
+   `Leads` / `FAQ` respectively. Tip: instead of using the dropdown, you can
+   paste the tab's `gid` from its URL directly into the Sheet field with mode
+   set to "By ID" — e.g. `.../edit?gid=443764452` means the Sheet field value
+   is `443764452`; the Leads/first tab is usually `gid=0`.
 4. Activate the workflow.
 5. Open the **Webhook** node and copy its **Production URL**
    (looks like `https://your-n8n-instance.com/webhook/solar-chatbot`).
