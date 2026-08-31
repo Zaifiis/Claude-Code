@@ -23,13 +23,13 @@
         "promptType": "define",
         "text": "={{ $json.body.message }}",
         "options": {
-          "systemMessage": "You are the on-page shopping assistant for the Snaplyr LED Solar Wall Lamp (Outdoor) product page. Answer briefly and helpfully, in the same language/style the customer writes in (English or Roman Urdu). Only use the facts below — if something is not covered, say you're not sure and suggest they message us on WhatsApp (https://wa.me/923078907289).\n\nPRODUCT FACTS:\n- Product: LED Solar Wall Lamp | Outdoor, brand Snaplyr.\n- Price: Rs. 2,199 (sale, was Rs. 4,500).\n- Bundle discounts: Buy 2 = PKR 3,958 (10% off), Buy 3 = PKR 5,277 (20% off), Buy 4 = PKR 6,773 (23% off), Buy 5 = PKR 8,135 (26% off).\n- Features: solar auto-recharge, 100% waterproof/rain proof (IP65 rated), 1200mAh battery lasts a full night (even after cloudy days), motion sensor (light turns on only when someone is near, saving battery).\n- Installation: no electrician needed, ~15 minutes to install.\n- Shipping: free delivery all over Pakistan, orders processed in 1-2 business days, delivered in 3-7 business days.\n- Payment: Cash on Delivery (COD) available, as well as online Add to Cart checkout.\n- Warranty: 6 month warranty with free replacement or refund if there's an issue.\n- Returns: 7-day return/exchange policy, item must be in original condition.\n- Ordering: customers can Add to Cart on the site, order Cash on Delivery directly, or order via WhatsApp: https://wa.me/923078907289.\n- Rating: 4.9/5 average from 2,000+ verified reviews.\n\nKeep replies short (2-4 sentences), friendly, and end with a nudge to order when relevant. Never invent specs, prices, or policies that aren't listed above."
+          "systemMessage": "You are the on-page shopping assistant for the Snaplyr LED Solar Wall Lamp (Outdoor) product page. Answer briefly and helpfully, in the same language/style the customer writes in (English or Roman Urdu).\n\nPRODUCT FACTS:\n- Product: LED Solar Wall Lamp | Outdoor, brand Snaplyr.\n- Price: Rs. 2,199 (sale, was Rs. 4,500).\n- Bundle discounts: Buy 2 = PKR 3,958 (10% off), Buy 3 = PKR 5,277 (20% off), Buy 4 = PKR 6,773 (23% off), Buy 5 = PKR 8,135 (26% off).\n- Features: solar auto-recharge, 100% waterproof/rain proof (IP65 rated), 1200mAh battery lasts a full night (even after cloudy days), motion sensor (light turns on only when someone is near, saving battery).\n- Installation: no electrician needed, ~15 minutes to install.\n- Shipping: free delivery all over Pakistan, orders processed in 1-2 business days, delivered in 3-7 business days.\n- Payment: Cash on Delivery (COD) available, as well as online Add to Cart checkout.\n- Warranty: 6 month warranty with free replacement or refund if there's an issue.\n- Returns: 7-day return/exchange policy, item must be in original condition.\n- Ordering: customers can Add to Cart on the site, order Cash on Delivery directly, or order via WhatsApp: https://wa.me/923078907289.\n- Rating: 4.9/5 average from 2,000+ verified reviews.\n\nTOOLS:\n- If a question is not answered by the facts above, call \"Search FAQ Sheet\" to check the FAQ database before saying you're not sure. If it's still not covered, say so and suggest WhatsApp (https://wa.me/923078907289).\n- Whenever the customer wants to order, asks to be contacted, or shares their name/phone/city/quantity, call \"Save Lead to Google Sheets\" to record what they gave you (missing fields are fine, leave them blank). Do this quietly — don't tell the customer you're saving anything, just keep the conversation natural.\n\nKeep replies short (2-4 sentences), friendly, and end with a nudge to order when relevant. Never invent specs, prices, or policies that aren't listed above or found via Search FAQ Sheet."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
+      "typeVersion": 3.1,
       "position": [
-        920,
+        960,
         300
       ],
       "id": "b1111111-0000-4000-8000-000000000002",
@@ -37,25 +37,21 @@
     },
     {
       "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "gpt-4o-mini",
-          "mode": "list"
-        },
+        "model": "openai/gpt-4.1-mini",
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.2,
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
       "position": [
-        880,
-        520
+        780,
+        560
       ],
       "id": "b1111111-0000-4000-8000-000000000003",
-      "name": "OpenAI Chat Model",
+      "name": "OpenRouter Chat Model",
       "credentials": {
-        "openAiApi": {
-          "id": "REPLACE_WITH_YOUR_OPENAI_CRED_ID",
-          "name": "OpenAi account"
+        "openRouterApi": {
+          "id": "REPLACE_WITH_YOUR_OPENROUTER_CRED_ID",
+          "name": "OpenRouter account"
         }
       }
     },
@@ -68,11 +64,100 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        1040,
-        520
+        960,
+        560
       ],
       "id": "b1111111-0000-4000-8000-000000000004",
       "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toISO() }}",
+            "Session ID": "={{ $('Webhook').item.json.body.session_id }}",
+            "Name": "={{ $fromAI('name', \"the customer's name, if they gave one\", 'string', '') }}",
+            "Phone": "={{ $fromAI('phone', \"the customer's phone number, if they gave one\", 'string', '') }}",
+            "Interest": "={{ $fromAI('interest', 'what product and quantity they want to order', 'string', '') }}",
+            "Notes": "={{ $fromAI('notes', 'a short summary of what the customer wants or asked', 'string', '') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "Timestamp", "displayName": "Timestamp", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false },
+            { "id": "Session ID", "displayName": "Session ID", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false },
+            { "id": "Name", "displayName": "Name", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false },
+            { "id": "Phone", "displayName": "Phone", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false },
+            { "id": "Interest", "displayName": "Interest", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false },
+            { "id": "Notes", "displayName": "Notes", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1180,
+        560
+      ],
+      "id": "b1111111-0000-4000-8000-000000000006",
+      "name": "Save Lead to Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "FAQ",
+          "mode": "list",
+          "cachedResultName": "FAQ",
+          "cachedResultUrl": ""
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1400,
+        560
+      ],
+      "id": "b1111111-0000-4000-8000-000000000007",
+      "name": "Search FAQ Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
     },
     {
       "parameters": {
@@ -92,7 +177,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1180,
+        1220,
         300
       ],
       "id": "b1111111-0000-4000-8000-000000000005",
@@ -122,7 +207,7 @@
         ]
       ]
     },
-    "OpenAI Chat Model": {
+    "OpenRouter Chat Model": {
       "ai_languageModel": [
         [
           {
@@ -139,6 +224,28 @@
           {
             "node": "AI Agent",
             "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Lead to Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search FAQ Sheet": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
             "index": 0
           }
         ]
