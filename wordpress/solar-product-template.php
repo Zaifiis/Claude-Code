@@ -594,6 +594,9 @@ $displayReviews = array_merge(array_values($photoReviews), $freshReviews, array_
     .cb-msg { max-width: 82%; font-size: 13px; line-height: 1.55; padding: 9px 12px; border-radius: 14px; white-space: pre-wrap; word-break: break-word; }
     .cb-msg-bot { background: #fff; border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 4px; }
     .cb-msg-user { background: var(--primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .cb-images { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .cb-image { width: 96px; height: 96px; object-fit: cover; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--border); transition: transform 0.15s, border-color 0.15s; }
+    .cb-image:hover { transform: scale(1.05); border-color: var(--primary); }
     .cb-quick-replies { display: flex; flex-wrap: wrap; gap: 6px; }
     .cb-quick-reply {
       background: #fff; border: 1.5px solid var(--primary); color: var(--primary);
@@ -1628,13 +1631,55 @@ $displayReviews = array_merge(array_values($photoReviews), $freshReviews, array_
       body.scrollTop = body.scrollHeight;
     }
 
+    var IMAGE_URL_RE = /(https?:\/\/\S+?\.(?:webp|jpe?g|png|gif))(?=[\s.,!?]|$)/gi;
+
     function addMessage(text, sender) {
       var el = document.createElement('div');
       el.className = 'cb-msg ' + (sender === 'user' ? 'cb-msg-user' : 'cb-msg-bot');
-      el.textContent = text;
+
+      if (sender === 'bot') {
+        renderBotMessage(el, text);
+      } else {
+        el.textContent = text;
+      }
+
       body.appendChild(el);
       scrollToBottom();
       return el;
+    }
+
+    function renderBotMessage(el, text) {
+      var re = new RegExp(IMAGE_URL_RE.source, 'gi');
+      var lastIndex = 0;
+      var match;
+      var imageUrls = [];
+
+      while ((match = re.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+          el.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+        }
+        imageUrls.push(match[1]);
+        lastIndex = re.lastIndex;
+      }
+      if (lastIndex < text.length) {
+        el.appendChild(document.createTextNode(text.slice(lastIndex)));
+      }
+
+      if (imageUrls.length) {
+        var wrap = document.createElement('div');
+        wrap.className = 'cb-images';
+        imageUrls.forEach(function(url, i) {
+          var img = document.createElement('img');
+          img.src = url;
+          img.alt = 'Product photo';
+          img.loading = 'lazy';
+          img.className = 'cb-image lb-thumb';
+          img.setAttribute('data-photos', JSON.stringify(imageUrls));
+          img.setAttribute('data-idx', i);
+          wrap.appendChild(img);
+        });
+        el.appendChild(wrap);
+      }
     }
 
     function addQuickReplies() {
