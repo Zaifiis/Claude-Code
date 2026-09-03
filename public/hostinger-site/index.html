@@ -127,8 +127,8 @@
   .thumb{
     position:relative;aspect-ratio:16/9;background:#000;overflow:hidden;
   }
-  .thumb img{width:100%;height:100%;object-fit:cover;opacity:.85;transition:.2s}
-  .card:hover .thumb img{opacity:1;transform:scale(1.03)}
+  .thumb img,.thumb video{width:100%;height:100%;object-fit:cover;opacity:.85;transition:.2s}
+  .card:hover .thumb img,.card:hover .thumb video{opacity:1;transform:scale(1.03)}
   .play-badge{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   }
@@ -230,9 +230,8 @@
 
 <section class="featured">
   <div class="featured-frame" id="featured-frame">
-    <!-- === SWAP: put your main/hero video here === -->
-    <video controls poster="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop">
-      <source src="REPLACE_WITH_YOUR_VIDEO_URL.mp4" type="video/mp4">
+    <video controls preload="metadata">
+      <source src="media/actor-video-1.mp4" type="video/mp4">
     </video>
   </div>
 </section>
@@ -247,10 +246,8 @@
 
     <div class="filters" id="filters">
       <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="walkthrough">Walkthroughs</button>
-      <button class="filter-btn" data-filter="drone">Drone / Aerial</button>
-      <button class="filter-btn" data-filter="social">Social Cuts</button>
-      <button class="filter-btn" data-filter="testimonial">Testimonials</button>
+      <button class="filter-btn" data-filter="actor">AI Lifestyle Actors</button>
+      <button class="filter-btn" data-filter="property">Property Videos</button>
     </div>
 
     <div class="grid" id="grid">
@@ -321,58 +318,36 @@ document.getElementById('year').textContent = new Date().getFullYear();
    ========================================================= */
 const VIDEOS = [
   {
-    title: "Modern Downtown Loft — Full Walkthrough",
-    desc: "3BR/2BA loft walkthrough, natural light throughout.",
-    category: "walkthrough",
-    duration: "2:14",
-    thumb: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format&fit=crop",
+    title: "AI Lifestyle Actor — Scene 1",
+    desc: "AI-generated lifestyle actor composited into a property scene.",
+    category: "actor",
+    duration: "",
     type: "mp4",
-    src: "REPLACE_WITH_YOUR_VIDEO_URL_1.mp4"
+    src: "media/actor-video-1.mp4"
   },
   {
-    title: "Lakeside Estate — Aerial Establishing Shot",
-    desc: "Drone flyover of the grounds and private dock.",
-    category: "drone",
-    duration: "1:02",
-    thumb: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
+    title: "AI Lifestyle Actor — Scene 2",
+    desc: "AI-generated lifestyle actor composited into a property scene.",
+    category: "actor",
+    duration: "",
     type: "mp4",
-    src: "REPLACE_WITH_YOUR_VIDEO_URL_2.mp4"
+    src: "media/actor-video-2.mp4"
   },
   {
-    title: "Suburban Family Home — Reel Cut",
-    desc: "Vertical, captioned cut ready for Instagram Reels.",
-    category: "social",
-    duration: "0:32",
-    thumb: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop",
+    title: "Property Video — Sample 1",
+    desc: "Sample property marketing video.",
+    category: "property",
+    duration: "",
     type: "mp4",
-    src: "REPLACE_WITH_YOUR_VIDEO_URL_3.mp4"
+    src: "media/property-video-1.mp4"
   },
   {
-    title: "Happy Buyers — Client Testimonial",
-    desc: "The Martins on why they chose their agent.",
-    category: "testimonial",
-    duration: "1:48",
-    thumb: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop",
+    title: "Property Video — Sample 2",
+    desc: "Sample property marketing video.",
+    category: "property",
+    duration: "",
     type: "mp4",
-    src: "REPLACE_WITH_YOUR_VIDEO_URL_4.mp4"
-  },
-  {
-    title: "Hillside Villa — Cinematic Walkthrough",
-    desc: "Full interior/exterior walkthrough with steadicam.",
-    category: "walkthrough",
-    duration: "3:05",
-    thumb: "https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=800&auto=format&fit=crop",
-    type: "mp4",
-    src: "REPLACE_WITH_YOUR_VIDEO_URL_5.mp4"
-  },
-  {
-    title: "Coastal Development — Aerial Overview",
-    desc: "Full-site drone footage for the new development.",
-    category: "drone",
-    duration: "1:40",
-    thumb: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop",
-    type: "mp4",
-    src: "REPLACE_WITH_YOUR_VIDEO_URL_6.mp4"
+    src: "media/property-video-2.mp4"
   }
 ];
 
@@ -392,10 +367,10 @@ function renderGrid(){
     card.className = 'card';
     card.innerHTML = `
       <div class="thumb">
-        <img src="${v.thumb}" alt="${v.title}" loading="lazy">
+        <video src="${v.src}#t=0.5" preload="metadata" muted playsinline></video>
         <span class="tag">${v.category}</span>
         <div class="play-badge"><span>${playIcon()}</span></div>
-        <span class="duration">${v.duration}</span>
+        ${v.duration ? `<span class="duration">${v.duration}</span>` : ''}
       </div>
       <div class="card-body">
         <h3>${v.title}</h3>
