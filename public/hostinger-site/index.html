@@ -129,6 +129,10 @@
   }
   .thumb img,.thumb video{width:100%;height:100%;object-fit:cover;opacity:.85;transition:.2s}
   .card:hover .thumb img,.card:hover .thumb video{opacity:1;transform:scale(1.03)}
+  .thumb-fallback{
+    width:100%;height:100%;
+    background:linear-gradient(135deg,rgba(94,224,200,0.18),rgba(124,140,255,0.22));
+  }
   .play-badge{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   }
@@ -310,11 +314,23 @@
 document.getElementById('year').textContent = new Date().getFullYear();
 
 /* =========================================================
-   VIDEO DATA — replace `src` with your real video URLs.
-   type: "mp4"  -> direct MP4 link (Hostinger file, S3, etc.)
-   type: "youtube" -> paste the YouTube VIDEO ID only
-   type: "vimeo"    -> paste the Vimeo VIDEO ID only
-   category must match one of: walkthrough, drone, social, testimonial
+   VIDEO DATA
+   type: "mp4"     -> direct MP4 URL or local path (best quality/reliability)
+   type: "gdrive"  -> Google Drive FILE ID only (see notes below)
+   type: "youtube" -> YouTube VIDEO ID only
+   type: "vimeo"   -> Vimeo VIDEO ID only
+   category must match a data-filter value on the filter buttons.
+
+   --- HOW TO ADD A GOOGLE DRIVE VIDEO ---
+   1. In Drive, right-click the video -> Share -> General access ->
+      "Anyone with the link" (Viewer). It will NOT play otherwise.
+   2. Copy the link. It looks like:
+        https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrSt/view?usp=sharing
+                                        ^^^^^^^^^^^^^^^^^^^^^^ this is the FILE ID
+   3. Add an entry with type:"gdrive" and src:"<that FILE ID>".
+   4. Drive can't generate a preview frame cross-origin, so give each
+      Drive entry a `thumb` image URL (or leave it out for a plain
+      gradient placeholder card).
    ========================================================= */
 const VIDEOS = [
   {
@@ -349,6 +365,18 @@ const VIDEOS = [
     type: "mp4",
     src: "media/property-video-2.mp4"
   }
+
+  /* --- Google Drive example: uncomment, swap in your own FILE ID ---
+  ,{
+    title: "Drive Video — Example",
+    desc: "Played through Google Drive's embedded preview player.",
+    category: "property",
+    duration: "",
+    type: "gdrive",
+    src: "PASTE_GOOGLE_DRIVE_FILE_ID_HERE",
+    thumb: ""   // optional image URL; blank shows a gradient placeholder
+  }
+  */
 ];
 
 const grid = document.getElementById('grid');
@@ -359,6 +387,22 @@ function playIcon(){
   return '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
 }
 
+/* Local/direct MP4s can render their own first frame as the thumbnail.
+   Cross-origin embeds (Drive, YouTube, Vimeo) cannot, so they use an
+   explicit `thumb` image, or a gradient placeholder as a last resort. */
+function thumbFor(v){
+  if (v.thumb) {
+    return `<img src="${v.thumb}" alt="${v.title}" loading="lazy">`;
+  }
+  if (v.type === 'mp4') {
+    return `<video src="${v.src}#t=0.5" preload="metadata" muted playsinline></video>`;
+  }
+  if (v.type === 'youtube') {
+    return `<img src="https://img.youtube.com/vi/${v.src}/hqdefault.jpg" alt="${v.title}" loading="lazy">`;
+  }
+  return `<div class="thumb-fallback"></div>`;
+}
+
 function renderGrid(){
   grid.innerHTML = '';
   const items = VIDEOS.filter(v => activeFilter === 'all' || v.category === activeFilter);
@@ -367,7 +411,7 @@ function renderGrid(){
     card.className = 'card';
     card.innerHTML = `
       <div class="thumb">
-        <video src="${v.src}#t=0.5" preload="metadata" muted playsinline></video>
+        ${thumbFor(v)}
         <span class="tag">${v.category}</span>
         <div class="play-badge"><span>${playIcon()}</span></div>
         ${v.duration ? `<span class="duration">${v.duration}</span>` : ''}
@@ -396,6 +440,9 @@ const modalTitle = document.getElementById('modal-title');
 const modalDesc = document.getElementById('modal-desc');
 
 function embedFor(v){
+  if (v.type === 'gdrive') {
+    return `<iframe src="https://drive.google.com/file/d/${v.src}/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+  }
   if (v.type === 'youtube') {
     return `<iframe src="https://www.youtube.com/embed/${v.src}?autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
   }
