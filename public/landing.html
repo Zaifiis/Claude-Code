@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rs 999 Direction Plan by Zaifi</title>
+<meta name="description" content="You are earning and still going nowhere. One path built from your answers and someone who checks that you did it.">
+<meta name="theme-color" content="#0B0B0C">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: #0B0B0C;
+    color: #F2F2F0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { width: 100%; max-width: 720px; margin: 0 auto; padding-left: 22px; padding-right: 22px; }
+  section { padding-block: 72px; border-top: 1px solid #18181B; }
+  section:first-of-type { border-top: 0; }
+  h1, h2, h3 { margin: 0; font-weight: 800; letter-spacing: -0.025em; line-height: 1.05; }
+  h1 { font-size: clamp(34px, 10vw, 62px); }
+  h2 { font-size: clamp(27px, 7vw, 40px); }
+  h3 { font-size: 19px; letter-spacing: -0.01em; line-height: 1.3; }
+  section h2 { margin-bottom: 26px; }
+  p { margin: 0 0 18px; color: #B9B9B6; }
+  p.lead { color: #DCDCD8; font-size: 19px; }
+  p:last-child { margin-bottom: 0; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #77777C; margin: 0 0 20px; font-weight: 600;
+  }
+  .accent { color: #FF4F18; }
+
+  /* buttons */
+  .btn {
+    display: block; width: 100%; text-align: center; text-decoration: none;
+    background: #FF4F18; color: #0B0B0C;
+    font-size: 17px; font-weight: 700; letter-spacing: -0.01em;
+    padding: 19px 26px; border-radius: 3px; border: 0;
+    transition: background 140ms linear;
+  }
+  .btn:hover { background: #FF6A3C; }
+  .btn:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 3px; }
+  .btn-note { margin-top: 14px; font-size: 14px; color: #77777C; }
+  a { color: #F2F2F0; }
+  a:focus-visible { outline: 3px solid #FF4F18; outline-offset: 3px; border-radius: 2px; }
+
+  /* hero */
+  .hero { padding-top: 96px; padding-bottom: 84px; }
+  .hero h1 { margin-bottom: 26px; }
+  .hero p { max-width: 30em; }
+  .mark { font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #77777C; margin-bottom: 56px; }
+
+  /* mirror */
+  .mirror { list-style: none; margin: 0; padding: 0; }
+  .mirror li {
+    font-size: clamp(19px, 5vw, 23px); line-height: 1.35; font-weight: 600;
+    color: #EDEDEA; padding: 22px 0; border-bottom: 1px solid #18181B;
+  }
+  .mirror li:first-child { border-top: 1px solid #18181B; }
+
+  /* planners */
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 28px; }
+  .card {
+    background: #111113; border: 1px solid #1F1F23; border-radius: 5px; padding: 14px;
+  }
+  .sheet { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+  .row { display: flex; align-items: center; gap: 7px; }
+  .box { width: 9px; height: 9px; border: 1px solid #3A3A40; border-radius: 2px; flex: none; }
+  .box.on { background: #FF4F18; border-color: #FF4F18; }
+  .bar { height: 5px; border-radius: 3px; background: #26262B; flex: 1 1 auto; }
+  .bar.w80 { flex-basis: 80%; } .bar.w60 { flex-basis: 60%; } .bar.w40 { flex-basis: 40%; }
+  .card h3 { font-size: 14px; font-weight: 600; color: #DCDCD8; letter-spacing: 0; }
+
+  /* plain lists */
+  .plain { list-style: none; margin: 0 0 18px; padding: 0; }
+  .plain li { position: relative; padding: 14px 0 14px 26px; border-bottom: 1px solid #18181B; color: #DCDCD8; }
+  .plain li::before {
+    content: ""; position: absolute; left: 0; top: 24px;
+    width: 7px; height: 7px; background: #3A3A40; border-radius: 50%;
+  }
+  .plain li:first-child { border-top: 1px solid #18181B; }
+  .plain li b { color: #F2F2F0; font-weight: 700; }
+
+  /* frameworks */
+  .fw { margin: 0; padding: 0; list-style: none; }
+  .fw li { padding: 24px 0; border-bottom: 1px solid #18181B; }
+  .fw li:first-child { border-top: 1px solid #18181B; }
+  .fw h3 { margin-bottom: 8px; }
+  .fw p { margin: 0; font-size: 16px; }
+
+  /* tier block */
+  .tier { border: 1px solid #1F1F23; border-top: 3px solid #FF4F18; border-radius: 5px; padding: 26px 20px; background: #101012; }
+  .price { font-size: 15px; color: #DCDCD8; font-weight: 600; margin-bottom: 22px; }
+  .limit { margin-top: 24px; font-size: 15px; color: #8E8E93; }
+
+  /* steps */
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  .steps li { counter-increment: s; padding: 26px 0 26px 54px; position: relative; border-bottom: 1px solid #18181B; }
+  .steps li:first-child { border-top: 1px solid #18181B; }
+  .steps li::before {
+    content: "0" counter(s); position: absolute; left: 0; top: 26px;
+    font-size: 15px; font-weight: 700; color: #FF4F18; letter-spacing: 0.04em;
+  }
+  .steps h3 { margin-bottom: 8px; }
+  .steps p { margin: 0; font-size: 16px; }
+  .ph {
+    display: inline-block; margin-top: 10px; padding: 8px 12px;
+    background: #111113; border: 1px dashed #3A3A40; border-radius: 4px;
+    font-size: 14px; color: #8E8E93; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  /* faq */
+  .faq { margin-top: 12px; }
+  .faq > div { padding: 24px 0; border-bottom: 1px solid #18181B; }
+  .faq > div:first-child { border-top: 1px solid #18181B; }
+  .faq h3 { margin-bottom: 10px; }
+  .faq p { margin: 0; font-size: 16px; }
+
+  /* testimonials placeholder */
+  .empty {
+    border: 1px dashed #2E2E34; border-radius: 5px; padding: 30px 20px; text-align: center;
+    color: #77777C; font-size: 15px;
+  }
+
+  /* closing */
+  .closing { padding-block: 92px; }
+  .closing h2 { margin-bottom: 24px; }
+  footer { padding-block: 40px 56px; color: #5C5C61; font-size: 13px; border-top: 1px solid #18181B; }
+
+  @media (min-width: 700px) {
+    body { font-size: 18px; }
+    section { padding-block: 112px; }
+    .hero { padding-top: 128px; padding-bottom: 120px; }
+    .grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .btn { display: inline-block; width: auto; min-width: 300px; }
+    .tier { padding: 36px 34px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1390921542601599');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1390921542601599&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+</head>
+<body>
+
+<!-- 1. HERO -->
+<section class="hero">
+  <div class="wrap">
+    <p class="mark">Zaifi</p>
+    <h1>You are earning<br>and still going<br><span class="accent">nowhere.</span></h1>
+    <p class="lead">You are not lazy and you are not short on ideas. Nobody has ever checked whether you actually did the thing.</p>
+    <a class="btn js-lead" href="#join">Start for Rs 999</a>
+  </div>
+</section>
+
+<!-- 2. THE MIRROR -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Read this slowly</p>
+    <h2>You know this week already.</h2>
+    <ul class="mirror">
+      <li>You were busy all week. Nothing moved.</li>
+      <li>You bought another course. You opened it once.</li>
+      <li>You started something in March. It is still sitting there.</li>
+      <li>From outside you look like you are doing well. Inside you feel lost.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 3. WHY THIS KEEPS HAPPENING -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Why this keeps happening</p>
+    <h2>It is not knowledge. It is not motivation.</h2>
+    <p class="lead">You do not have an information problem. You already know what to do. You have known for a long time.</p>
+    <p>Motivation is not the problem either. Motivation shows up every time. It shows up when you buy the course and when you write the plan and when you tell yourself this month is different.</p>
+    <p>Then week two arrives. The excitement is gone. The results are not here yet. Nobody is watching. So you go back to being busy and you call that work.</p>
+    <p>Every single time you quit it was week two. And every single time there was nobody there in week two.</p>
+    <p class="lead">That is the whole problem. <span class="accent">Nobody checks.</span> No teacher. No boss for your own work. Nobody asking what you finished this week and why you did not.</p>
+    <p>This is built to be that.</p>
+  </div>
+</section>
+
+<!-- 4. WHO I AM -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Who is writing this</p>
+    <h2>Huzaifa Saad. People call me Zaifi.</h2>
+    <p>I am from Lahore. I have been building online since 2016. YouTube. Editing. Design. Web development. AI automation.</p>
+    <p>I tried all of it and I was lost for years. Same loop. Start. Drop. Start again.</p>
+    <p>Today I run multiple businesses with over 3 crore PKR revenue generated across them.</p>
+    <p class="lead">I am not a guru and I do not have all the answers. I was stuck exactly the way you are stuck and I found my path. Now I run the system that gets other people to theirs.</p>
+  </div>
+</section>
+
+<!-- 5. WHAT YOU GET FOR RS 999 -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Rs 999 once</p>
+    <h2>What you get.</h2>
+    <ul class="plain">
+      <li><b>A form.</b> You answer honestly about your real situation. Money. Time. Skills. What you have already tried and dropped.</li>
+      <li><b>A plan built from your answers.</b> One path. Not a list of options to choose from.</li>
+      <li><b>Entry into the community.</b> People doing the same work in the same weeks.</li>
+      <li><b>Ongoing help clearing your path and your direction.</b> When you get stuck you get unstuck.</li>
+    </ul>
+
+    <p class="eyebrow" style="margin-top:44px">The planners</p>
+    <div class="grid">
+      <div class="card">
+        <div class="sheet">
+          <div class="row"><span class="box on"></span><span class="bar w80"></span></div>
+          <div class="row"><span class="box on"></span><span class="bar w60"></span></div>
+          <div class="row"><span class="box"></span><span class="bar w40"></span></div>
+        </div>
+        <h3>30 Day Habit Tracker</h3>
+      </div>
+      <div class="card">
+        <div class="sheet">
+          <div class="row"><span class="bar w40"></span></div>
+          <div class="row"><span class="box on"></span><span class="bar w80"></span></div>
+          <div class="row"><span class="box"></span><span class="bar w60"></span></div>
+        </div>
+        <h3>Goal Planner</h3>
+      </div>
+      <div class="card">
+        <div class="sheet">
+          <div class="row"><span class="bar w60"></span></div>
+          <div class="row"><span class="bar w80"></span></div>
+          <div class="row"><span class="box on"></span><span class="bar w40"></span></div>
+        </div>
+        <h3>Weekly Review Planner</h3>
+      </div>
+      <div class="card">
+        <div class="sheet">
+          <div class="row"><span class="box"></span><span class="bar w60"></span></div>
+          <div class="row"><span class="box on"></span><span class="bar w80"></span></div>
+          <div class="row"><span class="box"></span><span class="bar w40"></span></div>
+        </div>
+        <h3>Side Hustle Tracker</h3>
+      </div>
+      <div class="card">
+        <div class="sheet">
+          <div class="row"><span class="box on"></span><span class="bar w40"></span></div>
+          <div class="row"><span class="box on"></span><span class="bar w60"></span></div>
+          <div class="row"><span class="box"></span><span class="bar w80"></span></div>
+        </div>
+        <h3>Morning Routine Tracker</h3>
+      </div>
+      <div class="card">
+        <div class="sheet">
+          <div class="row"><span class="bar w80"></span></div>
+          <div class="row"><span class="bar w40"></span></div>
+          <div class="row"><span class="box on"></span><span class="bar w60"></span></div>
+        </div>
+        <h3>Finance Tracker</h3>
+      </div>
+      <div class="card">
+        <div class="sheet">
+          <div class="row"><span class="box"></span><span class="bar w60"></span></div>
+          <div class="row"><span class="box on"></span><span class="bar w40"></span></div>
+          <div class="row"><span class="box"></span><span class="bar w80"></span></div>
+        </div>
+        <h3>Mood and Energy Tracker</h3>
+      </div>
+      <div class="card">
+        <div class="sheet">
+          <div class="row"><span class="bar w40"></span></div>
+          <div class="row"><span class="box on"></span><span class="bar w80"></span></div>
+          <div class="row"><span class="box"></span><span class="bar w60"></span></div>
+        </div>
+        <h3>Reading Tracker</h3>
+      </div>
+    </div>
+
+    <p class="eyebrow" style="margin-top:44px">The frameworks</p>
+    <p>The Direction Map. The One Lane Rule. The Week Two Fix. The Offer Audit. The Proof Loop. All five are explained below.</p>
+    <a class="btn js-lead" href="#join">Start for Rs 999</a>
+  </div>
+</section>
+
+<!-- 6. THE FRAMEWORKS EXPLAINED -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">What the frameworks do</p>
+    <h2>Five tools. Nothing extra.</h2>
+    <ul class="fw">
+      <li>
+        <h3>The Direction Map</h3>
+        <p>Your skills against your time against the money you need.</p>
+      </li>
+      <li>
+        <h3>The One Lane Rule</h3>
+        <p>Why you drop everything except one path for 90 days.</p>
+      </li>
+      <li>
+        <h3>The Week Two Fix</h3>
+        <p>The exact week people quit and what to do in it.</p>
+      </li>
+      <li>
+        <h3>The Offer Audit</h3>
+        <p>Checking if what you sell is actually sellable.</p>
+      </li>
+      <li>
+        <h3>The Proof Loop</h3>
+        <p>Small proof every week instead of waiting for one big win.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- 7. DONE WITH YOU -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Done With You</p>
+    <h2>Rs 5000 per month.</h2>
+    <p class="lead">This is for people who want it handled with them and not alone. You still do the work. You just stop doing it by yourself.</p>
+    <div class="tier">
+      <p class="price">Rs 5000 per month</p>
+      <ul class="plain">
+        <li><b>A roadmap built with you.</b> Not handed to you. Built in front of you for your situation.</li>
+        <li><b>Direction and advice when you are stuck.</b> You do not sit on a problem for three weeks.</li>
+        <li><b>Techniques and flows for your specific situation.</b> Your skill. Your market. Your hours.</li>
+        <li><b>Offer evaluation.</b> You send your offer or your work and it gets reviewed honestly.</li>
+        <li><b>Weekly call review.</b> Every week your last week gets checked.</li>
+      </ul>
+      <p class="limit">This takes real time so the number of people is limited. Open spots right now: <span class="ph">[OWNER FILLS IN SEAT COUNT]</span></p>
+    </div>
+    <p style="margin-top:28px">Start at Rs 999 first if you are not sure. You can move up later.</p>
+    <a class="btn js-lead" href="#join">Start for Rs 999</a>
+  </div>
+</section>
+
+<!-- 8. WHO THIS IS NOT FOR -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Do not buy this</p>
+    <h2>Who this is not for.</h2>
+    <ul class="plain">
+      <li>People looking for quick money.</li>
+      <li>People who want to be told they are doing great.</li>
+      <li>People who will not write honestly in the form.</li>
+      <li>People who buy things and never open them.</li>
+      <li>People who want a new idea every month instead of finishing one.</li>
+    </ul>
+    <p>If you read that list and felt something then you already know which side you are on.</p>
+  </div>
+</section>
+
+<!-- TESTIMONIALS PLACEHOLDER. Real ones get added here. Do not put fake ones. -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Results from real people</p>
+    <div class="empty">
+      <p>[TESTIMONIAL SLOT. REAL SCREENSHOTS AND REAL WORDS ONLY. LEAVE EMPTY UNTIL THEY EXIST.]</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9. HOW TO JOIN -->
+<section id="join">
+  <div class="wrap">
+    <p class="eyebrow">How to join</p>
+    <h2>Three steps.</h2>
+    <ol class="steps">
+      <li>
+        <h3>Pay Rs 999</h3>
+        <p>Send it to the account below.</p>
+        <span class="ph">[PAYMENT DETAILS HERE. BANK OR EASYPAISA OR JAZZCASH. ACCOUNT NAME AND NUMBER.]</span>
+      </li>
+      <li>
+        <h3>Send the payment screenshot on WhatsApp</h3>
+        <p>Screenshot the transfer and send it to this number.</p>
+        <span class="ph">[WHATSAPP NUMBER HERE]</span>
+      </li>
+      <li>
+        <h3>Get the form link once it is verified</h3>
+        <p>You fill it honestly. Your plan is built from what you write.</p>
+      </li>
+    </ol>
+    <a class="btn js-checkout" href="https://wa.me/PLACEHOLDER" target="_blank" rel="noopener">Send your screenshot on WhatsApp</a>
+    <p class="btn-note">Payment is verified by hand so give it a little time.</p>
+  </div>
+</section>
+
+<!-- 10. QUESTIONS -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Questions</p>
+    <h2>Straight answers.</h2>
+    <div class="faq">
+      <div>
+        <h3>What if I already know what to do?</h3>
+        <p>Then do it. If you were doing it you would not be reading this page at this time of night. Knowing was never the gap. Doing it in week two when nobody is watching is the gap.</p>
+      </div>
+      <div>
+        <h3>How is this different from a course?</h3>
+        <p>A course gives you more information. You already have too much of it. This gives you one path and a person who checks whether you moved.</p>
+      </div>
+      <div>
+        <h3>What if I have no time?</h3>
+        <p>You have time. You are spending it on five different things. The plan takes one of them and drops the rest. That is the point.</p>
+      </div>
+      <div>
+        <h3>Can I upgrade later?</h3>
+        <p>Yes. Start at Rs 999. Move to Done With You at Rs 5000 per month whenever you want it handled with you.</p>
+      </div>
+      <div>
+        <h3>What if it does not work for me?</h3>
+        <p>Then it does not work. I will not promise you income and I will not guarantee results. What you get is one clear path and someone checking on you. What happens next depends on what you actually do.</p>
+      </div>
+      <div>
+        <h3>How fast will I see something?</h3>
+        <p>You get your path in the first week. Week two is the real test. Everything after that is small proof stacked week after week.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11. CLOSING -->
+<section class="closing">
+  <div class="wrap">
+    <h2>You can close this and go back to being busy.</h2>
+    <p class="lead">Or you can pay Rs 999 and finally have someone check.</p>
+    <a class="btn js-checkout" href="https://wa.me/PLACEHOLDER" target="_blank" rel="noopener">Send your screenshot on WhatsApp</a>
+    <p class="btn-note">Rs 999 once. Then the form. Then your path.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Huzaifa Saad. Lahore. No income promises and no guaranteed results. Revenue figures are revenue generated across businesses.</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    function fire(name) {
+      if (window.fbq) { fbq('track', name); }
+    }
+    var leads = document.querySelectorAll('.js-lead');
+    for (var i = 0; i < leads.length; i++) {
+      leads[i].addEventListener('click', function () { fire('Lead'); });
+    }
+    var checkouts = document.querySelectorAll('.js-checkout');
+    for (var j = 0; j < checkouts.length; j++) {
+      checkouts[j].addEventListener('click', function () { fire('InitiateCheckout'); });
+    }
+  })();
+</script>
+</body>
+</html>
