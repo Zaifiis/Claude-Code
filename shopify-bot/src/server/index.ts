@@ -21,6 +21,7 @@ import {
   handleProductUpdate,
   handleShopRedact,
 } from "./webhooks.js";
+import { MemoryHistoryStore } from "./memory-history.js";
 import { isFresh, verifyAppProxySignature, verifyWebhookHmac } from "./verify.js";
 
 /**
@@ -115,6 +116,7 @@ async function handleChat(
     provider: LlmProvider;
     catalogs: CatalogCache;
     apiSecret: string;
+    memoryHistory: MemoryHistoryStore;
   },
 ): Promise<void> {
   const verified = verifyAppProxySignature(url.searchParams, deps.apiSecret);
@@ -188,8 +190,14 @@ async function handleChat(
     supabase && catalog instanceof SupabaseCatalog
       ? await findOrCreateConversation(supabase, catalog.shopId, visitorId)
       : null;
+
+  // Fall back to in-process history when there is no database. Without this the
+  // bot forgets the previous message entirely and starts every turn from
+  // nothing, which reads as stupidity rather than as a missing feature.
   const history =
-    supabase && conversation ? await loadHistory(supabase, conversation.id) : [];
+    supabase && conversation
+      ? await loadHistory(supabase, conversation.id)
+      : deps.memoryHistory.get(verified.shop, visitorId);
 
   try {
     const result = await runTurn({
@@ -209,6 +217,8 @@ async function handleChat(
 
     if (supabase && conversation) {
       await recordTurn(supabase, conversation, message, result, Date.now() - startedAt);
+    } else {
+      deps.memoryHistory.append(verified.shop, visitorId, message, result.reply);
     }
   } catch (error) {
     // The stream is already open, so the error goes down the stream, not as a
@@ -302,6 +312,7 @@ export function startServer(port = Number(process.env["PORT"] ?? 3000)): void {
 
   const provider = createProvider();
   const catalogs = new CatalogCache(supabase);
+  const memoryHistory = new MemoryHistoryStore();
 
   // Log every request. Without this, a widget that says "connection problem"
   // gives you nothing to work with — you cannot tell a blocked proxy from a
@@ -332,12 +343,23 @@ export function startServer(port = Number(process.env["PORT"] ?? 3000)): void {
     void (async () => {
       try {
         if (req.method === "GET" && path === "/health") {
-          json(res, 200, { ok: true, provider: provider.name });
+          json(res, 200, {
+            ok: true,
+            provider: provider.name,
+            storage: supabase ? "supabase" : "in-memory",
+            conversations: memoryHistory.size,
+          });
           return;
         }
 
         if (req.method === "POST" && path === "/apps/chat") {
-          await handleChat(req, res, url, { supabase, provider, catalogs, apiSecret });
+          await handleChat(req, res, url, {
+            supabase,
+            provider,
+            catalogs,
+            apiSecret,
+            memoryHistory,
+          });
           return;
         }
 

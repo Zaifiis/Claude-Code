@@ -16,6 +16,7 @@ import { buildCartUrl, executeTool, type ToolContext } from "../src/agent/tools.
 import { MemoryCatalog } from "../src/catalog/memory.js";
 import { createHmac } from "node:crypto";
 import { detectCustomerGender, neutraliseAddress } from "../src/agent/address.js";
+import { MemoryHistoryStore } from "../src/server/memory-history.js";
 import { classifyByGid, parseBulkJsonl } from "../src/shopify/bulk.js";
 import { isFresh, verifyAppProxySignature, verifyWebhookHmac } from "../src/server/verify.js";
 import { htmlToText, numericId } from "../src/shopify/client.js";
@@ -338,6 +339,54 @@ async function main(): Promise<void> {
       "hoodie dikhao",
     ) === "male",
   );
+
+  // --- conversation memory ---------------------------------------------------
+  // Without this the bot forgot the previous message entirely: it found a
+  // hoodie, then asked "which product?" when the customer said "medium size
+  // chahiye", and ended up offering bags.
+  const store = new MemoryHistoryStore();
+  const SHOP = "sana-threads-dev.myshopify.com";
+
+  check("a new visitor has no history", store.get(SHOP, "v1").length === 0);
+
+  store.append(SHOP, "v1", "koi hoodie hai", "Black aur Maroon dono hain, 4200 ka");
+  const afterOne = store.get(SHOP, "v1");
+  check("a turn is remembered as user + assistant", afterOne.length === 2);
+  check("the customer turn comes first", afterOne[0]?.role === "user");
+  check(
+    "the assistant reply is stored verbatim",
+    afterOne[1]?.content === "Black aur Maroon dono hain, 4200 ka",
+  );
+
+  store.append(SHOP, "v1", "medium size chahiye", "Maroon mein M available hai");
+  check("history accumulates across turns", store.get(SHOP, "v1").length === 4);
+
+  check(
+    "a different visitor gets their own history",
+    store.get(SHOP, "v2").length === 0,
+  );
+  check(
+    "the same visitor on another shop is separate",
+    store.get("other-store.myshopify.com", "v1").length === 0,
+  );
+
+  // Every turn resends the whole history, so an unbounded log is a cost leak.
+  for (let i = 0; i < 20; i++) {
+    store.append(SHOP, "v3", `question ${i}`, `answer ${i}`);
+  }
+  const cappedHistory = store.get(SHOP, "v3");
+  check("history is capped", cappedHistory.length <= 12, `${cappedHistory.length} messages`);
+  check(
+    "the capped history still starts on a customer turn",
+    cappedHistory[0]?.role === "user",
+  );
+  check(
+    "the cap keeps the most recent turns",
+    JSON.stringify(cappedHistory).includes("answer 19"),
+  );
+
+  store.append(SHOP, "v4", "hello", "   ");
+  check("an empty reply is not stored", store.get(SHOP, "v4").length === 0);
 
   console.log();
   if (failures === 0) {
