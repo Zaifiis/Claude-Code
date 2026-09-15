@@ -1,0 +1,22 @@
+{
+  "name": "shopify-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AI sales agent and customer support for Shopify stores",
+  "scripts": {
+    "chat": "tsx scripts/chat.ts",
+    "eval": "tsx evals/run.ts",
+    "typecheck": "tsc --noEmit",
+    "smoke": "tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.125.0",
+    "@supabase/supabase-js": "^2.110.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
+  }
+}
