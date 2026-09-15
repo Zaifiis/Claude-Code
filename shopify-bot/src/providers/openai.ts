@@ -182,6 +182,13 @@ export class OpenAiProvider implements LlmProvider {
       params.tools = toOpenAiTools(req.tools);
       const choice = toOpenAiToolChoice(req.toolChoice);
       if (choice) params.tool_choice = choice;
+
+      // The GPT-5.6 tiers reject function tools on Chat Completions unless
+      // reasoning is off — the alternative is migrating to /v1/responses.
+      // Off is the right setting here anyway: this is a latency-sensitive
+      // sales chat, and both tiers do classification and short replies, not
+      // multi-step reasoning. Override per model if that stops being true.
+      params.reasoning_effort = "none";
     }
 
     let completion: OpenAI.Chat.Completions.ChatCompletion;
