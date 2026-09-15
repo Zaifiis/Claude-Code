@@ -1,6 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import type { CatalogRepository } from "../catalog/types.js";
 import { estimateCostUsd } from "../providers/anthropic.js";
+import { estimateOpenAiCostUsd } from "../providers/openai.js";
 import type { LlmProvider } from "../providers/types.js";
 import type { ReplyLanguage, TokenUsage } from "../types.js";
 import { addUsage, emptyUsage } from "../types.js";
@@ -25,6 +26,17 @@ const ROUTER_SYSTEM =
   "Call the route tool exactly once. Rewrite what they want as a short English product search query — " +
   "translate Roman Urdu shopping words (kurta, lawn, suit, sasta, garam, sardi) into the English terms a " +
   "product catalog would use. Do not answer the customer.";
+
+/** Cost lookup routed by provider, since each vendor prices its own models. */
+function estimateCost(
+  providerName: string,
+  model: string,
+  usage: TokenUsage,
+): number {
+  return providerName === "openai"
+    ? estimateOpenAiCostUsd(model, usage)
+    : estimateCostUsd(model, usage);
+}
 
 export interface RouteResult {
   intent: string;
@@ -114,7 +126,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     });
 
     usage = addUsage(usage, routed.usage);
-    costUsd += estimateCostUsd(routed.model, routed.usage);
+    costUsd += estimateCost(provider.name, routed.model, routed.usage);
 
     const call = routed.toolUses.find((t) => t.name === ROUTE_TOOL_NAME);
     route = call ? parseRoute(call.input, userMessage) : fallbackRoute(userMessage);
@@ -152,7 +164,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     });
 
     usage = addUsage(usage, result.usage);
-    costUsd += estimateCostUsd(result.model, result.usage);
+    costUsd += estimateCost(provider.name, result.model, result.usage);
 
     if (result.toolUses.length === 0) {
       reply = result.text;

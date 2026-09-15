@@ -57,8 +57,18 @@ Note down:
 
 ### 5. Model API key
 
-Get an Anthropic API key from <https://console.anthropic.com>. Without one the
-bot falls back to the offline mock and its replies are templated placeholders.
+Either vendor works — the bot picks whichever key it finds:
+
+- **Anthropic** — <https://console.anthropic.com>. Set `ANTHROPIC_API_KEY`.
+- **OpenAI** — <https://platform.openai.com>. Set `OPENAI_API_KEY`. This one
+  also covers embeddings, so it is the only key you need.
+
+Without either, the bot falls back to the offline mock and its replies are
+templated placeholders.
+
+Both are pay-as-you-go and need credit on the account. A new key with a zero
+balance fails with a rate-limit error, which reads confusingly — if you see
+that on a brand new key, check the balance before debugging anything else.
 
 ### 6. Shopify CLI
 
@@ -84,10 +94,16 @@ SCOPES=read_products,read_inventory,read_content,read_locales
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 
-# Model (from step 5)
+# Model (from step 5) — set ONE of these
 ANTHROPIC_API_KEY=
+OPENAI_API_KEY=
 
-# Force the offline mock even when a key is present. Use this in CI.
+# Optional model overrides (OpenAI). Defaults: luna for routing, terra for
+# replies. gpt-6-astra is the flagship and roughly 5x the price per token.
+# OPENAI_ROUTER_MODEL=gpt-5.6-luna
+# OPENAI_REPLY_MODEL=gpt-5.6-terra
+
+# Force a provider. BOT_PROVIDER=mock is what CI should use.
 # BOT_PROVIDER=mock
 ```
 
@@ -129,7 +145,8 @@ SHOP_DOMAIN=sana-threads-dev.myshopify.com
 SHOPIFY_ADMIN_TOKEN=shpat_...
 SUPABASE_URL=...
 SUPABASE_SERVICE_ROLE_KEY=...
-VOYAGE_API_KEY=...          # optional, but retrieval is not semantic without it
+# Embeddings: OPENAI_API_KEY covers this too. VOYAGE_API_KEY overrides it.
+# VOYAGE_API_KEY=...
 ```
 
 ### 3. Sync, then talk to your own store

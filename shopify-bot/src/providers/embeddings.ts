@@ -66,6 +66,57 @@ export class VoyageEmbeddings implements EmbeddingProvider {
 }
 
 /**
+ * OpenAI embeddings.
+ *
+ * text-embedding-3-small is 1536 dimensions by default, but it supports the
+ * `dimensions` parameter (Matryoshka truncation), so we ask for 1024 and the
+ * schema needs no change. That keeps one schema working for both vendors.
+ */
+export class OpenAiEmbeddings implements EmbeddingProvider {
+  readonly name = "openai";
+  readonly dimensions = EMBEDDING_DIMENSIONS;
+
+  constructor(
+    private readonly apiKey: string,
+    private readonly model = "text-embedding-3-small",
+  ) {}
+
+  async embed(texts: string[]): Promise<number[][]> {
+    if (texts.length === 0) return [];
+
+    const response = await fetch("https://api.openai.com/v1/embeddings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.apiKey}`,
+      },
+      body: JSON.stringify({
+        input: texts,
+        model: this.model,
+        dimensions: this.dimensions,
+      }),
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`OpenAI embeddings failed (${response.status}): ${body.slice(0, 300)}`);
+    }
+
+    const payload = (await response.json()) as {
+      data?: Array<{ index: number; embedding: number[] }>;
+    };
+    if (!payload.data) throw new Error("OpenAI returned no embedding data.");
+
+    const out: number[][] = new Array(texts.length);
+    for (const item of payload.data) out[item.index] = item.embedding;
+    for (let i = 0; i < texts.length; i++) {
+      if (!out[i]) throw new Error(`OpenAI returned no embedding for input ${i}.`);
+    }
+    return out as number[][];
+  }
+}
+
+/**
  * Deterministic offline embedder — hashed bag of words, L2 normalised.
  *
  * NOT semantic. "warm jacket" and "winter coat" land nowhere near each other,
@@ -110,5 +161,9 @@ export class HashEmbeddings implements EmbeddingProvider {
 export function createEmbeddingProvider(): EmbeddingProvider {
   const voyageKey = process.env["VOYAGE_API_KEY"];
   if (voyageKey) return new VoyageEmbeddings(voyageKey);
+
+  const openAiKey = process.env["OPENAI_API_KEY"];
+  if (openAiKey) return new OpenAiEmbeddings(openAiKey);
+
   return new HashEmbeddings();
 }

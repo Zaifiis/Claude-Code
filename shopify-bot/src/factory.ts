@@ -4,6 +4,7 @@ import type { CatalogRepository } from "./catalog/types.js";
 import { createEmbeddingProvider } from "./providers/embeddings.js";
 import { AnthropicProvider } from "./providers/anthropic.js";
 import { MockProvider } from "./providers/mock.js";
+import { OpenAiProvider } from "./providers/openai.js";
 import type { LlmProvider } from "./providers/types.js";
 import { storeSnapshot } from "../fixtures/store.js";
 
@@ -19,11 +20,16 @@ export function createProvider(): LlmProvider {
   const forced = process.env["BOT_PROVIDER"];
   if (forced === "mock") return new MockProvider();
   if (forced === "anthropic") return new AnthropicProvider();
+  if (forced === "openai") return new OpenAiProvider();
 
-  const hasKey =
+  const hasAnthropic =
     Boolean(process.env["ANTHROPIC_API_KEY"]) ||
     Boolean(process.env["ANTHROPIC_AUTH_TOKEN"]);
-  return hasKey ? new AnthropicProvider() : new MockProvider();
+  if (hasAnthropic) return new AnthropicProvider();
+
+  if (process.env["OPENAI_API_KEY"]) return new OpenAiProvider();
+
+  return new MockProvider();
 }
 
 /**
