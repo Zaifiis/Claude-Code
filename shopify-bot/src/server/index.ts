@@ -119,10 +119,17 @@ async function handleChat(
 ): Promise<void> {
   const verified = verifyAppProxySignature(url.searchParams, deps.apiSecret);
   if (!verified.valid || !verified.shop) {
+    // Almost always one of: SHOPIFY_API_SECRET does not match this app, or the
+    // request did not come through Shopify's proxy at all.
+    console.warn(
+      `[chat] signature rejected (shop=${url.searchParams.get("shop") ?? "none"}, ` +
+        `signature=${url.searchParams.get("signature") ? "present" : "missing"})`,
+    );
     json(res, 401, { error: "invalid_signature" });
     return;
   }
   if (!isFresh(url.searchParams.get("timestamp"))) {
+    console.warn("[chat] rejected a request with a stale timestamp");
     json(res, 401, { error: "stale_request" });
     return;
   }
@@ -296,8 +303,23 @@ export function startServer(port = Number(process.env["PORT"] ?? 3000)): void {
   const provider = createProvider();
   const catalogs = new CatalogCache(supabase);
 
+  // Log every request. Without this, a widget that says "connection problem"
+  // gives you nothing to work with — you cannot tell a blocked proxy from a
+  // rejected signature from a crash.
+  const quiet = process.env["LOG_REQUESTS"] === "off";
+
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+    const startedAt = Date.now();
+
+    if (!quiet) {
+      res.on("finish", () => {
+        console.log(
+          `${req.method} ${url.pathname} -> ${res.statusCode} (${Date.now() - startedAt}ms)` +
+            (url.searchParams.get("shop") ? ` shop=${url.searchParams.get("shop")}` : ""),
+        );
+      });
+    }
 
     void (async () => {
       try {
