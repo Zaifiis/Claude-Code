@@ -96,27 +96,79 @@ policy in the database, and the Shopify secret lets anyone impersonate your app.
 
 ---
 
+## Connect your real store (no OAuth needed yet)
+
+The full embedded app needs `shopify app init` and the Shopify CLI. You do not
+need any of that to get your real catalog into the bot — a **custom app token**
+is enough, and it takes two minutes.
+
+### 1. Create a custom app in the store admin
+
+In the store admin (not the Partner dashboard):
+
+**Settings → Apps and sales channels → Develop apps → Create an app**
+
+Name it `Sana Sync`, then **Configure Admin API scopes** and tick:
+
+- `read_products`
+- `read_inventory`
+- `read_content`
+- `read_locales`
+
+**Install app**, then reveal and copy the **Admin API access token** (`shpat_...`).
+
+> That token is shown once. It is a password to your store's catalog — put it
+> straight into `.env`, never into a commit, a screenshot or a chat message.
+
+### 2. Point the sync at it
+
+In `.env`:
+
+```bash
+SHOP_DOMAIN=sana-threads-dev.myshopify.com
+SHOPIFY_ADMIN_TOKEN=shpat_...
+SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+VOYAGE_API_KEY=...          # optional, but retrieval is not semantic without it
+```
+
+### 3. Sync, then talk to your own store
+
+```bash
+npm run sync
+npm run chat
+```
+
+`npm run sync` is idempotent — run it as often as you like. It reconciles
+deletions, and it only re-embeds products whose text actually changed, so a
+stock update costs nothing.
+
+This custom-app token is a **development shortcut**. It works on exactly one
+store, which is fine for building. Selling to other merchants needs the OAuth
+install flow — same sync code underneath, different way of getting the token.
+
+---
+
 ## What is not built yet
 
-This folder currently contains the **brain and the data model**, not the Shopify
-app itself. Built and working:
+This folder contains the **brain, the data model and the catalog sync** — not
+yet the installable storefront app. Built and working:
 
 - the store mirror schema (`supabase/schema.sql`)
 - the catalog layer, the agent pipeline, the tools, the persona, the guardrails
-- a terminal chat harness, a tool-layer smoke test, and a 40-case eval set
+- full catalog sync from a real store (`npm run sync`), with delete
+  reconciliation and change-only re-embedding
+- a terminal chat harness, a 50-check smoke test, and a 40-case eval set
 
 Not built yet, in the order it should be built:
 
-1. **Scaffold the embedded app** — `shopify app init --template reactRouter`.
-   This needs your Partner login, which is why it is not done yet. It brings
-   OAuth, session storage, webhook HMAC verification and the embedded admin
-   shell, all pre-wired.
-2. **`SupabaseCatalog`** — the same `CatalogRepository` interface that
-   `MemoryCatalog` implements, backed by the `match_products()` SQL function.
-   The agent will not know the difference.
-3. **Sync** — bulk operation on install, webhooks for changes, daily reconcile.
-4. **The widget** — theme app extension with an app embed block, talking to the
+1. **Webhooks** — `products/update`, `inventory_levels/update`, `app/uninstalled`
+   and the three mandatory privacy topics, so changes land in seconds rather
+   than waiting for the next full sync.
+2. **Scaffold the embedded app** — `shopify app init --template reactRouter`.
+   Needs your Partner login. Brings OAuth, session storage, webhook HMAC
+   verification and the embedded admin shell, all pre-wired.
+3. **The widget** — theme app extension with an app embed block, talking to the
    backend through Shopify's App Proxy.
-
-Step 2 is the one to do first once the tables exist: the moment it lands, the
-same `npm run chat` you are already using talks to a real store's catalog.
+4. **Merchant dashboard** — sync status, the persona settings form, conversation
+   transcripts.

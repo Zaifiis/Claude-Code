@@ -82,6 +82,9 @@ create table if not exists variants (
   available            boolean not null default false,
   position             integer,
   shopify_updated_at   timestamptz,
+  -- Stamped on every sync. Rows left behind with an older stamp were deleted
+  -- in Shopify, which is how the reconcile pass finds them.
+  synced_at            timestamptz not null default now(),
   unique (shop_id, shopify_gid)
 );
 
@@ -95,6 +98,7 @@ create table if not exists collections (
   title                text not null,
   description          text,
   shopify_updated_at   timestamptz,
+  synced_at            timestamptz not null default now(),
   unique (shop_id, shopify_gid)
 );
 

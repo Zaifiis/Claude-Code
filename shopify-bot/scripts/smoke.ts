@@ -8,9 +8,15 @@
  * produces a bad URL, no amount of prompt tuning saves you.
  */
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { storeSnapshot } from "../fixtures/store.js";
 import { buildCartUrl, executeTool, type ToolContext } from "../src/agent/tools.js";
 import { MemoryCatalog } from "../src/catalog/memory.js";
+import { classifyByGid, parseBulkJsonl } from "../src/shopify/bulk.js";
+import { htmlToText, numericId } from "../src/shopify/client.js";
+import { mapProduct } from "../src/sync/map.js";
 
 const GREEN = "\x1b[32m";
 const RED = "\x1b[31m";
@@ -151,6 +157,67 @@ async function main(): Promise<void> {
   // --- unknown tool ---------------------------------------------------------
   const unknown = await call(ctx, "delete_everything", {});
   check("unknown tool names are rejected", unknown["error"] === "unknown_tool");
+
+  // --- sync: bulk JSONL parsing and mapping ---------------------------------
+  // Mapping bugs are quiet and expensive — a mis-parsed price is a wrong price
+  // quoted to a real customer — so this is checked against a real-shaped
+  // Shopify bulk export rather than only end to end.
+  const here = dirname(fileURLToPath(import.meta.url));
+  const jsonl = readFileSync(join(here, "../fixtures/bulk-sample.jsonl"), "utf8");
+  const bulk = parseBulkJsonl(jsonl, classifyByGid);
+
+  check("bulk parse finds both products as roots", bulk.roots.length === 2);
+  check(
+    "variants are attached to the right parent",
+    bulk.childrenOf("gid://shopify/Product/8001", "ProductVariant").length === 2 &&
+      bulk.childrenOf("gid://shopify/Product/8002", "ProductVariant").length === 1,
+  );
+
+  const kurtaNode = bulk.roots.find((n) => n["handle"] === "cotton-kurta-white")!;
+  const kurta = mapProduct(
+    kurtaNode,
+    bulk.childrenOf("gid://shopify/Product/8001", "ProductVariant"),
+  );
+
+  check("price strings become numbers", kurta.variants[0]?.price === 3200);
+  check("variant id is numeric for cart links", kurta.variants[0]?.shopify_variant_id === "45001");
+  check("selectedOptions become an options map", kurta.variants[0]?.options["Size"] === "S");
+  check("sold out variant is marked unavailable", kurta.variants[1]?.available === false);
+  check("product is available when any variant is", kurta.available === true);
+  check(
+    "price range ignores out of stock variants",
+    kurta.price_min === 3200 && kurta.price_max === 3200,
+  );
+  check("compareAtPrice is kept when set", kurta.variants[1]?.compare_at_price === 4000);
+  check("null sku stays null", kurta.variants[0]?.sku === "KUR-W-S");
+
+  const dupattaNode = bulk.roots.find((n) => n["handle"] === "bridal-dupatta-red")!;
+  const dupatta = mapProduct(
+    dupattaNode,
+    bulk.childrenOf("gid://shopify/Product/8002", "ProductVariant"),
+  );
+  check("fully sold out product is unavailable", dupatta.available === false);
+  check(
+    "price range falls back to all variants when none available",
+    dupatta.price_min === 18500,
+  );
+  check("missing featured image maps to no images", dupatta.images.length === 0);
+
+  check("html is stripped from descriptions", !kurta.description.includes("<"));
+  check("br becomes a newline", kurta.description.includes("\n"));
+  check("list items survive as bullets", kurta.description.includes("• Pre-shrunk"));
+  check("html entities are decoded", dupatta.description.includes("zari work & hand"));
+
+  check(
+    "content hash is stable for identical input",
+    mapProduct(kurtaNode, bulk.childrenOf("gid://shopify/Product/8001", "ProductVariant"))
+      .content_hash === kurta.content_hash,
+  );
+  check("content hash differs between products", kurta.content_hash !== dupatta.content_hash);
+
+  check("numericId extracts the trailing id", numericId("gid://shopify/Product/8001") === "8001");
+  check("htmlToText handles null", htmlToText(null) === "");
+  check("malformed jsonl lines are skipped", parseBulkJsonl("{bad\n", classifyByGid).roots.length === 0);
 
   console.log();
   if (failures === 0) {
