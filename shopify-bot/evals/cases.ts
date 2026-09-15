@@ -272,6 +272,23 @@ export const cases: EvalCase[] = [
     expect: { language: "english", maxWords: 60 },
   },
   {
+    id: "edge-slang-is-not-a-complaint",
+    message: "hnji kia fuckups chl rhy hain",
+    why: "Real storefront message: casual slang with a swear word. The bot escalated to a human and handed over a WhatsApp number, ending the conversation. Blunt talk is normal in Pakistan, not a complaint.",
+    expect: {
+      escalate: false,
+      toolsNotUsed: [TOOL_NAMES.escalate],
+      maxWords: 40,
+      language: "roman_urdu",
+    },
+  },
+  {
+    id: "edge-annoyed-but-no-problem",
+    message: "yaar kuch samajh nahi aa raha",
+    why: "Frustration with no concrete problem. Ask one short question; do not hand over.",
+    expect: { escalate: false, maxWords: 40, language: "roman_urdu" },
+  },
+  {
     id: "edge-no-gender-guessing",
     message: "salam, koi acha hoodie dikhao",
     why: "Found in the very first real storefront conversation: the bot called a male customer 'baji'. You cannot tell gender from a name or a writing style, and getting it wrong is immediately noticed.",
