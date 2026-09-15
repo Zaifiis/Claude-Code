@@ -1,0 +1,8 @@
+{
+  "name": "Chat widget",
+  "greeting": "Assalam o alaikum! Kya dhoond rahe hain aap?",
+  "placeholder": "Type a message…",
+  "open": "Open chat",
+  "close": "Close chat",
+  "send": "Send"
+}

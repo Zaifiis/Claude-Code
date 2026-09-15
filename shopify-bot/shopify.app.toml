@@ -47,8 +47,10 @@ api_version = "2026-07"
   uri = "https://REPLACE-WITH-YOUR-URL/webhooks/app"
 
   # Mandatory for App Store review. Cheap to add now, painful to retrofit.
+  # GDPR topics use `compliance_topics`, not `topics` — Shopify rejects the
+  # whole config with "invalid topic" if you use the normal key for these.
   [[webhooks.subscriptions]]
-  topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
   uri = "https://REPLACE-WITH-YOUR-URL/webhooks/privacy"
 
 [build]
