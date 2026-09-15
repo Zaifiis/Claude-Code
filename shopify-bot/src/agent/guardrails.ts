@@ -26,7 +26,14 @@ const URDU_SCRIPT = /[؀-ۿ]/;
 const LATIN_LETTERS = /[a-zA-Z]{3,}/;
 
 export interface GuardrailWarning {
-  code: "banned_phrase" | "too_long" | "mixed_script" | "wrong_language" | "empty";
+  code:
+    | "banned_phrase"
+    | "too_long"
+    | "mixed_script"
+    | "wrong_language"
+    | "empty"
+    | "robotic_punctuation"
+    | "gendered_guess";
   detail: string;
 }
 
@@ -58,6 +65,21 @@ export function checkReply(
       code: "too_long",
       detail: `${lines.length} lines / ${words} words`,
     });
+  }
+
+  // Nobody types an em dash on a phone. It is one of the clearest tells that a
+  // machine wrote the message, and it survives most prompt instructions.
+  //
+  // Known false positive: a merchant whose product title itself contains an em
+  // dash will trip this whenever the bot quotes it. Left in deliberately — this
+  // is a warning, not a block, and the tell is worth catching.
+  if (/[—–]/.test(trimmed)) {
+    warnings.push({ code: "robotic_punctuation", detail: "em or en dash in a chat reply" });
+  }
+
+  // Markdown leaking into a chat bubble renders as literal asterisks.
+  if (/\*\*|^\s*[-*]\s/m.test(trimmed)) {
+    warnings.push({ code: "robotic_punctuation", detail: "markdown in a chat reply" });
   }
 
   const hasUrdu = URDU_SCRIPT.test(trimmed);

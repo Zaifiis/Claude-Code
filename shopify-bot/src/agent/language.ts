@@ -25,6 +25,10 @@ const ROMAN_URDU_MARKERS = [
   "soch", "raha", "rahi", "rahe", "hun", "hoon", "abhi", "zara", "thora",
   "bohat", "bahut", "zyada", "sirf", "lekin", "magar", "phir", "bilkul",
   "kaun", "konsa", "konsi", "kaise", "kaisa", "ghalat", "sahi",
+  // Short spellings people actually type on a phone. Roman Urdu has no fixed
+  // orthography, so the long forms alone miss a lot of real messages.
+  "ma", "mai", "tw", "hu", "larka", "larki", "lrka", "lrki", "banda",
+  "krna", "krni", "kro", "krte", "dekhna", "lena", "dena", "bhi", "sath",
   // NOTE: do not add words that are also ordinary English shopping words
   // ("order", "size", "free"). One false hit flips the whole reply language,
   // and replying in Roman Urdu to an English customer is very visible.

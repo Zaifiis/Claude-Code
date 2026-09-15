@@ -69,7 +69,7 @@ function sized(price: number, stock: number[], color = "Default"): Variant[] {
 export const products: Product[] = [
   p(
     "embroidered-lawn-3pc-azure",
-    "Embroidered Lawn 3-Piece — Azure",
+    "Embroidered Lawn 3-Piece - Azure",
     "Unstitched three piece lawn suit. Embroidered front, printed back and sleeves, cotton trouser and a chiffon dupatta. Colour is a soft azure blue that works for both day events and casual wear. Fabric is lightweight, suitable for Karachi and Lahore summers.",
     "Unstitched Suit",
     ["lawn", "unstitched", "3-piece", "summer", "eid"],
@@ -78,7 +78,7 @@ export const products: Product[] = [
   ),
   p(
     "embroidered-lawn-3pc-rose",
-    "Embroidered Lawn 3-Piece — Rose",
+    "Embroidered Lawn 3-Piece - Rose",
     "Unstitched three piece lawn suit in dusty rose. Heavy embroidered neckline, printed dupatta. Same fabric as our Azure suit, different colourway.",
     "Unstitched Suit",
     ["lawn", "unstitched", "3-piece", "summer", "eid"],
@@ -87,7 +87,7 @@ export const products: Product[] = [
   ),
   p(
     "premium-lawn-2pc-mint",
-    "Premium Lawn 2-Piece — Mint",
+    "Premium Lawn 2-Piece - Mint",
     "Two piece unstitched lawn. Shirt and trouser only, no dupatta. Digital print.",
     "Unstitched Suit",
     ["lawn", "unstitched", "2-piece", "summer", "budget"],
@@ -96,8 +96,8 @@ export const products: Product[] = [
   ),
   p(
     "cotton-kurta-white",
-    "Cotton Kurta — White",
-    "Stitched straight cut cotton kurta with side slits. Full sleeves, round neck with a small placket. Pre-shrunk fabric, machine washable. Runs slightly loose — if you are between sizes take the smaller one.",
+    "Cotton Kurta - White",
+    "Stitched straight cut cotton kurta with side slits. Full sleeves, round neck with a small placket. Pre-shrunk fabric, machine washable. Runs slightly loose - if you are between sizes take the smaller one.",
     "Kurta",
     ["kurta", "stitched", "cotton", "everyday", "office"],
     ["Ready to Wear"],
@@ -105,7 +105,7 @@ export const products: Product[] = [
   ),
   p(
     "cotton-kurta-black",
-    "Cotton Kurta — Black",
+    "Cotton Kurta - Black",
     "Same cut as our white cotton kurta, in black. Straight cut, side slits, full sleeves.",
     "Kurta",
     ["kurta", "stitched", "cotton", "everyday", "office"],
@@ -114,7 +114,7 @@ export const products: Product[] = [
   ),
   p(
     "khaddar-kurta-olive",
-    "Khaddar Kurta — Olive",
+    "Khaddar Kurta - Olive",
     "Winter khaddar kurta, olive green. Heavier weave, keeps you warm without a jacket indoors. Full sleeves.",
     "Kurta",
     ["kurta", "khaddar", "winter", "warm"],
@@ -123,7 +123,7 @@ export const products: Product[] = [
   ),
   p(
     "pashmina-shawl-charcoal",
-    "Pashmina Shawl — Charcoal",
+    "Pashmina Shawl - Charcoal",
     "Soft woven pashmina shawl, charcoal grey with a subtle self pattern and fringed edges. 2.2 metres. Warm enough for Islamabad winters and light enough to carry.",
     "Shawl",
     ["shawl", "pashmina", "winter", "warm", "gift"],
@@ -132,7 +132,7 @@ export const products: Product[] = [
   ),
   p(
     "pashmina-shawl-camel",
-    "Pashmina Shawl — Camel",
+    "Pashmina Shawl - Camel",
     "Woven pashmina shawl in camel. Same weight as charcoal.",
     "Shawl",
     ["shawl", "pashmina", "winter", "warm", "gift"],
@@ -141,8 +141,8 @@ export const products: Product[] = [
   ),
   p(
     "fleece-hoodie-black",
-    "Fleece Hoodie — Black",
-    "Unisex pullover hoodie, brushed fleece inside. Kangaroo pocket, drawstring hood, ribbed cuffs. 320 GSM — genuinely warm, not a summer-weight hoodie.",
+    "Fleece Hoodie - Black",
+    "Unisex pullover hoodie, brushed fleece inside. Kangaroo pocket, drawstring hood, ribbed cuffs. 320 GSM - genuinely warm, not a summer-weight hoodie.",
     "Hoodie",
     ["hoodie", "winter", "unisex", "warm", "casual"],
     ["Winter Collection"],
@@ -150,7 +150,7 @@ export const products: Product[] = [
   ),
   p(
     "fleece-hoodie-maroon",
-    "Fleece Hoodie — Maroon",
+    "Fleece Hoodie - Maroon",
     "Same 320 GSM fleece hoodie in maroon.",
     "Hoodie",
     ["hoodie", "winter", "unisex", "warm", "casual"],
@@ -159,7 +159,7 @@ export const products: Product[] = [
   ),
   p(
     "puffer-jacket-navy",
-    "Puffer Jacket — Navy",
+    "Puffer Jacket - Navy",
     "Quilted puffer jacket with a water resistant shell and full zip. Two side pockets with zips, elasticated cuffs. Packs down small.",
     "Jacket",
     ["jacket", "winter", "warm", "outerwear"],
@@ -168,7 +168,7 @@ export const products: Product[] = [
   ),
   p(
     "abaya-classic-black",
-    "Classic Abaya — Black",
+    "Classic Abaya - Black",
     "Nida matt abaya, plain classic cut with a front zip and wide sleeves. Falls straight, no cling. Comes with a matching hijab.",
     "Abaya",
     ["abaya", "modest", "everyday", "black"],
@@ -182,7 +182,7 @@ export const products: Product[] = [
   ),
   p(
     "embellished-abaya-navy",
-    "Embellished Abaya — Navy",
+    "Embellished Abaya - Navy",
     "Navy nida abaya with hand-applied stone work on the cuffs and front panel. Occasion piece. Dry clean only.",
     "Abaya",
     ["abaya", "modest", "occasion", "formal"],
@@ -192,14 +192,14 @@ export const products: Product[] = [
       v({ Size: "56", Color: "Navy" }, 11500, 2),
     ],
   ),
-  // Deliberately thin description — real catalogs are full of these.
+  // Deliberately thin description - real catalogs are full of these.
   p("silk-scarf-printed", "Printed Silk Scarf", "Silk scarf.", "Accessory", ["scarf", "gift"], ["Accessories"], [
     v({ Color: "Teal" }, 2200, 15),
     v({ Color: "Rust" }, 2200, 9),
   ]),
   p(
     "leather-tote-tan",
-    "Leather Tote Bag — Tan",
+    "Leather Tote Bag - Tan",
     "Full grain leather tote with a cotton lining, one internal zip pocket and two slip pockets. Fits a 14 inch laptop. Handles are reinforced. Leather will darken with use.",
     "Bag",
     ["bag", "leather", "work", "gift"],
@@ -208,7 +208,7 @@ export const products: Product[] = [
   ),
   p(
     "canvas-sneakers-white",
-    "Canvas Sneakers — White",
+    "Canvas Sneakers - White",
     "Low top canvas sneakers with a vulcanised rubber sole. Unisex sizing in UK sizes.",
     "Footwear",
     ["shoes", "sneakers", "casual", "unisex"],
@@ -223,8 +223,8 @@ export const products: Product[] = [
   ),
   p(
     "khussa-embroidered-gold",
-    "Embroidered Khussa — Gold",
-    "Handmade khussa with gold thread embroidery on a leather sole. Traditional pointed toe. These stretch slightly with wear — order your normal size.",
+    "Embroidered Khussa - Gold",
+    "Handmade khussa with gold thread embroidery on a leather sole. Traditional pointed toe. These stretch slightly with wear - order your normal size.",
     "Footwear",
     ["khussa", "traditional", "wedding", "occasion"],
     ["Footwear", "Occasion"],
@@ -235,10 +235,10 @@ export const products: Product[] = [
       v({ Size: "39" }, 4400, 2),
     ],
   ),
-  // Sold out entirely — the bot must not pretend otherwise.
+  // Sold out entirely - the bot must not pretend otherwise.
   p(
     "bridal-dupatta-red",
-    "Bridal Dupatta — Red",
+    "Bridal Dupatta - Red",
     "Heavy zari work bridal dupatta in deep red, four sided border with hand embroidery.",
     "Dupatta",
     ["bridal", "wedding", "occasion", "heavy"],
@@ -247,7 +247,7 @@ export const products: Product[] = [
   ),
   p(
     "attar-oud-royal",
-    "Attar — Oud Royal",
+    "Attar - Oud Royal",
     "Alcohol free concentrated attar, 12ml roll on. Oud base with rose and a little amber. Lasts most of the day on skin.",
     "Fragrance",
     ["attar", "fragrance", "gift", "alcohol-free"],
@@ -320,7 +320,7 @@ export const storeSnapshot: StoreSnapshot = {
     currency: "PKR",
     countryCode: "PK",
     about:
-      "Pakistani clothing and accessories — unstitched lawn, ready to wear kurtas, modest wear, winter layers, bags and fragrance.",
+      "Pakistani clothing and accessories - unstitched lawn, ready to wear kurtas, modest wear, winter layers, bags and fragrance.",
   },
   settings: {
     enabled: true,

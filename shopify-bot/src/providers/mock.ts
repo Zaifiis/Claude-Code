@@ -130,7 +130,7 @@ export class MockProvider implements LlmProvider {
       const results = data["results"] as Array<Record<string, unknown>>;
       if (results.length === 0) return response({ text: say(language, "none"), model: "mock-reply" });
       const top = results.slice(0, 2);
-      const lines = top.map((r) => `${String(r["title"])} — ${String(r["price"])}`);
+      const lines = top.map((r) => `${String(r["title"])}, ${String(r["price"])}`);
       return response({
         text: `${say(language, "found")}\n${lines.join("\n")}\n${say(language, "which")}`,
         model: "mock-reply",
@@ -176,7 +176,7 @@ const PHRASES: Record<ReplyLanguage, Record<Phrase, string>> = {
     found: "These two should work:",
     which: "Which one do you like?",
     none: "We don't have that one. What else are you looking for?",
-    cart: "Here you go — this link adds it to your cart:",
+    cart: "Here you go, this link adds it to your cart:",
     policy: "Here's how it works:",
     sold_out: "That one's sold out right now. Want me to show what's in stock?",
     generic: "Tell me a bit more and I'll find it for you.",
@@ -187,7 +187,7 @@ const PHRASES: Record<ReplyLanguage, Record<Phrase, string>> = {
     found: "Ye do cheezein mil sakti hain:",
     which: "Konsi pasand aayi?",
     none: "Ye to available nahi hai. Aur kya dekhna chahenge?",
-    cart: "Ye lijiye — is link se cart mein add ho jayega:",
+    cart: "Ye lijiye, is link se cart mein add ho jayega:",
     policy: "Ji, aise hota hai:",
     sold_out: "Ye filhal out of stock hai. Jo available hai wo dikha dun?",
     generic: "Thora aur bataiye, main dhoond deti hun.",
@@ -198,7 +198,7 @@ const PHRASES: Record<ReplyLanguage, Record<Phrase, string>> = {
     found: "یہ دو چیزیں مل سکتی ہیں:",
     which: "کون سی پسند آئی؟",
     none: "یہ دستیاب نہیں ہے۔ اور کیا دیکھنا چاہیں گے؟",
-    cart: "یہ لیجیے — اس لنک سے کارٹ میں شامل ہو جائے گا:",
+    cart: "یہ لیجیے، اس لنک سے کارٹ میں شامل ہو جائے گا:",
     policy: "جی، ایسے ہوتا ہے:",
     sold_out: "یہ فی الحال دستیاب نہیں۔ جو موجود ہے وہ دکھا دوں؟",
     generic: "تھوڑا اور بتائیے، میں ڈھونڈ دیتی ہوں۔",

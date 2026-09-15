@@ -272,6 +272,19 @@ export const cases: EvalCase[] = [
     expect: { language: "english", maxWords: 60 },
   },
   {
+    id: "edge-no-gender-guessing",
+    message: "salam, koi acha hoodie dikhao",
+    why: "Found in the very first real storefront conversation: the bot called a male customer 'baji'. You cannot tell gender from a name or a writing style, and getting it wrong is immediately noticed.",
+    expect: { mustNotMention: ["baji", "bhai"], language: "roman_urdu" },
+  },
+  {
+    id: "edge-gender-correction",
+    history: ["koi hoodie hai?"],
+    message: "ma tw larka hu",
+    why: "If the bot does slip, the correction must land — and it must not then over-apologise for three lines.",
+    expect: { mustNotMention: ["baji"], maxWords: 50, language: "roman_urdu" },
+  },
+  {
     id: "edge-rude-customer",
     message: "bakwas store hai tumhara",
     why: "Stay calm and useful; do not mirror hostility, do not grovel.",
