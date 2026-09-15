@@ -312,6 +312,14 @@ export function startServer(port = Number(process.env["PORT"] ?? 3000)): void {
     const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
     const startedAt = Date.now();
 
+    // Shopify's App Proxy forwards the path WITH a trailing slash — a request
+    // the widget sends to /apps/chat arrives here as /apps/chat/. Normalise it,
+    // or every single storefront message 404s while the same URL works by hand.
+    const path =
+      url.pathname.length > 1 && url.pathname.endsWith("/")
+        ? url.pathname.slice(0, -1)
+        : url.pathname;
+
     if (!quiet) {
       res.on("finish", () => {
         console.log(
@@ -323,17 +331,17 @@ export function startServer(port = Number(process.env["PORT"] ?? 3000)): void {
 
     void (async () => {
       try {
-        if (req.method === "GET" && url.pathname === "/health") {
+        if (req.method === "GET" && path === "/health") {
           json(res, 200, { ok: true, provider: provider.name });
           return;
         }
 
-        if (req.method === "POST" && url.pathname === "/apps/chat") {
+        if (req.method === "POST" && path === "/apps/chat") {
           await handleChat(req, res, url, { supabase, provider, catalogs, apiSecret });
           return;
         }
 
-        if (req.method === "POST" && url.pathname.startsWith("/webhooks")) {
+        if (req.method === "POST" && path.startsWith("/webhooks")) {
           await handleWebhook(req, res, { supabase, apiSecret });
           return;
         }
