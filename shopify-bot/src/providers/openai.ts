@@ -25,6 +25,9 @@ const DEFAULT_MODELS: Record<ModelTier, string> = {
 const PRICING: Record<string, { input: number; output: number; cacheRead: number }> = {
   "gpt-6-astra": { input: 10.0, output: 50.0, cacheRead: 1.0 },
   "gpt-5.6-terra": { input: 2.0, output: 12.0, cacheRead: 0.2 },
+  // Luna was cut to $0.20/$1.20 on 2026-07-30, which is why it is the router:
+  // ten times cheaper than Terra on input for a job that is pure classification.
+  "gpt-5.6-luna": { input: 0.2, output: 1.2, cacheRead: 0.02 },
 };
 
 const warnedUnpriced = new Set<string>();
