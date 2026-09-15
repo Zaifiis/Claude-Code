@@ -166,26 +166,51 @@ install flow — same sync code underneath, different way of getting the token.
 
 ---
 
+## Putting it on a storefront
+
+Once the catalog is synced, the widget is two commands and one toggle.
+
+```bash
+npm run serve                                  # the backend, in one terminal
+npx @shopify/cli@latest app config link        # binds shopify.app.toml to your app
+npx @shopify/cli@latest app dev                # public tunnel to your machine
+```
+
+On Windows PowerShell use `npm.cmd` and `npx.cmd`, or run
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once to stop Windows
+blocking them.
+
+Then, in the store admin:
+
+**Online Store → Themes → Customize → App embeds → Chat widget → on → Save**
+
+Open the storefront and the bubble is there. That last toggle is the step every
+merchant gets stuck on — there is no way to enable an app embed for them from
+the app, so plan your onboarding around it.
+
+`npm run serve` works without Supabase too: it serves the fixture store and
+warns that conversations are not being saved, which is enough to test the
+widget before the database exists.
+
+Full hosting notes, including the nginx buffering trap that silently breaks
+streaming, are in [DEPLOY.md](./DEPLOY.md).
+
+---
+
 ## What is not built yet
 
-This folder contains the **brain, the data model and the catalog sync** — not
-yet the installable storefront app. Built and working:
+Everything a single store needs is built: the schema, the catalog sync, the
+agent, the backend, the webhooks and the storefront widget.
 
-- the store mirror schema (`supabase/schema.sql`)
-- the catalog layer, the agent pipeline, the tools, the persona, the guardrails
-- full catalog sync from a real store (`npm run sync`), with delete
-  reconciliation and change-only re-embedding
-- a terminal chat harness, a 50-check smoke test, and a 40-case eval set
+What is missing is what it takes to sell this to **other** merchants:
 
-Not built yet, in the order it should be built:
+1. **OAuth install flow** — so a merchant can click Install and have their own
+   token stored. One store works today with a custom app token.
+2. **Shopify Billing API** — required before you can charge anyone.
+3. **Merchant dashboard** — sync status, the persona settings form, conversation
+   transcripts. `bot_settings` is already read from the database; nothing edits
+   it yet.
+4. **App Store listing and review** — the mandatory GDPR webhooks are already
+   implemented, which is the part people usually retrofit painfully.
 
-1. **Webhooks** — `products/update`, `inventory_levels/update`, `app/uninstalled`
-   and the three mandatory privacy topics, so changes land in seconds rather
-   than waiting for the next full sync.
-2. **Scaffold the embedded app** — `shopify app init --template reactRouter`.
-   Needs your Partner login. Brings OAuth, session storage, webhook HMAC
-   verification and the embedded admin shell, all pre-wired.
-3. **The widget** — theme app extension with an app embed block, talking to the
-   backend through Shopify's App Proxy.
-4. **Merchant dashboard** — sync status, the persona settings form, conversation
-   transcripts.
+None of those change the agent, the sync or the widget. They are the wrapper.
