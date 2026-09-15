@@ -19,7 +19,7 @@ const RESET = "\x1b[0m";
 
 async function main(): Promise<void> {
   const provider = createProvider();
-  const catalog = createCatalog();
+  const catalog = await createCatalog();
   const profile = await catalog.getProfile();
   const settings = await catalog.getSettings();
 

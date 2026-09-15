@@ -1,5 +1,7 @@
 import { MemoryCatalog } from "./catalog/memory.js";
+import { createSupabaseClient, SupabaseCatalog } from "./catalog/supabase.js";
 import type { CatalogRepository } from "./catalog/types.js";
+import { createEmbeddingProvider } from "./providers/embeddings.js";
 import { AnthropicProvider } from "./providers/anthropic.js";
 import { MockProvider } from "./providers/mock.js";
 import type { LlmProvider } from "./providers/types.js";
@@ -24,7 +26,26 @@ export function createProvider(): LlmProvider {
   return hasKey ? new AnthropicProvider() : new MockProvider();
 }
 
-/** The fixture store. Swap for SupabaseCatalog once a real store is synced. */
-export function createCatalog(): CatalogRepository {
+/**
+ * Fixtures by default; the real store mirror when Supabase is configured.
+ *
+ * Set SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY and SHOP_DOMAIN and the same
+ * `npm run chat` talks to a live catalog. BOT_CATALOG=memory forces fixtures.
+ */
+export async function createCatalog(): Promise<CatalogRepository> {
+  if (process.env["BOT_CATALOG"] === "memory") return new MemoryCatalog(storeSnapshot);
+
+  const shopDomain = process.env["SHOP_DOMAIN"];
+  const hasSupabase =
+    Boolean(process.env["SUPABASE_URL"]) && Boolean(process.env["SUPABASE_SERVICE_ROLE_KEY"]);
+
+  if (shopDomain && hasSupabase) {
+    return SupabaseCatalog.forShopDomain(
+      createSupabaseClient(),
+      shopDomain,
+      createEmbeddingProvider(),
+    );
+  }
+
   return new MemoryCatalog(storeSnapshot);
 }

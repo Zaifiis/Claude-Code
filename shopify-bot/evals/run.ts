@@ -32,7 +32,7 @@ interface CaseOutcome {
 async function runCase(
   testCase: EvalCase,
   provider: ReturnType<typeof createProvider>,
-  catalog: ReturnType<typeof createCatalog>,
+  catalog: Awaited<ReturnType<typeof createCatalog>>,
 ): Promise<CaseOutcome> {
   let history: Anthropic.MessageParam[] = [];
   let costUsd = 0;
@@ -106,7 +106,7 @@ async function main(): Promise<void> {
   }
 
   const provider = createProvider();
-  const catalog = createCatalog();
+  const catalog = await createCatalog();
 
   console.log(`${BOLD}Running ${selected.length} cases${RESET} ${DIM}(provider: ${provider.name})${RESET}`);
   if (provider.name === "mock") {
