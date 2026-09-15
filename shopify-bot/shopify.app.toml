@@ -1,0 +1,55 @@
+# Shopify app configuration.
+#
+# Run `shopify app config link` to bind this to the app in your Dev Dashboard,
+# then `shopify app deploy` to push scopes, the proxy and webhooks to Shopify.
+# Editing those by hand in the dashboard and here both is how they drift apart.
+
+name = "Sana Chat"
+application_url = "https://REPLACE-WITH-YOUR-URL"
+embedded = true
+
+[access_scopes]
+# Only what the bot actually reads. Asking for scopes you do not use is the
+# fastest way to fail App Store review.
+#   read_products / read_inventory — the catalog and stock levels
+#   read_content                   — policy pages and FAQ pages
+#   read_locales                   — the store's languages
+#
+# NOT requested: read_orders / read_customers. Order tracking needs those, and
+# they are protected customer data requiring Shopify's approval. Add them when
+# you build that feature, not before.
+scopes = "read_products,read_inventory,read_content,read_locales"
+
+[auth]
+redirect_urls = [ "https://REPLACE-WITH-YOUR-URL/auth/callback" ]
+
+# The storefront widget posts here. Shopify signs every request with your API
+# secret, which is how the backend knows which shop it is talking to without
+# trusting anything the browser sent.
+[app_proxy]
+url = "https://REPLACE-WITH-YOUR-URL/apps/chat"
+subpath = "chat"
+prefix = "apps"
+
+[webhooks]
+api_version = "2026-07"
+
+  [[webhooks.subscriptions]]
+  topics = [ "products/create", "products/update", "products/delete" ]
+  uri = "https://REPLACE-WITH-YOUR-URL/webhooks/products"
+
+  [[webhooks.subscriptions]]
+  topics = [ "inventory_levels/update" ]
+  uri = "https://REPLACE-WITH-YOUR-URL/webhooks/inventory"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "https://REPLACE-WITH-YOUR-URL/webhooks/app"
+
+  # Mandatory for App Store review. Cheap to add now, painful to retrofit.
+  [[webhooks.subscriptions]]
+  topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+  uri = "https://REPLACE-WITH-YOUR-URL/webhooks/privacy"
+
+[build]
+automatically_update_urls_on_dev = true

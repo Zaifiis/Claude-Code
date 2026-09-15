@@ -2,7 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { detectLanguage, extractPriceCap } from "../agent/language.js";
 import { ROUTE_TOOL_NAME, TOOL_NAMES } from "../agent/tools.js";
 import type { ReplyLanguage } from "../types.js";
-import type { LlmProvider, LlmRequest, LlmResponse } from "./types.js";
+import type { LlmProvider, LlmRequest, LlmResponse, TextDeltaHandler } from "./types.js";
 
 /**
  * Offline provider — no API key, no network, fully deterministic.
@@ -33,6 +33,15 @@ export class MockProvider implements LlmProvider {
       return this.chooseTool(req.messages, userText);
     }
     return this.speak(results[results.length - 1]!, language);
+  }
+
+  /** Emits the finished text word by word so the streaming UI can be tested. */
+  async completeStreaming(req: LlmRequest, onDelta: TextDeltaHandler): Promise<LlmResponse> {
+    const result = await this.complete(req);
+    for (const word of result.text.split(/(\s+)/)) {
+      if (word) onDelta(word);
+    }
+    return result;
   }
 
   private route(userText: string, language: ReplyLanguage): LlmResponse {

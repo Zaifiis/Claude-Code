@@ -1,0 +1,213 @@
+/*
+ * Chat widget styles.
+ *
+ * Everything is scoped under #sana-chat-root and every property is set
+ * explicitly, because this loads into a merchant's theme and themes set
+ * aggressive global rules. Inheriting a theme's box-sizing or button styles is
+ * how a widget ends up looking broken on one store in five.
+ */
+
+#sana-chat-root,
+#sana-chat-root * {
+  box-sizing: border-box;
+}
+
+#sana-chat-root {
+  --sana-accent: #1f6feb;
+  --sana-bg: #ffffff;
+  --sana-fg: #1a1a1a;
+  --sana-muted: #6b7280;
+  --sana-border: #e5e7eb;
+  --sana-user-bg: #eef2ff;
+
+  position: fixed;
+  bottom: 20px;
+  z-index: 2147483000; /* above sticky headers and cookie bars */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--sana-fg);
+}
+
+#sana-chat-root[data-pos="right"] { right: 20px; }
+#sana-chat-root[data-pos="left"]  { left: 20px; }
+
+/* --- bubble --------------------------------------------------------------- */
+
+#sana-chat-root .sana-bubble {
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sana-accent);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-left: auto;
+  transition: transform 0.15s ease;
+}
+
+#sana-chat-root .sana-bubble:hover { transform: scale(1.06); }
+#sana-chat-root .sana-bubble:focus-visible { outline: 3px solid var(--sana-accent); outline-offset: 3px; }
+
+/* --- panel ---------------------------------------------------------------- */
+
+#sana-chat-root .sana-panel {
+  position: absolute;
+  bottom: 70px;
+  width: 360px;
+  max-width: calc(100vw - 40px);
+  height: 480px;
+  max-height: calc(100vh - 120px);
+  background: var(--sana-bg);
+  border: 1px solid var(--sana-border);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#sana-chat-root[data-pos="right"] .sana-panel { right: 0; }
+#sana-chat-root[data-pos="left"]  .sana-panel { left: 0; }
+
+#sana-chat-root .sana-panel[hidden] { display: none !important; }
+
+#sana-chat-root .sana-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--sana-accent);
+  color: #fff;
+  flex: 0 0 auto;
+}
+
+#sana-chat-root .sana-title { font-weight: 600; }
+
+#sana-chat-root .sana-close {
+  background: transparent;
+  border: 0;
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+/* --- messages ------------------------------------------------------------- */
+
+#sana-chat-root .sana-log {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fafafa;
+}
+
+#sana-chat-root .sana-msg {
+  max-width: 82%;
+  padding: 9px 12px;
+  border-radius: 14px;
+  white-space: pre-wrap;  /* the bot replies in short lines; keep them */
+  word-break: break-word;
+}
+
+#sana-chat-root .sana-bot {
+  background: #fff;
+  border: 1px solid var(--sana-border);
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+}
+
+#sana-chat-root .sana-user {
+  background: var(--sana-user-bg);
+  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+}
+
+#sana-chat-root .sana-msg a {
+  color: var(--sana-accent);
+  text-decoration: underline;
+}
+
+#sana-chat-root .sana-typing {
+  color: var(--sana-muted);
+  font-size: 20px;
+  letter-spacing: 2px;
+  padding: 6px 12px;
+  animation: sana-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes sana-pulse {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sana-chat-root .sana-typing { animation: none; opacity: 0.6; }
+  #sana-chat-root .sana-bubble { transition: none; }
+}
+
+/* --- composer ------------------------------------------------------------- */
+
+#sana-chat-root .sana-form {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--sana-border);
+  background: var(--sana-bg);
+  flex: 0 0 auto;
+}
+
+#sana-chat-root .sana-input {
+  flex: 1 1 auto;
+  border: 1px solid var(--sana-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  /* 16px stops iOS Safari zooming the page when the field is focused. */
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--sana-fg);
+  background: #fff;
+  min-width: 0;
+}
+
+#sana-chat-root .sana-input:focus { outline: 2px solid var(--sana-accent); outline-offset: -1px; }
+#sana-chat-root .sana-input:disabled { background: #f3f4f6; }
+
+#sana-chat-root .sana-send {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 10px;
+  background: var(--sana-accent);
+  color: #fff;
+  font-size: 18px;
+  width: 44px;
+  cursor: pointer;
+}
+
+#sana-chat-root .sana-send:disabled { opacity: 0.5; cursor: default; }
+
+/* Phones: full width, anchored to the bottom. */
+@media (max-width: 480px) {
+  #sana-chat-root { bottom: 14px; }
+  #sana-chat-root[data-pos="right"] { right: 14px; }
+  #sana-chat-root[data-pos="left"]  { left: 14px; }
+
+  #sana-chat-root .sana-panel {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: 80px;
+    width: auto;
+    max-width: none;
+    height: calc(100vh - 140px);
+  }
+}

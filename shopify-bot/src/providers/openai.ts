@@ -1,6 +1,13 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
-import type { LlmProvider, LlmRequest, LlmResponse, LlmToolUse, ModelTier } from "./types.js";
+import type {
+  LlmProvider,
+  LlmRequest,
+  LlmResponse,
+  LlmToolUse,
+  ModelTier,
+  TextDeltaHandler,
+} from "./types.js";
 
 /**
  * OpenAI provider.
@@ -171,7 +178,7 @@ export class OpenAiProvider implements LlmProvider {
     };
   }
 
-  async complete(req: LlmRequest): Promise<LlmResponse> {
+  private buildParams(req: LlmRequest): OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming {
     const model = this.models[req.tier];
 
     const params: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming = {
@@ -194,6 +201,12 @@ export class OpenAiProvider implements LlmProvider {
       params.reasoning_effort = "none";
     }
 
+    return params;
+  }
+
+  async complete(req: LlmRequest): Promise<LlmResponse> {
+    const params = this.buildParams(req);
+
     let completion: OpenAI.Chat.Completions.ChatCompletion;
     try {
       completion = await this.client.chat.completions.create(params);
@@ -209,7 +222,7 @@ export class OpenAiProvider implements LlmProvider {
       }
       if (error instanceof OpenAI.NotFoundError) {
         throw new Error(
-          `OpenAI has no model "${model}" available to this account. ` +
+          `OpenAI has no model "${params.model}" available to this account. ` +
             "Set OPENAI_ROUTER_MODEL / OPENAI_REPLY_MODEL in .env to models you can access.",
         );
       }
@@ -248,6 +261,82 @@ export class OpenAiProvider implements LlmProvider {
         outputTokens: usage?.completion_tokens ?? 0,
         cacheReadTokens,
       },
+    };
+  }
+
+  async completeStreaming(
+    req: LlmRequest,
+    onDelta: TextDeltaHandler,
+  ): Promise<LlmResponse> {
+    const params = this.buildParams(req);
+
+    const stream = await this.client.chat.completions.create({
+      ...params,
+      stream: true,
+      // Usage is not reported on a stream unless asked for, and without it
+      // every streamed conversation would log as costing nothing.
+      stream_options: { include_usage: true },
+    });
+
+    let text = "";
+    let model = params.model;
+    const toolCallsByIndex = new Map<
+      number,
+      { id: string; name: string; arguments: string }
+    >();
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let cacheReadTokens = 0;
+
+    for await (const chunk of stream) {
+      if (chunk.model) model = chunk.model;
+
+      if (chunk.usage) {
+        inputTokens = chunk.usage.prompt_tokens ?? 0;
+        outputTokens = chunk.usage.completion_tokens ?? 0;
+        cacheReadTokens = chunk.usage.prompt_tokens_details?.cached_tokens ?? 0;
+      }
+
+      const delta = chunk.choices[0]?.delta;
+      if (!delta) continue;
+
+      if (delta.content) {
+        text += delta.content;
+        onDelta(delta.content);
+      }
+
+      // Tool call arguments arrive in fragments keyed by index, not by id.
+      for (const call of delta.tool_calls ?? []) {
+        const existing = toolCallsByIndex.get(call.index) ?? {
+          id: "",
+          name: "",
+          arguments: "",
+        };
+        if (call.id) existing.id = call.id;
+        if (call.function?.name) existing.name = call.function.name;
+        if (call.function?.arguments) existing.arguments += call.function.arguments;
+        toolCallsByIndex.set(call.index, existing);
+      }
+    }
+
+    const toolUses: LlmToolUse[] = [...toolCallsByIndex.values()]
+      .filter((call) => call.name)
+      .map((call) => {
+        let input: unknown = {};
+        try {
+          input = JSON.parse(call.arguments || "{}");
+        } catch {
+          input = {};
+        }
+        return { id: call.id || `call_${call.name}`, name: call.name, input };
+      });
+
+    return {
+      text: text.trim(),
+      toolUses,
+      stopReason: toolUses.length > 0 ? "tool_use" : "end_turn",
+      model,
+      usage: { inputTokens, outputTokens, cacheReadTokens },
     };
   }
 }

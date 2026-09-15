@@ -1,0 +1,13 @@
+# Theme app extension.
+#
+# App embed blocks are the supported way to add a floating chat bubble to a
+# storefront. Script tags are the old way: none can be created after
+# 2026-10-01 and they stop running entirely on 2027-03-01, so that path is a
+# dead end for a new app.
+name = "Chat widget"
+type = "theme"
+
+[[extensions]]
+type = "theme"
+name = "Chat widget"
+handle = "chat-widget"

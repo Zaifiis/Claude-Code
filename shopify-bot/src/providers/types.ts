@@ -37,7 +37,18 @@ export interface LlmResponse {
   usage: TokenUsage;
 }
 
+/** Called with each chunk of assistant text as it is generated. */
+export type TextDeltaHandler = (delta: string) => void;
+
 export interface LlmProvider {
   readonly name: string;
   complete(req: LlmRequest): Promise<LlmResponse>;
+  /**
+   * Same as complete(), but emits assistant text as it arrives.
+   *
+   * Only worth using for the final customer-facing reply: intermediate tool
+   * rounds produce no text worth showing. Providers that cannot stream may
+   * omit this and the pipeline falls back to complete().
+   */
+  completeStreaming?(req: LlmRequest, onDelta: TextDeltaHandler): Promise<LlmResponse>;
 }

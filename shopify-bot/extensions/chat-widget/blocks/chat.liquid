@@ -1,0 +1,65 @@
+{% comment %}
+  App embed block. The merchant enables this in Theme editor → App embeds,
+  which is the one onboarding step every merchant gets stuck on — the merchant
+  dashboard should link straight here.
+
+  Settings below appear in the theme editor, so a merchant can match the bubble
+  to their brand without touching code.
+{% endcomment %}
+
+<div
+  id="sana-chat-root"
+  data-proxy-url="{{ block.settings.proxy_url | default: '/apps/chat' }}"
+  data-accent="{{ block.settings.accent_color }}"
+  data-position="{{ block.settings.position }}"
+  data-greeting="{{ block.settings.greeting | escape }}"
+  data-title="{{ block.settings.bot_name | escape }}"
+  data-shop="{{ shop.permanent_domain }}"
+></div>
+
+{{ 'chat.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'chat.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Chat widget",
+  "target": "body",
+  "settings": [
+    {
+      "type": "text",
+      "id": "bot_name",
+      "label": "Assistant name",
+      "default": "Sana"
+    },
+    {
+      "type": "text",
+      "id": "greeting",
+      "label": "First message",
+      "default": "Assalam o alaikum! Kya dhoond rahe hain aap?"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Bubble colour",
+      "default": "#1f6feb"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Position",
+      "options": [
+        { "value": "right", "label": "Bottom right" },
+        { "value": "left", "label": "Bottom left" }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "text",
+      "id": "proxy_url",
+      "label": "App proxy path",
+      "info": "Leave as /apps/chat unless you changed the proxy prefix.",
+      "default": "/apps/chat"
+    }
+  ]
+}
+{% endschema %}

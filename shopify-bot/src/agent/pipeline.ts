@@ -2,7 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import type { CatalogRepository } from "../catalog/types.js";
 import { estimateCostUsd } from "../providers/anthropic.js";
 import { estimateOpenAiCostUsd } from "../providers/openai.js";
-import type { LlmProvider } from "../providers/types.js";
+import type { LlmProvider, TextDeltaHandler } from "../providers/types.js";
 import type { ReplyLanguage, TokenUsage } from "../types.js";
 import { addUsage, emptyUsage } from "../types.js";
 import { checkReply, type GuardrailWarning } from "./guardrails.js";
@@ -54,6 +54,11 @@ export interface TurnInput {
   userMessage: string;
   /** Guard against a tool loop that never terminates. */
   maxToolRounds?: number;
+  /**
+   * Receives the reply as it is generated. Tool rounds are not streamed —
+   * they produce no text a customer should see.
+   */
+  onDelta?: TextDeltaHandler;
 }
 
 export interface TurnResult {
@@ -155,13 +160,22 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   let reply = "";
 
   for (let round = 0; round <= maxToolRounds; round++) {
-    const result = await provider.complete({
-      tier: "reply",
+    const request = {
+      tier: "reply" as const,
       system,
       messages,
       tools: replyTools,
       maxTokens: 2000,
-    });
+    };
+
+    // Stream only once tools have run: the first round usually returns tool
+    // calls with no text, and streaming that shows the customer nothing.
+    const canStream =
+      input.onDelta !== undefined && round > 0 && provider.completeStreaming !== undefined;
+
+    const result = canStream
+      ? await provider.completeStreaming!(request, input.onDelta!)
+      : await provider.complete(request);
 
     usage = addUsage(usage, result.usage);
     costUsd += estimateCost(provider.name, result.model, result.usage);

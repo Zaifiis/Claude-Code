@@ -5,9 +5,9 @@ and sells — answers questions, handles objections, upsells, and walks the
 customer to checkout. Built for Pakistani stores first: Roman Urdu, Urdu script
 and English, COD, PKR.
 
-**This folder currently holds the brain, not the storefront app.** You can talk
-to the bot today; connecting a real Shopify store is the next milestone. See
-[SETUP.md](./SETUP.md).
+Complete and runnable: agent, catalog sync, backend, and the storefront widget.
+What is left is wiring it to *your* accounts — see [SETUP.md](./SETUP.md) to
+connect a store and [DEPLOY.md](./DEPLOY.md) to put it online.
 
 ---
 
@@ -31,15 +31,18 @@ Fleece Hoodie — Maroon — PKR 4,200
 Konsi pasand aayi?
 ```
 
-Without `ANTHROPIC_API_KEY` the replies come from the offline mock provider and
-are **templated placeholders** — the routing, retrieval, tools and cart links
-are real, the personality is not. Set a key to see the actual bot.
+With no API key the replies come from the offline mock provider and are
+**templated placeholders** — the routing, retrieval, tools and cart links are
+real, the personality is not. Put `OPENAI_API_KEY=sk-...` (or
+`ANTHROPIC_API_KEY=`) in a `.env` file in this folder to see the actual bot.
 
 | Command | What it does |
 |---|---|
 | `npm run chat` | Talk to the bot in the terminal |
+| `npm run serve` | Run the backend the widget talks to |
+| `npm run sync` | Pull a real Shopify store into the mirror |
 | `npm run eval` | Run the 40-case eval set, print a pass rate |
-| `npm run smoke` | Tool-layer checks — no model involved |
+| `npm run smoke` | 50 checks — tools, sync mapping, request signatures |
 | `npm run typecheck` | `tsc --noEmit` |
 
 `npm run eval -- policy` runs only cases whose id contains "policy".
@@ -52,13 +55,13 @@ are real, the personality is not. Set a key to see the actual bot.
 ```
 customer message
    │
-   ├─ 1. route      cheap model (Haiku)  → intent, language, English search query, price cap
+   ├─ 1. route      cheap model → intent, language, English search query, price cap
    │                 this is what makes Roman Urdu work: "koi lawn suit 3 hazar se kam"
    │                 becomes query="lawn suit" max_price=3000 before retrieval sees it
    │
    ├─ 2. retrieve   tools against the catalog — never the model's memory
    │
-   └─ 3. reply      strong model (Opus) with the persona + tool results
+   └─ 3. reply      stronger model, streamed, with the persona + tool results
 ```
 
 Split across `src/agent/`:
@@ -72,8 +75,12 @@ Split across `src/agent/`:
 | `language.ts` | Roman Urdu / Urdu / English detection, price-cap extraction |
 
 Two catalog implementations sit behind one interface (`catalog/types.ts`), so
-the agent cannot tell fixtures from a real store: `MemoryCatalog` today,
-`SupabaseCatalog` next.
+the agent cannot tell fixtures from a real store: `MemoryCatalog` for
+development and evals, `SupabaseCatalog` for a synced store.
+
+The pipeline has no HTTP, Shopify or database in it. That is why the same code
+backs the terminal harness, the eval runner and the storefront endpoint — and
+why WhatsApp later is a new entry point rather than a rewrite.
 
 ---
 
@@ -105,10 +112,9 @@ and prompt injection. Each says *why* it exists.
 Run it after **every** prompt change and compare the pass rate. Prompt edits
 silently break things that used to work — this is the only way you find out.
 
-The current 40/40 is against the **mock** provider, which measures plumbing, not
-persona quality. Your first real number comes when you add an API key; that is
-the baseline to hill-climb from. Add a case every time a real conversation goes
-wrong.
+40/40 against the **mock** provider measures plumbing, not persona quality.
+Your real number comes from running it with an API key — that is the baseline
+to improve against. Add a case every time a real conversation goes wrong.
 
 ---
 
@@ -117,16 +123,35 @@ wrong.
 Every turn logs tokens and cost (`TurnResult.costUsd`, shown in the chat
 harness and totalled by the eval runner). Watch it from day one: the business
 question for this product is whether a conversation costs less than it earns
-from a Pakistani merchant's monthly fee. The levers, in order, are prompt
-caching on the persona block, the cheap router, and reply effort.
+from a Pakistani merchant's monthly fee.
+
+Measured on the fixture store: roughly **$0.002-0.003 per message**, so a
+15-message conversation costs about **Rs 10**. The levers, in order, are prompt
+caching on the persona block (it is identical every turn), the cheap router
+model, and reply length.
 
 ---
 
-## Next
+## What's here
 
-1. `shopify app init --template reactRouter` — needs your Partner login
-2. `SupabaseCatalog` behind the existing `CatalogRepository` interface
-3. Sync: bulk operation on install, webhooks for changes, daily reconcile
-4. The widget: theme app extension + app embed block, over Shopify's App Proxy
+```
+src/agent/        route -> retrieve -> reply, the persona, the tools
+src/catalog/      one interface, two backings: fixtures and the real mirror
+src/providers/    OpenAI, Anthropic, and an offline mock
+src/shopify/      Admin GraphQL client, bulk operations
+src/sync/         catalog sync with delete reconciliation
+src/server/       app proxy chat endpoint (SSE), webhooks, signature checks
+extensions/       the storefront widget, as a theme app extension
+supabase/         schema.sql — the store mirror
+evals/ scripts/   40 eval cases, 50 smoke checks, chat and sync CLIs
+```
 
-Full plan and rationale in [SETUP.md](./SETUP.md).
+## Still to build
+
+- **OAuth install flow** — needed only to sell to other merchants. One store
+  works today with a custom app token.
+- **Merchant dashboard** — sync status, the persona settings form, transcripts.
+  `bot_settings` is read from the database already; nothing edits it yet.
+- **Shopify Billing** — required before charging anyone.
+- **WhatsApp** — the pipeline is transport-agnostic, so this is a new entry
+  point rather than a rewrite.

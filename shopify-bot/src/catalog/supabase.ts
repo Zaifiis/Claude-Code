@@ -124,7 +124,8 @@ export class SupabaseCatalog implements CatalogRepository {
 
   constructor(
     private readonly client: SupabaseClient,
-    private readonly shopId: string,
+    /** Row id of the shop. Every query in this class is scoped by it. */
+    readonly shopId: string,
     private readonly embeddings: EmbeddingProvider,
   ) {}
 

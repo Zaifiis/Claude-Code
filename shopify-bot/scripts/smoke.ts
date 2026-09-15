@@ -14,7 +14,9 @@ import { fileURLToPath } from "node:url";
 import { storeSnapshot } from "../fixtures/store.js";
 import { buildCartUrl, executeTool, type ToolContext } from "../src/agent/tools.js";
 import { MemoryCatalog } from "../src/catalog/memory.js";
+import { createHmac } from "node:crypto";
 import { classifyByGid, parseBulkJsonl } from "../src/shopify/bulk.js";
+import { isFresh, verifyAppProxySignature, verifyWebhookHmac } from "../src/server/verify.js";
 import { htmlToText, numericId } from "../src/shopify/client.js";
 import { mapProduct } from "../src/sync/map.js";
 
@@ -218,6 +220,71 @@ async function main(): Promise<void> {
   check("numericId extracts the trailing id", numericId("gid://shopify/Product/8001") === "8001");
   check("htmlToText handles null", htmlToText(null) === "");
   check("malformed jsonl lines are skipped", parseBulkJsonl("{bad\n", classifyByGid).roots.length === 0);
+
+  // --- request authentication ----------------------------------------------
+  // These are the only thing between the backend and the open internet. A bug
+  // here does not show up as a broken feature — it shows up as someone else
+  // using your OpenAI credits, so it is checked directly.
+  const SECRET = "test_secret_value";
+
+  function signedProxyQuery(params: Record<string, string>): URLSearchParams {
+    const sorted = Object.keys(params).sort();
+    const payload = sorted.map((key) => `${key}=${params[key]}`).join("");
+    const signature = createHmac("sha256", SECRET).update(payload).digest("hex");
+    const query = new URLSearchParams(params);
+    query.set("signature", signature);
+    return query;
+  }
+
+  const goodProxy = signedProxyQuery({
+    shop: "sana-threads-dev.myshopify.com",
+    path_prefix: "/apps/chat",
+    timestamp: String(Math.floor(Date.now() / 1000)),
+  });
+  const proxyResult = verifyAppProxySignature(goodProxy, SECRET);
+  check("valid app proxy signature is accepted", proxyResult.valid === true);
+  check("shop domain is extracted", proxyResult.shop === "sana-threads-dev.myshopify.com");
+
+  const tampered = signedProxyQuery({
+    shop: "sana-threads-dev.myshopify.com",
+    path_prefix: "/apps/chat",
+    timestamp: String(Math.floor(Date.now() / 1000)),
+  });
+  tampered.set("shop", "attacker-store.myshopify.com");
+  check(
+    "tampering with the shop parameter is rejected",
+    verifyAppProxySignature(tampered, SECRET).valid === false,
+  );
+
+  check(
+    "a request with no signature is rejected",
+    verifyAppProxySignature(new URLSearchParams({ shop: "x.myshopify.com" }), SECRET).valid === false,
+  );
+
+  check(
+    "a signature made with the wrong secret is rejected",
+    verifyAppProxySignature(goodProxy, "wrong_secret").valid === false,
+  );
+
+  check("a fresh timestamp passes", isFresh(String(Math.floor(Date.now() / 1000))));
+  check(
+    "an old timestamp is rejected (replay protection)",
+    isFresh(String(Math.floor(Date.now() / 1000) - 3600)) === false,
+  );
+  check("a missing timestamp is rejected", isFresh(null) === false);
+
+  const body = Buffer.from(JSON.stringify({ id: 1, title: "Kurta" }));
+  const goodHmac = createHmac("sha256", SECRET).update(body).digest("base64");
+  check("valid webhook hmac is accepted", verifyWebhookHmac(body, goodHmac, SECRET) === true);
+  check(
+    "a webhook with a tampered body is rejected",
+    verifyWebhookHmac(Buffer.from('{"id":1,"title":"Hacked"}'), goodHmac, SECRET) === false,
+  );
+  check("a webhook with no hmac header is rejected", verifyWebhookHmac(body, "", SECRET) === false);
+  check(
+    "a webhook signed with the wrong secret is rejected",
+    verifyWebhookHmac(body, goodHmac, "wrong_secret") === false,
+  );
 
   console.log();
   if (failures === 0) {
