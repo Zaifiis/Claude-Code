@@ -25,10 +25,9 @@ variants, stock levels and policy pages.
 ```
 You: koi garam hoodie hai 5000 se kam?
 
-Sana: Ye do cheezein mil sakti hain:
-Fleece Hoodie — Black — PKR 4,200
-Fleece Hoodie — Maroon — PKR 4,200
-Konsi pasand aayi?
+Sana: Ji, 320 GSM brushed fleece wali hoodies hain, proper warm.
+Black PKR 4,200 mein S se XL tak, Maroon mein M aur XL.
+Konsa colour pasand hai?
 ```
 
 With no API key the replies come from the offline mock provider and are
@@ -41,8 +40,8 @@ real, the personality is not. Put `OPENAI_API_KEY=sk-...` (or
 | `npm run chat` | Talk to the bot in the terminal |
 | `npm run serve` | Run the backend the widget talks to |
 | `npm run sync` | Pull a real Shopify store into the mirror |
-| `npm run eval` | Run the 40-case eval set, print a pass rate |
-| `npm run smoke` | 50 checks — tools, sync mapping, request signatures |
+| `npm run eval` | Run the 44-case eval set, print a pass rate |
+| `npm run smoke` | 87 checks — tools, sync mapping, signatures, memory |
 | `npm run typecheck` | `tsc --noEmit` |
 
 `npm run eval -- policy` runs only cases whose id contains "policy".
@@ -71,7 +70,8 @@ Split across `src/agent/`:
 | `pipeline.ts` | The turn loop. No HTTP, no Shopify, no Supabase — runs anywhere |
 | `persona.ts` | The system prompt. This is the product |
 | `tools.ts` | The seven tools, and the one rule: nothing is stated that a tool did not return |
-| `guardrails.ts` | Post-hoc checks — banned phrases, length, script mixing |
+| `guardrails.ts` | Post-hoc checks — banned phrases, length, script mixing, em dashes |
+| `address.ts` | Strips bhai/baji unless the customer revealed their own gender |
 | `language.ts` | Roman Urdu / Urdu / English detection, price-cap extraction |
 
 Two catalog implementations sit behind one interface (`catalog/types.ts`), so
@@ -99,20 +99,25 @@ Enforced in the prompt, checked by `guardrails.ts`, and asserted by the eval set
   goal; lying about it is a different thing, and it is the kind of thing that
   gets an app pulled from the App Store.
 - **Hands over** complaints, refund disputes and anything about an existing
-  order, and never upsells on top of a complaint.
+  order, and never upsells on top of a complaint. But swearing and slang are
+  not complaints — Pakistani customers are blunt, and handing a chatty customer
+  a phone number loses the sale.
+- **Never guesses gender.** bhai/baji only after the customer reveals it. This
+  one is enforced in code, not just asked for in the prompt.
 
 ---
 
 ## Evals
 
-`evals/cases.ts` holds 40 cases across language mirroring, retrieval,
+`evals/cases.ts` holds 44 cases across language mirroring, retrieval,
 truthfulness, policy questions, selling behaviour, escalation, rude customers
-and prompt injection. Each says *why* it exists.
+and prompt injection. Each says *why* it exists, and several were written from
+real storefront conversations that went wrong.
 
 Run it after **every** prompt change and compare the pass rate. Prompt edits
 silently break things that used to work — this is the only way you find out.
 
-40/40 against the **mock** provider measures plumbing, not persona quality.
+44/44 against the **mock** provider measures plumbing, not persona quality.
 Your real number comes from running it with an API key — that is the baseline
 to improve against. Add a case every time a real conversation goes wrong.
 
@@ -143,7 +148,7 @@ src/sync/         catalog sync with delete reconciliation
 src/server/       app proxy chat endpoint (SSE), webhooks, signature checks
 extensions/       the storefront widget, as a theme app extension
 supabase/         schema.sql — the store mirror
-evals/ scripts/   40 eval cases, 50 smoke checks, chat and sync CLIs
+evals/ scripts/   44 eval cases, 87 smoke checks, chat and sync CLIs
 ```
 
 ## Still to build
