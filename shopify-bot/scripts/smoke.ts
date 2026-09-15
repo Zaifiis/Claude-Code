@@ -15,6 +15,7 @@ import { storeSnapshot } from "../fixtures/store.js";
 import { buildCartUrl, executeTool, type ToolContext } from "../src/agent/tools.js";
 import { MemoryCatalog } from "../src/catalog/memory.js";
 import { createHmac } from "node:crypto";
+import { detectCustomerGender, neutraliseAddress } from "../src/agent/address.js";
 import { classifyByGid, parseBulkJsonl } from "../src/shopify/bulk.js";
 import { isFresh, verifyAppProxySignature, verifyWebhookHmac } from "../src/server/verify.js";
 import { htmlToText, numericId } from "../src/shopify/client.js";
@@ -284,6 +285,58 @@ async function main(): Promise<void> {
   check(
     "a webhook signed with the wrong secret is rejected",
     verifyWebhookHmac(body, goodHmac, "wrong_secret") === false,
+  );
+
+  // --- gendered address ------------------------------------------------------
+  // Real bug from the first storefront conversation: the bot called a male
+  // customer "baji". The prompt forbids it; this makes it certain.
+  check(
+    "leading Baji is removed",
+    neutraliseAddress("Baji, kya dhoond rahi hain?", "unknown") === "Kya dhoond rahi hain?",
+    neutraliseAddress("Baji, kya dhoond rahi hain?", "unknown"),
+  );
+  check(
+    "Ji baji collapses to Ji",
+    neutraliseAddress("Ji baji, batayein kya chahiye", "unknown") === "Ji, batayein kya chahiye",
+    neutraliseAddress("Ji baji, batayein kya chahiye", "unknown"),
+  );
+  check(
+    "trailing bhai is removed",
+    neutraliseAddress("Theek hai bhai", "unknown") === "Theek hai",
+    neutraliseAddress("Theek hai bhai", "unknown"),
+  );
+  check(
+    "mid-sentence address is removed",
+    neutraliseAddress("Hoodie available hai, baji", "unknown") === "Hoodie available hai",
+    neutraliseAddress("Hoodie available hai, baji", "unknown"),
+  );
+  check(
+    "a reply with no address term is untouched",
+    neutraliseAddress("Ye do cheezein mil sakti hain", "unknown") === "Ye do cheezein mil sakti hain",
+  );
+  check(
+    "once gender is known the term is allowed",
+    neutraliseAddress("Theek hai bhai", "male") === "Theek hai bhai",
+  );
+
+  check(
+    "customer saying larka hu reveals male",
+    detectCustomerGender([], "ma tw larka hu") === "male",
+  );
+  check(
+    "customer saying larki hun reveals female",
+    detectCustomerGender([], "main larki hun") === "female",
+  );
+  check(
+    "no reveal stays unknown",
+    detectCustomerGender([], "koi hoodie hai?") === "unknown",
+  );
+  check(
+    "a reveal earlier in the conversation still counts",
+    detectCustomerGender(
+      [{ role: "user", content: "ma larka hu" }],
+      "hoodie dikhao",
+    ) === "male",
   );
 
   console.log();

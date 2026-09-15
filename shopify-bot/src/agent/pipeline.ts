@@ -5,6 +5,7 @@ import { estimateOpenAiCostUsd } from "../providers/openai.js";
 import type { LlmProvider, TextDeltaHandler } from "../providers/types.js";
 import type { ReplyLanguage, TokenUsage } from "../types.js";
 import { addUsage, emptyUsage } from "../types.js";
+import { detectCustomerGender, neutraliseAddress } from "./address.js";
 import { checkReply, type GuardrailWarning } from "./guardrails.js";
 import { detectLanguage, extractPriceCap } from "./language.js";
 import { buildSystemBlocks, routingHint } from "./persona.js";
@@ -233,6 +234,18 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
       // Out of rounds with no answer — better to say nothing than to guess.
       reply = result.text;
     }
+  }
+
+  // Enforce the no-guessing rule rather than trusting the prompt to hold. The
+  // customer reads this word in the first sentence and notices when it is wrong.
+  const gender = detectCustomerGender(input.history ?? [], userMessage);
+  reply = neutraliseAddress(reply, gender);
+
+  // The stored assistant turn must match what the customer actually saw, or the
+  // next turn is conditioned on a message that was never sent.
+  const lastMessage = messages[messages.length - 1];
+  if (lastMessage?.role === "assistant" && typeof lastMessage.content === "string") {
+    lastMessage.content = reply;
   }
 
   return {
