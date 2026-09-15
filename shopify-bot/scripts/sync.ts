@@ -14,10 +14,13 @@
  * Run it again any time — it is idempotent, and it reconciles deletions.
  */
 
+import { loadEnv } from "../src/env.js";
 import { createSupabaseClient } from "../src/catalog/supabase.js";
 import { createEmbeddingProvider } from "../src/providers/embeddings.js";
 import { ShopifyClient } from "../src/shopify/client.js";
 import { fullSync } from "../src/sync/run.js";
+
+loadEnv();
 
 const DIM = "\x1b[2m";
 const BOLD = "\x1b[1m";

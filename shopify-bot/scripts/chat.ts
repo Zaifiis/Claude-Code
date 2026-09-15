@@ -10,8 +10,12 @@
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import type Anthropic from "@anthropic-ai/sdk";
+import { explainMissingKeys, loadEnv } from "../src/env.js";
 import { runTurn } from "../src/agent/pipeline.js";
 import { createCatalog, createProvider } from "../src/factory.js";
+
+// Must run before anything reads configuration.
+loadEnv();
 
 const DIM = "\x1b[2m";
 const BOLD = "\x1b[1m";
@@ -27,9 +31,11 @@ async function main(): Promise<void> {
   console.log(`${DIM}provider: ${provider.name}${RESET}`);
   if (provider.name === "mock") {
     console.log(
-      `${DIM}No ANTHROPIC_API_KEY set, so replies are templated placeholders.`,
+      `${DIM}Running on the offline mock — replies are templated placeholders.`,
       `The pipeline, tools and cart links are real; the persona is not.${RESET}`,
     );
+    const reason = explainMissingKeys();
+    if (reason) console.log(`${DIM}${reason}${RESET}`);
   }
   console.log(`${DIM}Type "exit" to quit.${RESET}\n`);
   if (settings.greeting) console.log(`${BOLD}${settings.botName}:${RESET} ${settings.greeting}\n`);

@@ -11,7 +11,10 @@
  */
 
 import type Anthropic from "@anthropic-ai/sdk";
+import { loadEnv } from "../src/env.js";
 import { runTurn } from "../src/agent/pipeline.js";
+
+loadEnv();
 import { createCatalog, createProvider } from "../src/factory.js";
 import { cases, type EvalCase } from "./cases.js";
 
