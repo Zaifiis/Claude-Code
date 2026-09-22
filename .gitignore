@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# The Hostinger site ships a config template; the real .env stays ignored.
+!site/.env.example

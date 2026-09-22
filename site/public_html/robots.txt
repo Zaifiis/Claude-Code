@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /thanks
+Disallow: /unsubscribe
+
+# Set your real domain here once the site is live.
+Sitemap: https://example.com/sitemap.xml

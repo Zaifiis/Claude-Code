@@ -1,0 +1,127 @@
+/* ==========================================================================
+   Kairo — admin (lead desk). Layered on top of site.css.
+   ========================================================================== */
+
+.admin { background: var(--bg); }
+
+.admin-bar {
+  position: sticky; top: 0; z-index: 30;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--line);
+}
+.admin-bar__inner {
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  max-width: 78rem; margin-inline: auto;
+  padding: .75rem var(--gutter);
+}
+.admin-bar .logo__mark { width: 1.6rem; height: 1.6rem; }
+.admin-bar .logo__text { font-size: .95rem; }
+
+.admin-bar__nav { display: flex; gap: .25rem; margin-right: auto; flex-wrap: wrap; }
+.admin-bar__nav a {
+  padding: .4rem .7rem; border-radius: var(--radius-sm);
+  font-size: .9rem; color: var(--muted);
+}
+.admin-bar__nav a:hover { background: var(--surface); color: var(--text); }
+.admin-bar__nav a[aria-current="page"] { background: var(--surface-2); color: var(--text); }
+
+.admin-bar__user { display: flex; align-items: center; gap: .75rem; font-size: .85rem; }
+
+.admin-main { padding-block: 2rem 4rem; }
+.admin-main .shell { max-width: 78rem; }
+.admin-main .shell > * + * { margin-top: 1.25rem; }
+
+.admin-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+
+.admin-login { display: grid; place-items: center; min-height: 100vh; padding: var(--gutter); }
+.admin-login .card { width: min(26rem, 100%); }
+
+.admin-empty { text-align: center; padding-block: 3rem; }
+.admin-empty > * + * { margin-top: .5rem; }
+
+/* Filters */
+.chip-row { display: flex; flex-wrap: wrap; gap: .4rem; }
+.chip {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .35rem .8rem;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 999px; font-size: .85rem; color: var(--muted);
+}
+.chip:hover { border-color: var(--line-strong); color: var(--text); }
+.chip--on {
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  color: var(--text);
+}
+.chip__count { font-family: var(--mono); font-size: .75rem; opacity: .8; }
+
+.admin-filters { display: grid; gap: .6rem; }
+@media (min-width: 52rem) {
+  .admin-filters { grid-template-columns: 1fr 12rem 12rem auto; align-items: center; }
+}
+
+/* Table */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.table th, .table td { padding: .85rem 1rem; text-align: left; vertical-align: top; }
+.table thead th {
+  font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); font-weight: 600;
+  border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.table tbody tr + tr { border-top: 1px solid var(--line); }
+.table tbody tr:hover { background: var(--surface-2); }
+.table th[scope="row"] { font-weight: 600; }
+.table__link { color: var(--text); }
+.table__link:hover { color: var(--accent-soft); }
+.table__sub { display: block; font-weight: 400; font-size: .82rem; color: var(--muted); margin-top: .15rem; }
+
+.score {
+  display: inline-grid; place-items: center;
+  min-width: 2.25rem; padding: .2rem .5rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--mono); font-size: .82rem; font-weight: 600;
+  border: 1px solid var(--line);
+}
+.score--high { color: var(--mint);  border-color: color-mix(in srgb, var(--mint) 40%, var(--line)); }
+.score--mid  { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 40%, var(--line)); }
+.score--low  { color: var(--muted); }
+
+.status {
+  display: inline-block; padding: .2rem .6rem;
+  border-radius: 999px; border: 1px solid var(--line);
+  font-size: .78rem; font-weight: 550; text-transform: capitalize;
+  color: var(--text-dim); background: var(--surface-2);
+}
+.status--new       { color: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.status--contacted { color: var(--amber);       border-color: color-mix(in srgb, var(--amber) 35%, var(--line)); }
+.status--qualified,
+.status--won       { color: var(--mint);        border-color: color-mix(in srgb, var(--mint) 40%, var(--line)); }
+.status--lost,
+.status--spam      { color: var(--muted); }
+
+.pager { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+
+/* Lead detail */
+.facts { display: grid; gap: .55rem .9rem; margin: 0; }
+@media (min-width: 30rem) { .facts { grid-template-columns: auto 1fr; } }
+.facts dt { font-size: .8rem; color: var(--muted); white-space: nowrap; }
+.facts dd { margin: 0; font-size: .92rem; word-break: break-word; }
+.facts a { color: var(--accent-soft); }
+
+.quote {
+  padding: 1rem 1.1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim); font-size: .95rem;
+}
