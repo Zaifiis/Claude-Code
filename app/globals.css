@@ -24,3 +24,226 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ==========================================================================
+   Content Studio design tokens
+   --------------------------------------------------------------------------
+   One accent colour, everything else neutral. Every colour is a semantic
+   token that re-resolves in dark mode, so components never name a raw value.
+   Spacing follows an 8pt grid (Tailwind steps 2 / 4 / 6 / 8 / 10 / 12 = 8 /
+   16 / 24 / 32 / 40 / 48px); 4px half-steps are used only for optical nudges.
+   ========================================================================== */
+
+:root {
+  --st-canvas: #f4f4f6;
+  --st-surface: #ffffff;
+  --st-surface-2: #ecedf0;
+  --st-glass: rgb(250 250 252 / 0.72);
+  --st-hairline: rgb(0 0 0 / 0.08);
+  --st-hairline-strong: rgb(0 0 0 / 0.14);
+  --st-text: #1d1d1f;
+  --st-text-2: #6a6a70;
+  --st-text-3: #93939b;
+  --st-accent: #007aff;
+  --st-accent-hover: #0069e0;
+  --st-accent-soft: rgb(0 122 255 / 0.1);
+  --st-on-accent: #ffffff;
+  --st-fill: rgb(0 0 0 / 0.05);
+  --st-fill-hover: rgb(0 0 0 / 0.08);
+  --st-shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.05);
+  --st-shadow-lift: 0 2px 6px rgb(0 0 0 / 0.08), 0 18px 44px rgb(0 0 0 / 0.16);
+
+  /* Soft rounded corners, one set shared by every card and panel. */
+  --st-r-control: 10px;
+  --st-r-card: 14px;
+  --st-r-panel: 20px;
+  --st-r-sheet: 28px;
+
+  /* Motion: short, eased, never bouncy. */
+  --st-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --st-dur-fast: 140ms;
+  --st-dur: 220ms;
+  --st-dur-slow: 320ms;
+}
+
+/* Follow the system by default, but let the in-app switch win. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --st-canvas: #101013;
+    --st-surface: #1b1b1f;
+    --st-surface-2: #26262b;
+    --st-glass: rgb(26 26 30 / 0.72);
+    --st-hairline: rgb(255 255 255 / 0.1);
+    --st-hairline-strong: rgb(255 255 255 / 0.18);
+    --st-text: #f5f5f7;
+    --st-text-2: #a3a3ab;
+    --st-text-3: #76767e;
+    --st-accent: #0a84ff;
+    --st-accent-hover: #3d9bff;
+    --st-accent-soft: rgb(10 132 255 / 0.18);
+    --st-on-accent: #ffffff;
+    --st-fill: rgb(255 255 255 / 0.06);
+    --st-fill-hover: rgb(255 255 255 / 0.1);
+    --st-shadow-card: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px rgb(0 0 0 / 0.36);
+    --st-shadow-lift: 0 2px 6px rgb(0 0 0 / 0.6), 0 18px 44px rgb(0 0 0 / 0.55);
+  }
+}
+
+:root[data-theme="dark"] {
+  --st-canvas: #101013;
+  --st-surface: #1b1b1f;
+  --st-surface-2: #26262b;
+  --st-glass: rgb(26 26 30 / 0.72);
+  --st-hairline: rgb(255 255 255 / 0.1);
+  --st-hairline-strong: rgb(255 255 255 / 0.18);
+  --st-text: #f5f5f7;
+  --st-text-2: #a3a3ab;
+  --st-text-3: #76767e;
+  --st-accent: #0a84ff;
+  --st-accent-hover: #3d9bff;
+  --st-accent-soft: rgb(10 132 255 / 0.18);
+  --st-on-accent: #ffffff;
+  --st-fill: rgb(255 255 255 / 0.06);
+  --st-fill-hover: rgb(255 255 255 / 0.1);
+  --st-shadow-card: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px rgb(0 0 0 / 0.36);
+  --st-shadow-lift: 0 2px 6px rgb(0 0 0 / 0.6), 0 18px 44px rgb(0 0 0 / 0.55);
+}
+
+@theme inline {
+  --color-st-canvas: var(--st-canvas);
+  --color-st-surface: var(--st-surface);
+  --color-st-surface-2: var(--st-surface-2);
+  --color-st-glass: var(--st-glass);
+  --color-st-hairline: var(--st-hairline);
+  --color-st-hairline-strong: var(--st-hairline-strong);
+  --color-st-text: var(--st-text);
+  --color-st-text-2: var(--st-text-2);
+  --color-st-text-3: var(--st-text-3);
+  --color-st-accent: var(--st-accent);
+  --color-st-accent-hover: var(--st-accent-hover);
+  --color-st-accent-soft: var(--st-accent-soft);
+  --color-st-on-accent: var(--st-on-accent);
+  --color-st-fill: var(--st-fill);
+  --color-st-fill-hover: var(--st-fill-hover);
+
+  --radius-st-control: var(--st-r-control);
+  --radius-st-card: var(--st-r-card);
+  --radius-st-panel: var(--st-r-panel);
+  --radius-st-sheet: var(--st-r-sheet);
+
+  --shadow-st-card: var(--st-shadow-card);
+  --shadow-st-lift: var(--st-shadow-lift);
+
+  --ease-st: var(--st-ease);
+
+  --font-st: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto, system-ui, sans-serif;
+}
+
+/* The studio owns the page background wherever it is mounted. */
+html:has(.st-root) {
+  background: var(--st-canvas);
+  color-scheme: light dark;
+}
+
+html[data-theme="light"]:has(.st-root) {
+  color-scheme: light;
+}
+
+html[data-theme="dark"]:has(.st-root) {
+  color-scheme: dark;
+}
+
+body:has(.st-root) {
+  background: var(--st-canvas);
+  color: var(--st-text);
+}
+
+.st-root {
+  font-family: var(--font-st);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  scrollbar-width: thin;
+}
+
+/* Liquid-glass material for the top bar and floating panels. */
+.st-glass {
+  background: var(--st-glass);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* One type scale, used everywhere. */
+.st-title-1 {
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 700;
+  letter-spacing: -0.021em;
+}
+.st-title-2 {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+}
+.st-title-3 {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+.st-headline {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  letter-spacing: -0.008em;
+}
+.st-body {
+  font-size: 15px;
+  line-height: 22px;
+  letter-spacing: -0.004em;
+}
+.st-callout {
+  font-size: 14px;
+  line-height: 20px;
+}
+.st-footnote {
+  font-size: 13px;
+  line-height: 18px;
+}
+.st-caption {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.st-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus rings: visible for keyboards, quiet for pointers. */
+.st-root :focus-visible {
+  outline: 2px solid var(--st-accent);
+  outline-offset: 2px;
+  border-radius: var(--st-r-control);
+}
+
+.st-root ::placeholder {
+  color: var(--st-text-3);
+}
+
+/* Reading measure for the distraction-free writing area. */
+.st-measure {
+  max-width: 68ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-root *,
+  .st-root *::before,
+  .st-root *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}

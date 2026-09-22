@@ -1,0 +1,310 @@
+"use client";
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+import {
+  applyOrder,
+  normaliseRanks,
+  reorderVisible,
+  sortActive,
+  sortArchived,
+  syncArchiveState,
+  UNRANKED,
+} from "@/lib/studio/ranking";
+import { type Idea, type IdeaPatch, PLATFORMS, type Status, STATUSES } from "@/types/studio";
+
+/** Shown in the top bar, so autosave is never something you have to trust blindly. */
+export type SaveState = "idle" | "saving" | "saved" | "error";
+
+const API = "/api/studio";
+const AUTOSAVE_DELAY = 600;
+const SAVED_BADGE_DURATION = 1800;
+const JSON_HEADERS = { "Content-Type": "application/json" } as const;
+
+function newId(): string {
+  const webCrypto = globalThis.crypto;
+  if (typeof webCrypto?.randomUUID === "function") return webCrypto.randomUUID();
+  if (typeof webCrypto?.getRandomValues === "function") {
+    const bytes = webCrypto.getRandomValues(new Uint8Array(16));
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+  return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function blankIdea(id: string, defaults: IdeaPatch): Idea {
+  const now = new Date().toISOString();
+  return {
+    id,
+    title: "",
+    platform: PLATFORMS[0],
+    pillar: "",
+    // New ideas land at the bottom of the ranked list, ready to be dragged up.
+    rank: UNRANKED - 1,
+    status: "Idea",
+    titleOptions: [],
+    thumbnailIdea: "",
+    hook: "",
+    script: "",
+    caption: "",
+    targetDate: "",
+    owner: "",
+    notes: "",
+    performanceNote: "",
+    archived: false,
+    createdAt: now,
+    updatedAt: now,
+    publishedAt: null,
+    ...defaults,
+  };
+}
+
+interface StudioValue {
+  /** Active ideas in make-next order. Index 0 is the next thing to make. */
+  active: Idea[];
+  /** Published ideas, most recently published first. */
+  archived: Idea[];
+  byId: Map<string, Idea>;
+  /** Every content pillar in use, for the tag filter. */
+  pillars: string[];
+  /** How many ideas are waiting at each status. */
+  counts: Record<Status, number>;
+  saveState: SaveState;
+  /** Quick capture. Returns the new id so the caller can open it. */
+  create: (title: string, defaults?: IdeaPatch) => string;
+  /** Optimistic field write. Text debounces; pickers save at once. */
+  update: (id: string, patch: IdeaPatch, when?: "debounced" | "now") => void;
+  /** Moves a card within the list the user can currently see. */
+  moveVisible: (visibleIds: string[], fromIndex: number, toIndex: number) => void;
+  moveToTop: (id: string) => void;
+  remove: (id: string) => void;
+  /** Writes any debounced edits immediately. */
+  flush: () => void;
+}
+
+const StudioContext = createContext<StudioValue | null>(null);
+
+export function useStudio(): StudioValue {
+  const value = useContext(StudioContext);
+  if (!value) throw new Error("useStudio must be used inside <StudioProvider>.");
+  return value;
+}
+
+export function StudioProvider({
+  initialIdeas,
+  children,
+}: {
+  initialIdeas: Idea[];
+  children: React.ReactNode;
+}) {
+  const [ideas, setIdeas] = useState<Idea[]>(() => normaliseRanks(initialIdeas));
+  const [saveState, setSaveStateRaw] = useState<SaveState>("idle");
+
+  // Mutations read the ref and write both, so no state updater ever has to run
+  // a side effect (which React would double-invoke in development).
+  const ideasRef = useRef(ideas);
+  const stateRef = useRef<SaveState>("idle");
+  const inFlightRef = useRef(0);
+  const pendingRef = useRef(new Map<string, IdeaPatch>());
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const commit = useCallback((next: Idea[]) => {
+    ideasRef.current = next;
+    setIdeas(next);
+  }, []);
+
+  const setSaveState = useCallback((next: SaveState) => {
+    stateRef.current = next;
+    setSaveStateRaw(next);
+  }, []);
+
+  /** Pulls server truth back after a failed write, so the UI cannot drift. */
+  const refresh = useCallback(async () => {
+    try {
+      const response = await fetch(`${API}/ideas`, { cache: "no-store" });
+      if (!response.ok) return;
+      const body = (await response.json()) as { ideas?: Idea[] };
+      if (!Array.isArray(body.ideas)) return;
+      commit(normaliseRanks(body.ideas));
+      setSaveState("idle");
+    } catch {
+      // Offline. Optimistic state stays on screen and the next write retries.
+    }
+  }, [commit, setSaveState]);
+
+  const send = useCallback(
+    async (path: string, init: RequestInit) => {
+      inFlightRef.current += 1;
+      setSaveState("saving");
+      try {
+        const response = await fetch(path, init);
+        if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+        inFlightRef.current -= 1;
+        if (inFlightRef.current === 0 && stateRef.current !== "error") setSaveState("saved");
+      } catch {
+        inFlightRef.current -= 1;
+        setSaveState("error");
+        void refresh();
+      }
+    },
+    [refresh, setSaveState],
+  );
+
+  const persistOrder = useCallback(
+    (orderedIds: string[]) => {
+      void send(`${API}/reorder`, {
+        method: "POST",
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ orderedIds }),
+      });
+    },
+    [send],
+  );
+
+  const flush = useCallback(
+    (keepalive = false) => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      const queued = [...pendingRef.current.entries()];
+      pendingRef.current.clear();
+
+      for (const [id, patch] of queued) {
+        void send(`${API}/ideas/${encodeURIComponent(id)}`, {
+          method: "PATCH",
+          headers: JSON_HEADERS,
+          body: JSON.stringify(patch),
+          keepalive,
+        });
+      }
+    },
+    [send],
+  );
+
+  const update = useCallback<StudioValue["update"]>(
+    (id, patch, when = "debounced") => {
+      const current = ideasRef.current.find((idea) => idea.id === id);
+      if (!current) return;
+
+      const merged = syncArchiveState(
+        { ...current, ...patch, updatedAt: new Date().toISOString() },
+        current.archived,
+      );
+      commit(normaliseRanks(ideasRef.current.map((idea) => (idea.id === id ? merged : idea))));
+
+      pendingRef.current.set(id, { ...pendingRef.current.get(id), ...patch });
+
+      if (when === "now") {
+        flush();
+        return;
+      }
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => flush(), AUTOSAVE_DELAY);
+    },
+    [commit, flush],
+  );
+
+  const create = useCallback<StudioValue["create"]>(
+    (title, defaults = {}) => {
+      const id = newId();
+      const trimmed = title.trim();
+      commit(normaliseRanks([...ideasRef.current, blankIdea(id, { ...defaults, title: trimmed })]));
+      void send(`${API}/ideas`, {
+        method: "POST",
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ ...defaults, id, title: trimmed }),
+      });
+      return id;
+    },
+    [commit, send],
+  );
+
+  const moveVisible = useCallback<StudioValue["moveVisible"]>(
+    (visibleIds, fromIndex, toIndex) => {
+      if (fromIndex === toIndex) return;
+      const fullIds = sortActive(ideasRef.current).map((idea) => idea.id);
+      const orderedIds = reorderVisible(fullIds, visibleIds, fromIndex, toIndex);
+      commit(applyOrder(ideasRef.current, orderedIds));
+      persistOrder(orderedIds);
+    },
+    [commit, persistOrder],
+  );
+
+  const moveToTop = useCallback(
+    (id: string) => {
+      const rest = sortActive(ideasRef.current)
+        .map((idea) => idea.id)
+        .filter((other) => other !== id);
+      const orderedIds = [id, ...rest];
+      commit(applyOrder(ideasRef.current, orderedIds));
+      persistOrder(orderedIds);
+    },
+    [commit, persistOrder],
+  );
+
+  const remove = useCallback(
+    (id: string) => {
+      pendingRef.current.delete(id);
+      commit(normaliseRanks(ideasRef.current.filter((idea) => idea.id !== id)));
+      void send(`${API}/ideas/${encodeURIComponent(id)}`, { method: "DELETE" });
+    },
+    [commit, send],
+  );
+
+  // Never lose a keystroke to a closed tab or a backgrounded phone.
+  useEffect(() => {
+    const flushNow = () => {
+      if (pendingRef.current.size > 0) flush(true);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flushNow();
+    };
+
+    window.addEventListener("pagehide", flushNow);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", flushNow);
+      document.removeEventListener("visibilitychange", onVisibility);
+      flushNow();
+    };
+  }, [flush]);
+
+  // Let the "Saved" badge settle back to quiet once the write has landed.
+  useEffect(() => {
+    if (saveState !== "saved") return;
+    const timer = setTimeout(() => setSaveState("idle"), SAVED_BADGE_DURATION);
+    return () => clearTimeout(timer);
+  }, [saveState, setSaveState]);
+
+  const value = useMemo<StudioValue>(() => {
+    const counts = Object.fromEntries(STATUSES.map((status) => [status, 0])) as Record<Status, number>;
+    for (const idea of ideas) counts[idea.status] += 1;
+
+    return {
+      active: sortActive(ideas),
+      archived: sortArchived(ideas),
+      byId: new Map(ideas.map((idea) => [idea.id, idea])),
+      pillars: [...new Set(ideas.map((idea) => idea.pillar.trim()).filter(Boolean))].sort((a, b) =>
+        a.localeCompare(b),
+      ),
+      counts,
+      saveState,
+      create,
+      update,
+      moveVisible,
+      moveToTop,
+      remove,
+      flush: () => flush(),
+    };
+  }, [ideas, saveState, create, update, moveVisible, moveToTop, remove, flush]);
+
+  return <StudioContext.Provider value={value}>{children}</StudioContext.Provider>;
+}

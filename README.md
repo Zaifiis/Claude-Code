@@ -1,4 +1,91 @@
-# Content Automation Dashboard
+# Content Studio (`/studio`)
+
+A personal dashboard for content ideas: drop an idea in, write the full script,
+and decide the exact order videos get made in. It is self-contained — no
+database, no sign-in, no environment variables — and lives alongside the n8n
+control panel described below.
+
+```bash
+npm install
+npm run dev
+```
+
+Then open <http://localhost:3000/studio>.
+
+## What it does
+
+**One ranked list.** Every active idea sits in a single make-next order. Drag a
+card by its handle to move it, or focus the handle and use the arrow keys
+(`Home` / `End` jump to either end). Whatever sits at the top is the next thing
+to make, and the top bar says so. Setting an idea's status to **Published**
+takes it out of the list on its own and files it in the archive.
+
+**Quick capture.** The box at the top of every view takes a title and `Enter`.
+The idea lands at the bottom of the ranked list and the field stays focused, so
+you can empty your head in one go without opening a form.
+
+**Four views.**
+
+| View | What it shows |
+| --- | --- |
+| Ranked | The make-next order, numbered first, second, third… |
+| Board | Columns by status; drag a card to another column to move its stage |
+| Calendar | A month of target publish dates, plus everything still undated |
+| Archive | Everything published, newest first, with its performance note |
+
+Opening any card gives it the full screen for writing. The script area is
+Markdown — headings, bullets, bold and italic — with a toolbar, a live word
+count and read-aloud estimate, and a preview toggle. `⌘⌥1` / `⌘⌥2` set a
+heading, `⌘⇧8` toggles bullets, and `Enter` continues a bullet list. **Focus**
+hides everything except the script; `Esc` steps back out.
+
+Everything autosaves as you type, and flushes immediately if you close the tab
+or background the app. The top bar shows when a write is in flight.
+
+**Finding things.** Search covers every written field, including script bodies
+and captions. Filter by platform or content pillar, and the counter strip shows
+how many ideas are waiting at each status — tap one to filter by it.
+
+## Where the data lives
+
+One JSON file, `data/studio.json`, written atomically (temp file + rename) with
+writes serialised so concurrent edits cannot interleave. It is gitignored, so
+your ideas stay on your machine. Point `STUDIO_DATA_FILE` at another path to
+keep it elsewhere — useful if you sync it, or if you deploy somewhere with a
+read-only filesystem and need a writable volume.
+
+To see the app populated before you have written anything, copy the sample:
+
+```bash
+mkdir -p data && cp data/studio.example.json data/studio.json
+```
+
+## Design notes
+
+- One accent colour; everything else is neutral. The accent only appears where
+  something is genuinely selected or is next up.
+- Colours are semantic tokens defined once in `app/globals.css` and redefined
+  for dark mode, so nothing hardcodes a hex value. The appearance switch in the
+  top bar follows the system until you choose, then remembers; the choice is
+  applied before first paint so a reload never flashes.
+- Spacing sits on an 8pt grid, corner radii come from one shared set, and the
+  top bar and the idea view use a translucent, blurred material so they read as
+  floating above the content.
+- Controls clear 44×44pt. The one deliberate exception is the calendar's month
+  grid, which is dense by nature and only renders from tablet width up; phones
+  get a full-height agenda list instead.
+- Motion is short and eased, never bouncy, and honours
+  `prefers-reduced-motion`.
+
+## How it fits with the rest of the repo
+
+`/studio` is exempt from the Supabase session gate in `proxy.ts`, which is why
+it runs with no configuration. The n8n control panel below still requires a
+Supabase project and a sign-in.
+
+---
+
+# Content Automation Dashboard (`/`, `/queue`, `/calendar`, `/platforms`)
 
 A control panel for the n8n content-automation pipeline. It replaces the Google
 Sheet that the workflow used to read and write, giving you a real UI to:
