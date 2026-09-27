@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
+
+import { SESSION_COOKIE, sessionIsValid, studioPassword } from "@/lib/studio/auth";
 import { updateSession } from "@/lib/supabase/middleware";
 
-/** Routes that Content Studio owns; see the early return in `proxy` below. */
+/** Routes that Content Studio owns. */
 function isStudioRoute(pathname: string): boolean {
   return (
     pathname === "/studio" ||
@@ -18,12 +20,38 @@ function supabaseConfigured(): boolean {
   );
 }
 
+/**
+ * Content Studio keeps its own data and has no Supabase session. It is open by
+ * default, which is what you want on your own machine; set `STUDIO_PASSWORD`
+ * and it asks for that password once per device, which is what you want on a
+ * public URL.
+ */
+async function studioGate(request: NextRequest) {
+  if (studioPassword() === null) return NextResponse.next({ request });
+
+  const { pathname } = request.nextUrl;
+  if (pathname === "/studio/login") return NextResponse.next({ request });
+
+  if (await sessionIsValid(request.cookies.get(SESSION_COOKIE)?.value)) {
+    return NextResponse.next({ request });
+  }
+
+  // The app's own fetches should fail loudly rather than be handed an HTML
+  // sign-in page they cannot parse.
+  if (pathname.startsWith("/api/studio")) {
+    return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+  }
+
+  const url = request.nextUrl.clone();
+  url.pathname = "/studio/login";
+  url.search = "";
+  return NextResponse.redirect(url);
+}
+
 // Next.js 16 renamed `middleware.ts` to `proxy.ts` (function name `proxy`).
 export async function proxy(request: NextRequest) {
-  // Content Studio stores its ideas in a local file rather than Supabase, so
-  // it stays reachable with no environment configuration and no sign-in.
   if (isStudioRoute(request.nextUrl.pathname)) {
-    return NextResponse.next({ request });
+    return studioGate(request);
   }
 
   // With no Supabase credentials the n8n dashboard can only throw, so send

@@ -74,14 +74,42 @@ of target publish dates.
 
 ## Where the data lives
 
-One JSON file, `data/studio.json`, written atomically (temp file + rename) with
-writes serialised so concurrent edits cannot interleave. It is gitignored, so
-your ideas stay on your machine. Point `STUDIO_DATA_FILE` at another path to
-keep it elsewhere. A file written by an earlier version of this app is migrated
-on load, including the nine-stage pipeline it used to have.
+**Locally:** one JSON file, `data/studio.json`, written atomically (temp file +
+rename) with writes serialised so they cannot interleave. It is gitignored, so
+your ideas stay on your machine. Back it up by copying that one file. Point
+`STUDIO_DATA_FILE` at another path to keep it elsewhere.
 
-> **Note:** the file store needs a writable filesystem, so this runs locally
-> rather than on a read-only host like Vercel.
+**On Netlify:** a function's filesystem is read-only, so the same data goes to
+a [Netlify Blobs](https://docs.netlify.com/build/data-and-storage/netlify-blobs/)
+store instead — no extra service to sign up for and no keys to manage. Writes
+are conditional on the version that was read, so editing on your phone and your
+laptop at the same time cannot silently overwrite either one; the write that
+loses the race re-reads and re-applies.
+
+Nothing above `lib/studio/backend.ts` knows which of the two is in use. Set
+`STUDIO_STORAGE` to `file` or `blobs` to choose explicitly; otherwise it
+follows `NETLIFY`.
+
+A data file written by an earlier version is migrated on load, including the
+nine-stage pipeline this app used to have.
+
+## Deploying to Netlify
+
+1. Push the repo and **Add new site → Import an existing project** on Netlify.
+   Netlify detects Next.js and needs no build configuration — [`netlify.toml`](netlify.toml)
+   only sets `STUDIO_STORAGE=blobs`.
+2. **Set a password before the site is live.** Under *Site configuration →
+   Environment variables*, add `STUDIO_PASSWORD`. Without it the studio is open
+   and anyone with the URL can read and edit your scripts.
+3. Deploy, then open the site. You will be asked for the password once per
+   device and stay signed in for 30 days. Changing `STUDIO_PASSWORD` signs every
+   device out.
+
+The n8n dashboard routes will keep redirecting to the studio unless you also set
+`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+
+> **Locally, leave `STUDIO_PASSWORD` unset** — there is no point locking a
+> dashboard that only your own machine can reach.
 
 ## Design notes
 

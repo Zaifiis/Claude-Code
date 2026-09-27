@@ -10,9 +10,8 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import path from "node:path";
 
+import { storeBackend } from "@/lib/studio/backend";
 import {
   applyOrder,
   normaliseRanks,
@@ -30,9 +29,8 @@ import {
   PLATFORMS,
 } from "@/types/studio";
 
-const DATA_FILE = process.env.STUDIO_DATA_FILE
-  ? path.resolve(process.env.STUDIO_DATA_FILE)
-  : path.join(process.cwd(), "data", "studio.json");
+/** How many times a write retries when another device wrote first. */
+const MAX_WRITE_ATTEMPTS = 5;
 
 /** Generous caps that keep one runaway paste from bloating the whole file. */
 const LIMITS = {
@@ -176,49 +174,42 @@ function applyPatch(idea: Idea, patch: IdeaPatch): Idea {
   return next;
 }
 
-// --- disk ------------------------------------------------------------------
+// --- reading and writing ---------------------------------------------------
 
-async function load(): Promise<Idea[]> {
-  let text: string;
-  try {
-    text = await readFile(DATA_FILE, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
-    throw error;
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    // A corrupt file should not take the dashboard down; keep the bad copy and
-    // start clean rather than throwing on every request.
-    await rename(DATA_FILE, `${DATA_FILE}.corrupt-${Date.now()}`).catch(() => {});
-    return [];
-  }
-
-  const list = Array.isArray(parsed)
-    ? parsed
-    : Array.isArray((parsed as { ideas?: unknown })?.ideas)
-      ? (parsed as { ideas: unknown[] }).ideas
+function parse(data: unknown): Idea[] {
+  const list = Array.isArray(data)
+    ? data
+    : Array.isArray((data as { ideas?: unknown })?.ideas)
+      ? (data as { ideas: unknown[] }).ideas
       : [];
 
   return normaliseRanks(list.map(coerceIdea).filter((idea): idea is Idea => idea !== null));
 }
 
-async function save(ideas: Idea[]): Promise<void> {
-  await mkdir(path.dirname(DATA_FILE), { recursive: true });
-  const temp = `${DATA_FILE}.${process.pid}.tmp`;
-  await writeFile(temp, `${JSON.stringify({ version: 1, ideas }, null, 2)}\n`, "utf8");
-  await rename(temp, DATA_FILE);
+async function load(): Promise<Idea[]> {
+  return parse((await storeBackend().read()).data);
 }
 
-/** Read, transform, write — all under the lock so writes can't interleave. */
+/**
+ * Read, transform, write — under the in-process lock so one server cannot
+ * interleave its own writes, and retrying when a *different* one got there
+ * first, which is how two devices can safely edit the same store.
+ */
 async function mutate<T>(fn: (ideas: Idea[]) => { ideas: Idea[]; result: T }): Promise<T> {
   return withLock(async () => {
-    const { ideas, result } = fn(await load());
-    await save(normaliseRanks(ideas));
-    return result;
+    const backend = storeBackend();
+
+    for (let attempt = 0; attempt < MAX_WRITE_ATTEMPTS; attempt += 1) {
+      const snapshot = await backend.read();
+      const { ideas, result } = fn(parse(snapshot.data));
+      const written = await backend.write(
+        { version: 1, ideas: normaliseRanks(ideas) },
+        snapshot.version,
+      );
+      if (written) return result;
+    }
+
+    throw new Error("Could not save: the ideas store kept changing underneath this write.");
   });
 }
 
