@@ -11,8 +11,9 @@ cp data/studio.example.json data/studio.json   # optional: start with samples
 npm run dev
 ```
 
-Then open <http://localhost:3000/studio>. (The bare root is the n8n dashboard
-and needs Supabase credentials; the studio does not.)
+Then open <http://localhost:3000>. With no Supabase credentials configured,
+every other route redirects here, so the plain address works — the studio is
+also always at <http://localhost:3000/studio>.
 
 ## The five stages
 
