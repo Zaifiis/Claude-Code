@@ -50,6 +50,21 @@ body {
   --st-on-accent: #ffffff;
   --st-fill: rgb(0 0 0 / 0.05);
   --st-fill-hover: rgb(0 0 0 / 0.08);
+  /* One colour per stage, and one per section of an idea. Apple's
+     system palette, so they sit together without shouting. */
+  --st-blue: #007aff;
+  --st-blue-soft: rgb(0 122 255 / 0.12);
+  --st-indigo: #5856d6;
+  --st-indigo-soft: rgb(88 86 214 / 0.12);
+  --st-orange: #f07800;
+  --st-orange-soft: rgb(255 149 0 / 0.14);
+  --st-teal: #0a93ab;
+  --st-teal-soft: rgb(48 176 199 / 0.14);
+  --st-green: #24a148;
+  --st-green-soft: rgb(52 199 89 / 0.14);
+  --st-pink: #e0245e;
+  --st-pink-soft: rgb(255 45 85 / 0.12);
+
   --st-shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.05);
   --st-shadow-lift: 0 2px 6px rgb(0 0 0 / 0.08), 0 18px 44px rgb(0 0 0 / 0.16);
 
@@ -84,6 +99,18 @@ body {
     --st-on-accent: #ffffff;
     --st-fill: rgb(255 255 255 / 0.06);
     --st-fill-hover: rgb(255 255 255 / 0.1);
+    --st-blue: #0a84ff;
+    --st-blue-soft: rgb(10 132 255 / 0.20);
+    --st-indigo: #7d7aff;
+    --st-indigo-soft: rgb(94 92 230 / 0.24);
+    --st-orange: #ff9f0a;
+    --st-orange-soft: rgb(255 159 10 / 0.20);
+    --st-teal: #44d4ee;
+    --st-teal-soft: rgb(64 200 224 / 0.20);
+    --st-green: #30d158;
+    --st-green-soft: rgb(48 209 88 / 0.20);
+    --st-pink: #ff6482;
+    --st-pink-soft: rgb(255 100 130 / 0.20);
     --st-shadow-card: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px rgb(0 0 0 / 0.36);
     --st-shadow-lift: 0 2px 6px rgb(0 0 0 / 0.6), 0 18px 44px rgb(0 0 0 / 0.55);
   }
@@ -105,6 +132,18 @@ body {
   --st-on-accent: #ffffff;
   --st-fill: rgb(255 255 255 / 0.06);
   --st-fill-hover: rgb(255 255 255 / 0.1);
+  --st-blue: #0a84ff;
+  --st-blue-soft: rgb(10 132 255 / 0.20);
+  --st-indigo: #7d7aff;
+  --st-indigo-soft: rgb(94 92 230 / 0.24);
+  --st-orange: #ff9f0a;
+  --st-orange-soft: rgb(255 159 10 / 0.20);
+  --st-teal: #44d4ee;
+  --st-teal-soft: rgb(64 200 224 / 0.20);
+  --st-green: #30d158;
+  --st-green-soft: rgb(48 209 88 / 0.20);
+  --st-pink: #ff6482;
+  --st-pink-soft: rgb(255 100 130 / 0.20);
   --st-shadow-card: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px rgb(0 0 0 / 0.36);
   --st-shadow-lift: 0 2px 6px rgb(0 0 0 / 0.6), 0 18px 44px rgb(0 0 0 / 0.55);
 }
@@ -124,6 +163,19 @@ body {
   --color-st-accent-soft: var(--st-accent-soft);
   --color-st-on-accent: var(--st-on-accent);
   --color-st-fill: var(--st-fill);
+
+  --color-st-blue: var(--st-blue);
+  --color-st-blue-soft: var(--st-blue-soft);
+  --color-st-indigo: var(--st-indigo);
+  --color-st-indigo-soft: var(--st-indigo-soft);
+  --color-st-orange: var(--st-orange);
+  --color-st-orange-soft: var(--st-orange-soft);
+  --color-st-teal: var(--st-teal);
+  --color-st-teal-soft: var(--st-teal-soft);
+  --color-st-green: var(--st-green);
+  --color-st-green-soft: var(--st-green-soft);
+  --color-st-pink: var(--st-pink);
+  --color-st-pink-soft: var(--st-pink-soft);
   --color-st-fill-hover: var(--st-fill-hover);
 
   --radius-st-control: var(--st-r-control);

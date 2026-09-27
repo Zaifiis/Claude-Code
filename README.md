@@ -1,87 +1,108 @@
 # Content Studio (`/studio`)
 
 A personal dashboard for content ideas: drop an idea in, write the full script,
-and decide the exact order videos get made in. It is self-contained — no
-database, no sign-in, no environment variables — and lives alongside the n8n
-control panel described below.
+and track it from raw idea to posted. It is self-contained — no database, no
+sign-in, no environment variables — and lives alongside the n8n control panel
+described below.
 
 ```bash
 npm install
+cp data/studio.example.json data/studio.json   # optional: start with samples
 npm run dev
 ```
 
-Then open <http://localhost:3000/studio>.
+Then open <http://localhost:3000/studio>. (The bare root is the n8n dashboard
+and needs Supabase credentials; the studio does not.)
 
-## What it does
+## The five stages
 
-**One ranked list.** Every active idea sits in a single make-next order. Drag a
-card by its handle to move it, or focus the handle and use the arrow keys
-(`Home` / `End` jump to either end). Whatever sits at the top is the next thing
-to make, and the top bar says so. Setting an idea's status to **Published**
-takes it out of the list on its own and files it in the archive.
+Every idea sits at one of five stages, and each stage has its own colour, so a
+glance down the list reads as a pipeline:
 
-**Quick capture.** The box at the top of every view takes a title and `Enter`.
-The idea lands at the bottom of the ranked list and the field stays focused, so
-you can empty your head in one go without opening a form.
+| Stage | Colour | Means |
+| --- | --- | --- |
+| Idea | Blue | Captured, nothing written yet |
+| Scripted | Indigo | The script is done |
+| Recorded | Orange | Filmed, not cut |
+| Edited | Teal | Cut and ready to post |
+| Posted | Green | Live, with room for a note on how it did |
 
-**Four views.**
+The sidebar lists them with a live count. **All** is everything still to make,
+in the order you intend to make it; **Posted** is the done pile, kept out of
+that order. On a phone the sidebar becomes one scrollable row of the same
+stages.
 
-| View | What it shows |
-| --- | --- |
-| Ranked | The make-next order, numbered first, second, third… |
-| Board | Columns by status; drag a card to another column to move its stage |
-| Calendar | A month of target publish dates, plus everything still undated |
-| Archive | Everything published, newest first, with its performance note |
+## Capturing
 
-Opening any card gives it the full screen for writing. The script area is
-Markdown — headings, bullets, bold and italic — with a toolbar, a live word
-count and read-aloud estimate, and a preview toggle. `⌘⌥1` / `⌘⌥2` set a
-heading, `⌘⇧8` toggles bullets, and `Enter` continues a bullet list. **Focus**
-hides everything except the script; `Esc` steps back out.
+**New idea** opens a large, empty box. Type the idea and click anywhere — it
+saves and lands in Ideas. Enter and Escape save too, so an idea cannot be lost
+by dismissing the wrong way; an empty box just closes.
 
-Everything autosaves as you type, and flushes immediately if you close the tab
-or background the app. The top bar shows when a write is in flight.
+## The idea page
 
-**Finding things.** Search covers every written field, including script bodies
-and captions. Filter by platform or content pillar, and the counter strip shows
-how many ideas are waiting at each status — tap one to filter by it.
+Tapping a card opens it full screen. The stage selector sits under the title,
+and each section carries its own colour:
+
+- **Script** (indigo) — a distraction-free Markdown area with headings and
+  bullets, a toolbar, `⌘⌥1` / `⌘⌥2` / `⌘⇧8` shortcuts, a live word count and a
+  read-aloud estimate. **Focus** hides everything else; `Esc` steps back out.
+- **Hooks** (pink) — opening lines to choose between.
+- **Inspiration** (teal) — links to other people's reels, each with a note on
+  what to take from it.
+- **Shot ideas** (orange) — what to film.
+- **Caption** (green) — what goes out with the post.
+- **Details** (neutral) — platform, pillar, target date, and more behind a
+  disclosure.
+
+Once a card reaches Posted it also gets a **How it did** section for the
+performance note.
+
+## Ordering
+
+Inside any stage, drag a card by its handle to change where it sits in the
+make-next order — or focus the handle and use the arrow keys (`Home` / `End`
+jump to either end). Dragging inside a stage moves the card within the single
+global order, so the sequence stays consistent wherever you look at it.
+
+## Everything else
+
+Search covers every written field — script bodies, captions, hooks, shot ideas
+and inspiration notes. **Board** and **Calendar**, at the foot of the sidebar,
+give a column-per-stage view (drag between columns to change stage) and a month
+of target publish dates.
 
 ## Where the data lives
 
 One JSON file, `data/studio.json`, written atomically (temp file + rename) with
 writes serialised so concurrent edits cannot interleave. It is gitignored, so
 your ideas stay on your machine. Point `STUDIO_DATA_FILE` at another path to
-keep it elsewhere — useful if you sync it, or if you deploy somewhere with a
-read-only filesystem and need a writable volume.
+keep it elsewhere. A file written by an earlier version of this app is migrated
+on load, including the nine-stage pipeline it used to have.
 
-To see the app populated before you have written anything, copy the sample:
-
-```bash
-mkdir -p data && cp data/studio.example.json data/studio.json
-```
+> **Note:** the file store needs a writable filesystem, so this runs locally
+> rather than on a read-only host like Vercel.
 
 ## Design notes
 
-- One accent colour; everything else is neutral. The accent only appears where
-  something is genuinely selected or is next up.
+- One colour per stage and per section, from Apple's system palette. Colour is
+  used to identify, never to decorate: a 4px edge on a card, a dot in the
+  sidebar, a section heading.
 - Colours are semantic tokens defined once in `app/globals.css` and redefined
-  for dark mode, so nothing hardcodes a hex value. The appearance switch in the
-  top bar follows the system until you choose, then remembers; the choice is
-  applied before first paint so a reload never flashes.
+  for dark mode, so nothing hardcodes a hex value. The appearance switch follows
+  the system until you choose, then remembers; the choice is applied before
+  first paint so a reload never flashes.
 - Spacing sits on an 8pt grid, corner radii come from one shared set, and the
-  top bar and the idea view use a translucent, blurred material so they read as
-  floating above the content.
+  top bar and popups use a translucent, blurred material.
 - Controls clear 44×44pt. The one deliberate exception is the calendar's month
   grid, which is dense by nature and only renders from tablet width up; phones
   get a full-height agenda list instead.
-- Motion is short and eased, never bouncy, and honours
-  `prefers-reduced-motion`.
+- Motion is short and eased, and honours `prefers-reduced-motion`.
 
 ## How it fits with the rest of the repo
 
-`/studio` is exempt from the Supabase session gate in `proxy.ts`, which is why
-it runs with no configuration. The n8n control panel below still requires a
-Supabase project and a sign-in.
+`/studio` and `/api/studio` are exempt from the Supabase session gate in
+`proxy.ts`, which is why the studio runs with no configuration. The n8n control
+panel below still requires a Supabase project and a sign-in.
 
 ---
 

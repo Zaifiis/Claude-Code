@@ -115,7 +115,9 @@ export function Segmented<T extends string>({
 const INPUT_BASE = cx(
   "w-full rounded-st-control bg-st-fill px-3 st-body text-st-text",
   "border border-transparent outline-none placeholder:text-st-text-3",
-  "focus:border-st-accent focus:bg-st-surface",
+  // The border and background carry focus on their own, so the global ring is
+  // suppressed here rather than doubling up on it.
+  "focus:border-st-accent focus:bg-st-surface focus-visible:outline-none",
   MOTION,
 );
 

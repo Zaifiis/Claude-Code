@@ -2,56 +2,78 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-import { matches, NO_FILTERS, hasActiveFilters } from "@/lib/studio/filters";
+import { matches } from "@/lib/studio/filters";
 import type { Status } from "@/types/studio";
 
-import { ArchiveList } from "./components/archive-list";
 import { BoardView } from "./components/board-view";
 import { CalendarView } from "./components/calendar-view";
-import { FilterStrip } from "./components/filter-strip";
-import { IdeaSheet } from "./components/idea-sheet";
-import { RankedList } from "./components/ranked-list";
-import { TopBar, type View } from "./components/top-bar";
+import { IdeaList } from "./components/idea-list";
+import { IdeaPage } from "./components/idea-page";
+import { type Section, SectionTabs, Sidebar } from "./components/nav";
+import { NewIdeaModal } from "./components/new-idea-modal";
+import { TopBar } from "./components/top-bar";
 import { useStudio } from "./studio-store";
 import { useAppearance } from "./use-theme";
 import { useToday } from "./use-today";
 
+const EMPTY: Record<Section, { title: string; body: string }> = {
+  All: {
+    title: "Nothing to make",
+    body: "Hit New idea, type what you're thinking, and click away. It lands in Ideas. Anything already posted is in the Posted section.",
+  },
+  Idea: { title: "No raw ideas", body: "Everything you've captured has moved on to a later stage." },
+  Scripted: { title: "Nothing scripted", body: "Write a script on an idea and move it to Scripted." },
+  Recorded: { title: "Nothing recorded", body: "Move a card here once you've filmed it." },
+  Edited: { title: "Nothing edited", body: "Cards land here when the edit is done and it's ready to post." },
+  Posted: { title: "Nothing posted yet", body: "Posted videos collect here, with room for a note on how each did." },
+  Board: { title: "", body: "" },
+  Calendar: { title: "", body: "" },
+};
+
 export function StudioApp() {
-  const { active, archived, byId, counts, pillars, saveState, create, update, moveVisible } =
-    useStudio();
+  const { active, archived, byId, counts, saveState, create, update, moveVisible } = useStudio();
   const today = useToday();
   const { appearance, setAppearance } = useAppearance();
 
-  const [view, setView] = useState<View>("list");
-  const [filters, setFilters] = useState(NO_FILTERS);
+  const [section, setSection] = useState<Section>("All");
+  const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [capturing, setCapturing] = useState(false);
 
-  const filtering = hasActiveFilters(filters);
+  const searching = query.trim() !== "";
+  const everything = useMemo(() => [...active, ...archived], [active, archived]);
 
-  const visibleActive = useMemo(
-    () => active.filter((idea) => matches(idea, filters)),
-    [active, filters],
+  /**
+   * Posted work is done, so it lives in its own section rather than cluttering
+   * the make-next order — except when you are searching, which looks
+   * everywhere.
+   */
+  const source = searching ? everything : section === "Posted" ? archived : active;
+
+  const found = useMemo(
+    () => source.filter((idea) => matches(idea, query)),
+    [source, query],
   );
-  const visibleArchived = useMemo(
-    () => archived.filter((idea) => matches(idea, filters)),
-    [archived, filters],
-  );
-  // The board and calendar show published work too: one stage on the board,
-  // and a date that has already been and gone on the calendar.
-  const everything = useMemo(
-    () => [...visibleActive, ...visibleArchived],
-    [visibleActive, visibleArchived],
-  );
+
+  const listed = useMemo(() => {
+    if (section === "All" || section === "Board" || section === "Calendar") return found;
+    return found.filter((idea) => idea.status === section);
+  }, [found, section]);
+
+  // Dragging edits the real make-next order, so it is offered wherever the list
+  // is made of cards that are actually in that order.
+  const reorderable =
+    !searching && section !== "Posted" && section !== "Board" && section !== "Calendar";
 
   const onMove = useCallback(
     (fromIndex: number, toIndex: number) => {
       moveVisible(
-        visibleActive.map((idea) => idea.id),
+        listed.map((idea) => idea.id),
         fromIndex,
         toIndex,
       );
     },
-    [moveVisible, visibleActive],
+    [moveVisible, listed],
   );
 
   const onSetStatus = useCallback(
@@ -60,75 +82,81 @@ export function StudioApp() {
   );
 
   const openIdea = openId ? byId.get(openId) : undefined;
-  const openPosition = openIdea && !openIdea.archived
-    ? active.findIndex((idea) => idea.id === openIdea.id) + 1
-    : null;
+  const empty = EMPTY[section];
 
   return (
-    <div className="st-root flex min-h-dvh flex-col bg-st-canvas text-st-text">
-      <TopBar
-        nextUp={active[0]?.title || (active.length > 0 ? "Untitled idea" : null)}
-        view={view}
-        onViewChange={setView}
-        query={filters.query}
-        onQueryChange={(query) => setFilters((current) => ({ ...current, query }))}
-        onCapture={(title) =>
-          create(title, filters.platform === "all" ? {} : { platform: filters.platform })
-        }
-        saveState={saveState}
-        appearance={appearance}
-        onAppearanceChange={setAppearance}
+    <div className="st-root flex min-h-dvh bg-st-canvas text-st-text">
+      <Sidebar
+        section={section}
+        counts={counts}
+        total={active.length}
+        onSelect={setSection}
+        onNew={() => setCapturing(true)}
       />
 
-      <main className="mx-auto w-full max-w-[1120px] flex-1 px-4 pt-6 pb-24 sm:px-6">
-        <FilterStrip
-          filters={filters}
-          counts={counts}
-          pillars={pillars}
-          onChange={setFilters}
-          onOpenArchive={() => setView("archive")}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TopBar
+          section={section}
+          count={listed.length}
+          query={query}
+          onQueryChange={setQuery}
+          onNew={() => setCapturing(true)}
+          saveState={saveState}
+          appearance={appearance}
+          onAppearanceChange={setAppearance}
         />
 
-        <div className="mt-6">
-          {view === "list" ? (
-            <RankedList
-              ideas={visibleActive}
-              today={today}
-              filtered={filtering}
-              onOpen={setOpenId}
-              onMove={onMove}
-            />
-          ) : null}
+        <main className="mx-auto w-full max-w-[1080px] flex-1 px-4 pt-4 pb-24 sm:px-6">
+          <SectionTabs
+            section={section}
+            counts={counts}
+            total={active.length}
+            onSelect={setSection}
+          />
 
-          {view === "board" ? (
-            <BoardView
-              ideas={everything}
-              today={today}
-              filtered={filtering}
-              onOpen={setOpenId}
-              onSetStatus={onSetStatus}
-            />
-          ) : null}
+          <div className="mt-4">
+            {section === "Board" ? (
+              <BoardView
+                ideas={everything.filter((idea) => matches(idea, query))}
+                today={today}
+                filtered={searching}
+                onOpen={setOpenId}
+                onSetStatus={onSetStatus}
+              />
+            ) : section === "Calendar" ? (
+              <CalendarView
+                ideas={everything.filter((idea) => matches(idea, query))}
+                today={today}
+                onOpen={setOpenId}
+              />
+            ) : (
+              <IdeaList
+                ideas={listed}
+                today={today}
+                emptyTitle={searching ? "Nothing matches" : empty.title}
+                emptyBody={
+                  searching
+                    ? "No idea matches that search. Clear it to see this stage again."
+                    : empty.body
+                }
+                reorderable={reorderable}
+                onOpen={setOpenId}
+                onMove={onMove}
+              />
+            )}
+          </div>
+        </main>
+      </div>
 
-          {view === "calendar" ? (
-            <CalendarView ideas={everything} today={today} onOpen={setOpenId} />
-          ) : null}
-
-          {view === "archive" ? (
-            <ArchiveList ideas={visibleArchived} filtered={filtering} onOpen={setOpenId} />
-          ) : null}
-        </div>
-      </main>
+      {capturing ? (
+        <NewIdeaModal
+          onSave={(title) => create(title)}
+          onClose={() => setCapturing(false)}
+        />
+      ) : null}
 
       {openIdea ? (
-        <IdeaSheet
-          key={openIdea.id}
-          idea={openIdea}
-          position={openPosition}
-          total={active.length}
-          today={today}
-          onClose={() => setOpenId(null)}
-        />
+        <IdeaPage key={openIdea.id} idea={openIdea} today={today} onClose={() => setOpenId(null)} />
       ) : null}
     </div>
   );

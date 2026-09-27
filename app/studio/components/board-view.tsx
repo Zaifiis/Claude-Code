@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { formatDayMonth, relativeLabel } from "@/lib/studio/dates";
 import { countWords } from "@/lib/studio/script";
-import { type Idea, PLATFORM_SHORT, type Status, STATUSES } from "@/types/studio";
+import { type Idea, PLATFORM_SHORT, STATUS_COLOR, type Status, STATUSES } from "@/types/studio";
 
 import { cx, EmptyState, Tag } from "./ui";
 
@@ -223,9 +223,13 @@ export function BoardView({
                   : "bg-st-surface-2",
               )}
             >
-              <header className="flex items-center justify-between gap-2 px-2 pt-2 pb-1">
-                <h2 className="st-caption text-st-text-2">{status}</h2>
-                <span className="st-footnote st-tabular text-st-text-3">{items.length}</span>
+              <header className="flex items-center gap-2 px-2 pt-2 pb-1">
+                <span
+                  aria-hidden="true"
+                  className={cx("h-2 w-2 shrink-0 rounded-full", STATUS_COLOR[status].dot)}
+                />
+                <h2 className={cx("st-caption", STATUS_COLOR[status].text)}>{status}</h2>
+                <span className="st-footnote st-tabular ml-auto text-st-text-3">{items.length}</span>
               </header>
 
               <div className="flex flex-col gap-2">
@@ -292,7 +296,7 @@ function BoardCard({
         props.onClick?.(event as unknown as React.MouseEvent<HTMLDivElement>);
       }}
       className={cx(
-        "flex cursor-grab touch-pan-y flex-col gap-2 rounded-st-card bg-st-surface p-3 text-left select-none",
+        "relative flex cursor-grab touch-pan-y flex-col gap-2 overflow-hidden rounded-st-card bg-st-surface p-3 pl-4 text-left select-none",
         "transition-[opacity,box-shadow] duration-[var(--st-dur-fast)] ease-st",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-accent",
         lifted ? "cursor-grabbing shadow-st-lift" : "shadow-st-card hover:shadow-st-lift",
@@ -300,6 +304,10 @@ function BoardCard({
       )}
       {...props}
     >
+      <span
+        aria-hidden="true"
+        className={cx("absolute inset-y-0 left-0 w-1", STATUS_COLOR[idea.status].dot)}
+      />
       <p className="st-callout line-clamp-3 font-medium text-st-text">
         {idea.title || "Untitled idea"}
       </p>

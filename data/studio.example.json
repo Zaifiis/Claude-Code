@@ -7,14 +7,28 @@
       "platform": "LinkedIn",
       "pillar": "Pricing",
       "rank": 0,
-      "status": "Scripting",
+      "status": "Scripted",
       "titleOptions": [
         "What I actually charge (and why)",
         "My pricing, in the open"
       ],
       "thumbnailIdea": "Plain background, one number set large, no face.",
-      "hook": "Everyone asks what I charge. Here is the actual number.",
+      "hooks": [
+        "Everyone asks what I charge. Here is the actual number.",
+        "I'll tell you my exact pricing in 30 seconds."
+      ],
       "script": "## Cold open\nI get asked this every single week, so here it is.\n\n## The numbers\n- Setup fee covers discovery and the first build\n- Retainer covers upkeep, monitoring and changes\n- Nothing is hidden behind a call\n\n## Close\nThat is the whole thing. No packages, no tiers.",
+      "inspiration": [
+        {
+          "url": "https://www.instagram.com/reel/example-pricing-breakdown/",
+          "note": "Number on screen in the first second — steal that opening"
+        }
+      ],
+      "shotIdeas": [
+        "Talking head, plain wall",
+        "Cutaway to the invoice on screen",
+        "Close-up on the number being written down"
+      ],
       "caption": "Pricing, in the open. Setup, retainer, and what each one actually buys you.",
       "targetDate": "2026-09-29",
       "owner": "",
@@ -31,11 +45,20 @@
       "platform": "LinkedIn",
       "pillar": "Lessons",
       "rank": 1,
-      "status": "Ready to record",
-      "titleOptions": ["The month-two problem"],
+      "status": "Scripted",
+      "titleOptions": [
+        "The month-two problem"
+      ],
       "thumbnailIdea": "A calendar with week 5 circled.",
-      "hook": "Your automation did not break. Nobody owned it.",
+      "hooks": [
+        "Your automation did not break. Nobody owned it."
+      ],
       "script": "## Cold open\nMonth one always works. Month two is where it goes quiet.\n\n## Why\n- The person who asked for it moved on\n- Nobody watches the failure emails\n- One upstream field gets renamed\n\n## What to do instead\nGive every workflow an owner and somewhere its failures are visible.",
+      "inspiration": [],
+      "shotIdeas": [
+        "Screen recording of a failed run",
+        "Calendar with week 5 circled"
+      ],
       "caption": "Month one always works. Here is what happens in month two.",
       "targetDate": "2026-09-24",
       "owner": "",
@@ -52,11 +75,23 @@
       "platform": "YouTube",
       "pillar": "Teardowns",
       "rank": 2,
-      "status": "Planned",
+      "status": "Idea",
       "titleOptions": [],
       "thumbnailIdea": "Three nodes on a dark canvas, wired left to right.",
-      "hook": "Almost every workflow I ship is the same three nodes.",
+      "hooks": [
+        "Almost every workflow I ship is the same three nodes."
+      ],
       "script": "",
+      "inspiration": [
+        {
+          "url": "https://www.youtube.com/watch?v=example-teardown",
+          "note": "Pacing of the walkthrough"
+        }
+      ],
+      "shotIdeas": [
+        "Screen capture of the canvas",
+        "Zoom on each node in turn"
+      ],
       "caption": "",
       "targetDate": "2026-09-28",
       "owner": "",
@@ -73,11 +108,18 @@
       "platform": "TikTok",
       "pillar": "Behind the scenes",
       "rank": 3,
-      "status": "Editing",
+      "status": "Edited",
       "titleOptions": [],
       "thumbnailIdea": "Phone screen, notifications visible.",
-      "hook": "Seven days of inbound, nothing cut out.",
+      "hooks": [
+        "Seven days of inbound, nothing cut out."
+      ],
       "script": "## Format\nOne clip per day, five seconds each, no commentary until the end.",
+      "inspiration": [],
+      "shotIdeas": [
+        "One clip per day",
+        "Phone screen with notifications"
+      ],
       "caption": "A full week of inbound with nothing edited out.",
       "targetDate": "2026-09-26",
       "owner": "",
@@ -97,8 +139,10 @@
       "status": "Idea",
       "titleOptions": [],
       "thumbnailIdea": "",
-      "hook": "",
+      "hooks": [],
       "script": "",
+      "inspiration": [],
+      "shotIdeas": [],
       "caption": "",
       "targetDate": "",
       "owner": "",
@@ -115,11 +159,19 @@
       "platform": "LinkedIn",
       "pillar": "Lessons",
       "rank": 9007199254740991,
-      "status": "Published",
-      "titleOptions": ["The first hire that actually mattered"],
+      "status": "Posted",
+      "titleOptions": [
+        "The first hire that actually mattered"
+      ],
       "thumbnailIdea": "Empty desk, one chair.",
-      "hook": "It was not a salesperson.",
+      "hooks": [
+        "It was not a salesperson."
+      ],
       "script": "## Cold open\nEveryone said hire sales. I hired an operator instead.\n\n## Why it worked\n- Delivery stopped being the bottleneck\n- I got my evenings back\n- Sales got easier once delivery was boring",
+      "inspiration": [],
+      "shotIdeas": [
+        "Empty desk, one chair"
+      ],
       "caption": "Everyone said hire sales first. Here is what I did instead.",
       "targetDate": "2026-09-12",
       "owner": "",

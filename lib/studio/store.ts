@@ -23,8 +23,10 @@ import {
   DONE_STATUS,
   type Idea,
   type IdeaPatch,
+  type Inspiration,
   isPlatform,
   isStatus,
+  LEGACY_STATUS,
   PLATFORMS,
 } from "@/types/studio";
 
@@ -41,6 +43,8 @@ const LIMITS = {
   caption: 20_000,
   script: 400_000,
   titleOptions: 24,
+  listRows: 40,
+  url: 2_000,
 } as const;
 
 // --- serialisation ---------------------------------------------------------
@@ -77,12 +81,35 @@ function isoDate(value: unknown): string {
   return roundTrips ? raw : "";
 }
 
-function titleOptions(value: unknown): string[] {
+/** A list of short text rows: title options, hooks, shot ideas. */
+function textList(value: unknown, max: number, limit: number = LIMITS.listRows): string[] {
   if (!Array.isArray(value)) return [];
   return value
-    .slice(0, LIMITS.titleOptions)
-    .map((option) => str(option, LIMITS.title))
-    .filter((option) => option.trim().length > 0);
+    .slice(0, limit)
+    .map((row) => str(row, max))
+    .filter((row) => row.trim().length > 0);
+}
+
+/**
+ * Inspiration rows. A row is kept when it has a link or a note, so a
+ * half-filled row a user is still typing into is never thrown away.
+ */
+function inspirationList(value: unknown): Inspiration[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .slice(0, LIMITS.listRows)
+    .map((row) => {
+      const raw = (typeof row === "object" && row !== null ? row : {}) as Record<string, unknown>;
+      return { url: str(raw.url, LIMITS.url).trim(), note: str(raw.note, LIMITS.title) };
+    })
+    .filter((row) => row.url !== "" || row.note.trim() !== "");
+}
+
+/** Reads a stage, translating the older nine-stage pipeline onto the five. */
+function status(value: unknown): Idea["status"] {
+  if (isStatus(value)) return value;
+  if (typeof value === "string" && value in LEGACY_STATUS) return LEGACY_STATUS[value];
+  return "Idea";
 }
 
 /** Fills in every field so a hand-edited or older file still loads cleanly. */
@@ -92,7 +119,7 @@ function coerceIdea(value: unknown): Idea | null {
   const id = typeof raw.id === "string" && raw.id.trim() ? raw.id.trim().slice(0, 64) : null;
   if (!id) return null;
 
-  const status = isStatus(raw.status) ? raw.status : "Idea";
+  const stage = status(raw.status);
   const now = new Date().toISOString();
   const createdAt = typeof raw.createdAt === "string" ? raw.createdAt : now;
 
@@ -102,17 +129,22 @@ function coerceIdea(value: unknown): Idea | null {
     platform: isPlatform(raw.platform) ? raw.platform : PLATFORMS[0],
     pillar: str(raw.pillar, LIMITS.pillar),
     rank: typeof raw.rank === "number" && Number.isFinite(raw.rank) ? raw.rank : UNRANKED,
-    status,
-    titleOptions: titleOptions(raw.titleOptions),
+    status: stage,
+    titleOptions: textList(raw.titleOptions, LIMITS.title, LIMITS.titleOptions),
     thumbnailIdea: str(raw.thumbnailIdea, LIMITS.shortText),
-    hook: str(raw.hook, LIMITS.shortText),
+    // `hook` was a single line before hooks became a list.
+    hooks: Array.isArray(raw.hooks)
+      ? textList(raw.hooks, LIMITS.shortText)
+      : textList([raw.hook], LIMITS.shortText),
     script: str(raw.script, LIMITS.script),
+    inspiration: inspirationList(raw.inspiration),
+    shotIdeas: textList(raw.shotIdeas, LIMITS.shortText),
     caption: str(raw.caption, LIMITS.caption),
     targetDate: isoDate(raw.targetDate),
     owner: str(raw.owner, LIMITS.owner),
     notes: str(raw.notes, LIMITS.shortText),
     performanceNote: str(raw.performanceNote, LIMITS.shortText),
-    archived: typeof raw.archived === "boolean" ? raw.archived : status === DONE_STATUS,
+    archived: typeof raw.archived === "boolean" ? raw.archived : stage === DONE_STATUS,
     createdAt,
     updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : createdAt,
     publishedAt: typeof raw.publishedAt === "string" ? raw.publishedAt : null,
@@ -126,10 +158,14 @@ function applyPatch(idea: Idea, patch: IdeaPatch): Idea {
   if ("platform" in patch && isPlatform(patch.platform)) next.platform = patch.platform;
   if ("pillar" in patch) next.pillar = str(patch.pillar, LIMITS.pillar);
   if ("status" in patch && isStatus(patch.status)) next.status = patch.status;
-  if ("titleOptions" in patch) next.titleOptions = titleOptions(patch.titleOptions);
+  if ("titleOptions" in patch) {
+    next.titleOptions = textList(patch.titleOptions, LIMITS.title, LIMITS.titleOptions);
+  }
   if ("thumbnailIdea" in patch) next.thumbnailIdea = str(patch.thumbnailIdea, LIMITS.shortText);
-  if ("hook" in patch) next.hook = str(patch.hook, LIMITS.shortText);
+  if ("hooks" in patch) next.hooks = textList(patch.hooks, LIMITS.shortText);
   if ("script" in patch) next.script = str(patch.script, LIMITS.script);
+  if ("inspiration" in patch) next.inspiration = inspirationList(patch.inspiration);
+  if ("shotIdeas" in patch) next.shotIdeas = textList(patch.shotIdeas, LIMITS.shortText);
   if ("caption" in patch) next.caption = str(patch.caption, LIMITS.caption);
   if ("targetDate" in patch) next.targetDate = isoDate(patch.targetDate);
   if ("owner" in patch) next.owner = str(patch.owner, LIMITS.owner);
@@ -208,8 +244,10 @@ export function createIdea(input: IdeaPatch & { id?: string }): Promise<Idea> {
       status: "Idea",
       titleOptions: [],
       thumbnailIdea: "",
-      hook: "",
+      hooks: [],
       script: "",
+      inspiration: [],
+      shotIdeas: [],
       caption: "",
       targetDate: "",
       owner: "",
