@@ -76,11 +76,11 @@ export function IdeaList({
             className={cx(
               "relative flex select-none items-stretch overflow-hidden rounded-st-card bg-st-surface",
               dragging
-                ? "z-10 shadow-st-lift"
-                : "shadow-st-card duration-[var(--st-dur)] ease-st transition-transform",
+                ? "z-10 scale-[1.01] shadow-st-float"
+                : "shadow-st-raised duration-[var(--st-dur)] ease-st transition-transform",
             )}
           >
-            <span aria-hidden="true" className={cx("w-1 shrink-0", tone.dot)} />
+            <span aria-hidden="true" className={cx("w-[3px] shrink-0", tone.dot)} />
 
             {reorderable ? (
               <button
@@ -106,15 +106,22 @@ export function IdeaList({
             <button
               type="button"
               onClick={() => onOpen(idea.id)}
-              className="flex min-h-16 min-w-0 flex-1 items-center gap-4 py-3 pr-4 text-left transition-colors duration-[var(--st-dur-fast)] ease-st hover:bg-st-fill"
+              className="st-pressable flex min-h-16 min-w-0 flex-1 items-center gap-4 py-3 pr-4 text-left hover:bg-st-fill/70"
             >
               <span className="min-w-0 flex-1">
                 <span className="st-headline block truncate text-st-text">
                   {idea.title || "Untitled idea"}
                 </span>
-                <span className="st-footnote mt-0.5 flex items-center gap-2 truncate">
-                  <span className={cx("shrink-0 font-semibold", tone.text)}>{idea.status}</span>
-                  <span aria-hidden="true" className="text-st-text-3">·</span>
+                <span className="st-footnote mt-1 flex items-center gap-2 truncate">
+                  <span
+                    className={cx(
+                      "shrink-0 rounded-full px-2 py-0.5 font-semibold",
+                      tone.soft,
+                      tone.text,
+                    )}
+                  >
+                    {idea.status}
+                  </span>
                   <span className="shrink-0 text-st-text-2">{PLATFORM_SHORT[idea.platform]}</span>
                   {idea.pillar ? (
                     <>

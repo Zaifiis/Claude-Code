@@ -46,6 +46,7 @@ export function IdeaPage({
   const [focusMode, setFocusMode] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const tone = STATUS_COLOR[idea.status];
@@ -55,9 +56,11 @@ export function IdeaPage({
     [idea.id, update],
   );
 
+  /** Lets the pop-out animation finish before the view is taken away. */
   const close = useCallback(() => {
     flush();
-    onClose();
+    setLeaving(true);
+    setTimeout(onClose, 180);
   }, [flush, onClose]);
 
   useEffect(() => {
@@ -97,7 +100,10 @@ export function IdeaPage({
       aria-modal="true"
       aria-label={idea.title || "Untitled idea"}
       tabIndex={-1}
-      className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-st-canvas outline-none"
+      className={cx(
+        "fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-st-canvas outline-none",
+        leaving ? "st-pop-out" : "st-push-in",
+      )}
     >
       <header className="st-glass sticky top-0 z-10 border-b border-st-hairline">
         <div className="mx-auto flex w-full max-w-[1080px] items-center gap-2 px-2 py-2 sm:px-4">
@@ -107,7 +113,7 @@ export function IdeaPage({
             className="inline-flex min-h-11 items-center gap-1 rounded-st-control pr-3 pl-1 st-callout font-medium text-st-accent transition-colors duration-[var(--st-dur-fast)] ease-st hover:bg-st-fill focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-accent"
           >
             <ChevronLeftIcon className="h-5 w-5" />
-            <span>Back</span>
+            <span className="st-callout">Ideas</span>
           </button>
 
           <div className="ml-auto flex items-center gap-1">

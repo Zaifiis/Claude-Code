@@ -106,7 +106,7 @@ export function StudioApp() {
           onAppearanceChange={setAppearance}
         />
 
-        <main className="mx-auto w-full max-w-[1080px] flex-1 px-4 pt-4 pb-24 sm:px-6">
+        <main className="mx-auto w-full max-w-[1080px] flex-1 px-4 pb-24 sm:px-6">
           <SectionTabs
             section={section}
             counts={counts}
@@ -114,7 +114,7 @@ export function StudioApp() {
             onSelect={setSection}
           />
 
-          <div className="mt-4">
+          <div key={section} className="st-section-enter mt-4">
             {section === "Board" ? (
               <BoardView
                 ideas={everything.filter((idea) => matches(idea, query))}

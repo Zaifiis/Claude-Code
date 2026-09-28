@@ -48,9 +48,18 @@ async function studioGate(request: NextRequest) {
   return NextResponse.redirect(url);
 }
 
+/** Public assets a browser fetches on its own, before anyone has signed in. */
+function isPublicAsset(pathname: string): boolean {
+  return pathname === "/manifest.webmanifest" || pathname === "/robots.txt";
+}
+
 // Next.js 16 renamed `middleware.ts` to `proxy.ts` (function name `proxy`).
 export async function proxy(request: NextRequest) {
-  if (isStudioRoute(request.nextUrl.pathname)) {
+  const { pathname } = request.nextUrl;
+
+  if (isPublicAsset(pathname)) return NextResponse.next({ request });
+
+  if (isStudioRoute(pathname)) {
     return studioGate(request);
   }
 

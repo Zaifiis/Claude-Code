@@ -195,3 +195,60 @@ export function ExpandIcon(props: IconProps) {
     </Svg>
   );
 }
+
+/* --- stage glyphs -------------------------------------------------------- */
+
+export function SparkIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M10 3.5 11.4 7.6 15.5 9l-4.1 1.4L10 14.5 8.6 10.4 4.5 9l4.1-1.4Z" />
+      <path d="M15.5 13.5 16 15l1.5.5-1.5.5-.5 1.5-.5-1.5L13 15l1.5-.5Z" />
+    </Svg>
+  );
+}
+
+export function ScriptIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M5 3.75h7.5l3 3v9.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V5.25A1.5 1.5 0 0 1 5 3.75Z" />
+      <path d="M12 3.75v3.5h3.5M6.75 11h6M6.75 14h4" />
+    </Svg>
+  );
+}
+
+export function CameraIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M3.5 7.25h2.2l1.1-1.75h6.4l1.1 1.75h2.2a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1v-6.5a1 1 0 0 1 1-1Z" />
+      <circle cx={10} cy={11.5} r={2.6} />
+    </Svg>
+  );
+}
+
+export function ScissorsIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <circle cx={5.5} cy={14.5} r={2} />
+      <circle cx={14.5} cy={14.5} r={2} />
+      <path d="M6.9 13.1 14 4.5M13.1 13.1 6 4.5" />
+    </Svg>
+  );
+}
+
+export function SendIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M16.5 4.2 3.8 8.6l5 2.2 2.2 5 5.5-11.6Z" />
+      <path d="M8.8 10.8 16.5 4.2" />
+    </Svg>
+  );
+}
+
+export function StackIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M10 3.5 17 7l-7 3.5L3 7Z" />
+      <path d="M3 11.2 10 14.7l7-3.5" />
+    </Svg>
+  );
+}

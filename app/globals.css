@@ -299,3 +299,134 @@ body:has(.st-root) {
     animation-duration: 1ms !important;
   }
 }
+
+/* ==========================================================================
+   Content Studio — materials and motion
+   The part that separates "a web page" from "an app": layered translucent
+   surfaces, navigation that moves the way a navigation stack moves, and
+   controls that answer to a press.
+   ========================================================================== */
+
+:root {
+  /* Sidebar vibrancy, distinct from the glass used on floating bars. */
+  --st-sidebar: rgb(246 246 248 / 0.72);
+  /* Apple-style layered shadow: a tight contact edge plus a soft ambient one. */
+  --st-shadow-raised: 0 0 0 0.5px rgb(0 0 0 / 0.04), 0 1px 1px rgb(0 0 0 / 0.04),
+    0 4px 12px rgb(0 0 0 / 0.05);
+  --st-shadow-float: 0 0 0 0.5px rgb(0 0 0 / 0.05), 0 4px 8px rgb(0 0 0 / 0.06),
+    0 16px 40px rgb(0 0 0 / 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --st-sidebar: rgb(22 22 26 / 0.72);
+    --st-shadow-raised: 0 0 0 0.5px rgb(255 255 255 / 0.06), 0 1px 2px rgb(0 0 0 / 0.5),
+      0 4px 12px rgb(0 0 0 / 0.4);
+    --st-shadow-float: 0 0 0 0.5px rgb(255 255 255 / 0.08), 0 4px 8px rgb(0 0 0 / 0.5),
+      0 16px 40px rgb(0 0 0 / 0.6);
+  }
+}
+
+:root[data-theme="dark"] {
+  --st-sidebar: rgb(22 22 26 / 0.72);
+  --st-shadow-raised: 0 0 0 0.5px rgb(255 255 255 / 0.06), 0 1px 2px rgb(0 0 0 / 0.5),
+    0 4px 12px rgb(0 0 0 / 0.4);
+  --st-shadow-float: 0 0 0 0.5px rgb(255 255 255 / 0.08), 0 4px 8px rgb(0 0 0 / 0.5),
+    0 16px 40px rgb(0 0 0 / 0.6);
+}
+
+@theme inline {
+  --color-st-sidebar: var(--st-sidebar);
+  --shadow-st-raised: var(--st-shadow-raised);
+  --shadow-st-float: var(--st-shadow-float);
+}
+
+/* Sidebar material: more opaque than the floating bars, so it reads as part
+   of the window rather than something hovering over the content. */
+.st-vibrancy {
+  background: var(--st-sidebar);
+  backdrop-filter: saturate(180%) blur(30px);
+  -webkit-backdrop-filter: saturate(180%) blur(30px);
+}
+
+/* A large title that gives way to the compact bar as the content scrolls
+   under it, the way a navigation bar does. */
+.st-large-title {
+  font-size: 34px;
+  line-height: 40px;
+  font-weight: 700;
+  letter-spacing: -0.026em;
+}
+
+/* Controls answer to a press rather than only to a hover. */
+.st-pressable {
+  transition:
+    transform var(--st-dur-fast) var(--st-ease),
+    box-shadow var(--st-dur) var(--st-ease),
+    background-color var(--st-dur-fast) var(--st-ease);
+}
+.st-pressable:active {
+  transform: scale(0.985);
+}
+
+@keyframes st-push-in {
+  from {
+    opacity: 0;
+    transform: translate3d(3%, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes st-pop-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(3%, 0, 0);
+  }
+}
+
+@keyframes st-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes st-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* A detail view arrives from the right and leaves the same way, like a push
+   and a pop on a navigation stack. */
+.st-push-in {
+  animation: st-push-in var(--st-dur-slow) var(--st-ease) both;
+}
+.st-pop-out {
+  animation: st-pop-out var(--st-dur) var(--st-ease) both;
+}
+.st-rise {
+  animation: st-rise var(--st-dur-slow) var(--st-ease) both;
+}
+.st-fade-in {
+  animation: st-fade-in var(--st-dur) var(--st-ease) both;
+}
+
+/* Switching sections settles the new list in rather than swapping it. */
+.st-section-enter {
+  animation: st-rise var(--st-dur) var(--st-ease) both;
+}

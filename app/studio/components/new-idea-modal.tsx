@@ -52,9 +52,9 @@ export function NewIdeaModal({
         // Only a click on the backdrop itself, never one inside the card.
         if (event.target === event.currentTarget) save();
       }}
-      className="st-glass fixed inset-0 z-50 flex items-start justify-center overscroll-contain px-4 pt-[18vh] pb-8"
+      className="st-glass st-fade-in fixed inset-0 z-50 flex items-start justify-center overscroll-contain px-4 pt-[18vh] pb-8"
     >
-      <div className="w-full max-w-[680px] rounded-st-sheet bg-st-surface p-6 shadow-st-lift sm:p-10">
+      <div className="st-rise w-full max-w-[680px] rounded-st-sheet bg-st-surface p-6 shadow-st-float sm:p-10">
         <textarea
           ref={inputRef}
           value={text}
