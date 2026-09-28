@@ -2,6 +2,11 @@ import Link from "next/link";
 import { getContentItems, getPlatforms } from "@/lib/data";
 import type { ContentItem } from "@/types/db";
 
+// Reads per-request Supabase data, so there is nothing to prerender. Marking
+// it dynamic also keeps `next build` working when no Supabase project is
+// configured — the proxy redirects these routes to /studio in that case.
+export const dynamic = "force-dynamic";
+
 function itemDate(item: ContentItem): string | null {
   return item.scheduled_for ?? (item.posted_at ? item.posted_at.slice(0, 10) : null);
 }

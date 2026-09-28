@@ -1,6 +1,11 @@
 import { getPlatformSettings, getPlatforms } from "@/lib/data";
 import { PlatformCard } from "./platform-card";
 
+// Reads per-request Supabase data, so there is nothing to prerender. Marking
+// it dynamic also keeps `next build` working when no Supabase project is
+// configured — the proxy redirects these routes to /studio in that case.
+export const dynamic = "force-dynamic";
+
 export default async function PlatformsPage() {
   const [platforms, settings] = await Promise.all([getPlatforms(), getPlatformSettings()]);
   const settingsByPlatform = new Map(settings.map((s) => [s.platform_id, s]));

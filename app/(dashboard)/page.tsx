@@ -1,6 +1,11 @@
 import { getContentItems, getPlatforms } from "@/lib/data";
 import Link from "next/link";
 
+// Reads per-request Supabase data, so there is nothing to prerender. Marking
+// it dynamic also keeps `next build` working when no Supabase project is
+// configured — the proxy redirects these routes to /studio in that case.
+export const dynamic = "force-dynamic";
+
 export default async function OverviewPage() {
   const [platforms, items] = await Promise.all([getPlatforms(), getContentItems()]);
 

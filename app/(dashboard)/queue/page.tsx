@@ -1,6 +1,11 @@
 import { getContentItems, getPlatforms } from "@/lib/data";
 import { QueueItem } from "./queue-item";
 
+// Reads per-request Supabase data, so there is nothing to prerender. Marking
+// it dynamic also keeps `next build` working when no Supabase project is
+// configured — the proxy redirects these routes to /studio in that case.
+export const dynamic = "force-dynamic";
+
 export default async function QueuePage() {
   const [items, platforms] = await Promise.all([
     getContentItems({ status: ["Pending", "Ready"] }),
