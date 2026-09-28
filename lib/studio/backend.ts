@@ -8,7 +8,7 @@
  * Server only.
  */
 
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 /** The store's contents plus a token identifying the version that was read. */
@@ -25,6 +25,15 @@ export interface StoreBackend {
    * when something else wrote first, so the caller can re-read and re-apply.
    */
   write(data: unknown, version: string | null): Promise<boolean>;
+  /**
+   * Keeps a copy of the version about to be replaced. Best effort: a backup
+   * that fails must never stop the save it was protecting.
+   */
+  snapshot(data: unknown): Promise<void>;
+  /** Backups, newest first. */
+  history(): Promise<Array<{ id: string; savedAt: string }>>;
+  /** Reads one backup back. */
+  restore(id: string): Promise<unknown>;
 }
 
 // --- a JSON file on disk ---------------------------------------------------
@@ -78,12 +87,73 @@ const fileBackend: StoreBackend = {
       throw error;
     }
   },
+
+  async snapshot(data) {
+    if (data === null || data === undefined) return;
+    try {
+      const dir = path.join(path.dirname(DATA_FILE), "backups");
+      await mkdir(dir, { recursive: true });
+      await writeFile(
+        path.join(dir, `studio-${stamp()}.json`),
+        `${JSON.stringify(data, null, 2)}\n`,
+        "utf8",
+      );
+      await pruneFileBackups(dir);
+    } catch {
+      // A backup that cannot be written must not block the save itself.
+    }
+  },
+
+  async history() {
+    try {
+      const dir = path.join(path.dirname(DATA_FILE), "backups");
+      const names = await readdir(dir);
+      return names
+        .filter((name) => name.startsWith("studio-") && name.endsWith(".json"))
+        .sort()
+        .reverse()
+        .map((name) => ({ id: name, savedAt: savedAtFrom(name) }));
+    } catch {
+      return [];
+    }
+  },
+
+  async restore(id) {
+    const dir = path.join(path.dirname(DATA_FILE), "backups");
+    const safe = path.basename(id);
+    return JSON.parse(await readFile(path.join(dir, safe), "utf8"));
+  },
 };
+
+/** A sortable, filename-safe timestamp. */
+function stamp(): string {
+  return new Date().toISOString().replace(/[:.]/g, "-");
+}
+
+function savedAtFrom(name: string): string {
+  const raw = name.replace(/^studio-/, "").replace(/\.json$/, "");
+  const iso = raw.replace(
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z$/,
+    "$1-$2-$3T$4:$5:$6.$7Z",
+  );
+  return Number.isNaN(Date.parse(iso)) ? raw : iso;
+}
+
+async function pruneFileBackups(dir: string): Promise<void> {
+  const names = (await readdir(dir))
+    .filter((name) => name.startsWith("studio-") && name.endsWith(".json"))
+    .sort()
+    .reverse();
+  await Promise.all(names.slice(KEEP_BACKUPS).map((name) => rm(path.join(dir, name)).catch(() => {})));
+}
 
 // --- Netlify Blobs ---------------------------------------------------------
 
 const STORE_NAME = "content-studio";
 const BLOB_KEY = "ideas";
+const BACKUP_PREFIX = "backups/";
+/** How many previous versions to keep. */
+const KEEP_BACKUPS = 30;
 
 type BlobStore = Awaited<ReturnType<typeof openBlobStore>>;
 let blobStore: BlobStore | null = null;
@@ -146,6 +216,42 @@ const blobsBackend: StoreBackend = {
         : store.setJSON(BLOB_KEY, data, { onlyIfMatch: version });
     });
     return result.modified;
+  },
+
+  async snapshot(data) {
+    if (data === null || data === undefined) return;
+    try {
+      const store = await blobs();
+      await store.setJSON(`${BACKUP_PREFIX}${stamp()}`, data);
+
+      const { blobs: kept } = await store.list({ prefix: BACKUP_PREFIX });
+      const stale = kept
+        .map((entry) => entry.key)
+        .sort()
+        .reverse()
+        .slice(KEEP_BACKUPS);
+      await Promise.all(stale.map((key) => store.delete(key).catch(() => {})));
+    } catch {
+      // A backup that cannot be written must not block the save itself.
+    }
+  },
+
+  async history() {
+    try {
+      const { blobs: kept } = await (await blobs()).list({ prefix: BACKUP_PREFIX });
+      return kept
+        .map((entry) => entry.key)
+        .sort()
+        .reverse()
+        .map((key) => ({ id: key, savedAt: savedAtFrom(`studio-${key.slice(BACKUP_PREFIX.length)}.json`) }));
+    } catch {
+      return [];
+    }
+  },
+
+  async restore(id) {
+    if (!id.startsWith(BACKUP_PREFIX)) throw new Error("Not a backup key.");
+    return (await blobs()).get(id, { type: "json" });
   },
 };
 

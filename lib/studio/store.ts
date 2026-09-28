@@ -111,10 +111,13 @@ function status(value: unknown): Idea["status"] {
 }
 
 /** Fills in every field so a hand-edited or older file still loads cleanly. */
-function coerceIdea(value: unknown): Idea | null {
+function coerceIdea(value: unknown, fallbackId?: string): Idea | null {
   if (typeof value !== "object" || value === null) return null;
   const raw = value as Record<string, unknown>;
-  const id = typeof raw.id === "string" && raw.id.trim() ? raw.id.trim().slice(0, 64) : null;
+  const id =
+    typeof raw.id === "string" && raw.id.trim()
+      ? raw.id.trim().slice(0, 64)
+      : (fallbackId ?? null);
   if (!id) return null;
 
   const stage = status(raw.status);
@@ -176,14 +179,37 @@ function applyPatch(idea: Idea, patch: IdeaPatch): Idea {
 
 // --- reading and writing ---------------------------------------------------
 
+/**
+ * Turns stored data into ideas.
+ *
+ * Throws rather than returning an empty list when the data is there but not
+ * understood. Returning empty would look like "no ideas yet", and the next
+ * save would then write that emptiness over everything — the one way this
+ * app could lose all your scripts at once.
+ */
 function parse(data: unknown): Idea[] {
+  if (data === null || data === undefined) return [];
+
   const list = Array.isArray(data)
     ? data
     : Array.isArray((data as { ideas?: unknown })?.ideas)
       ? (data as { ideas: unknown[] }).ideas
-      : [];
+      : null;
 
-  return normaliseRanks(list.map(coerceIdea).filter((idea): idea is Idea => idea !== null));
+  if (list === null) {
+    throw new Error(
+      "The ideas store holds data in a shape this app does not recognise. " +
+        "Refusing to continue rather than risk overwriting it.",
+    );
+  }
+
+  // An idea missing its id is given one instead of being dropped, so a
+  // malformed row can never quietly disappear.
+  return normaliseRanks(
+    list
+      .map((row, index) => coerceIdea(row, `recovered-${index}-${Date.now()}`))
+      .filter((idea): idea is Idea => idea !== null),
+  );
 }
 
 async function load(): Promise<Idea[]> {
@@ -195,17 +221,32 @@ async function load(): Promise<Idea[]> {
  * interleave its own writes, and retrying when a *different* one got there
  * first, which is how two devices can safely edit the same store.
  */
-async function mutate<T>(fn: (ideas: Idea[]) => { ideas: Idea[]; result: T }): Promise<T> {
+async function mutate<T>(
+  fn: (ideas: Idea[]) => { ideas: Idea[]; result: T },
+  options: { mayRemove?: number } = {},
+): Promise<T> {
   return withLock(async () => {
     const backend = storeBackend();
 
     for (let attempt = 0; attempt < MAX_WRITE_ATTEMPTS; attempt += 1) {
       const snapshot = await backend.read();
-      const { ideas, result } = fn(parse(snapshot.data));
-      const written = await backend.write(
-        { version: 1, ideas: normaliseRanks(ideas) },
-        snapshot.version,
-      );
+      const before = parse(snapshot.data);
+      const { ideas, result } = fn(before);
+
+      // Nothing but an explicit delete is allowed to reduce the count. A bug
+      // anywhere upstream therefore cannot quietly throw scripts away.
+      const allowed = options.mayRemove ?? 0;
+      if (ideas.length < before.length - allowed) {
+        throw new Error(
+          `Refusing to save: this would drop ${before.length - ideas.length} ideas ` +
+            `when at most ${allowed} should be removed.`,
+        );
+      }
+
+      const next = normaliseRanks(ideas);
+      // Keep the version being replaced, so any bad state can be undone.
+      await backend.snapshot(snapshot.data);
+      const written = await backend.write({ version: 1, ideas: next }, snapshot.version);
       if (written) return result;
     }
 
@@ -273,10 +314,13 @@ export function patchIdea(id: string, patch: IdeaPatch): Promise<Idea | null> {
 }
 
 export function deleteIdea(id: string): Promise<boolean> {
-  return mutate((ideas) => ({
-    ideas: ideas.filter((idea) => idea.id !== id),
-    result: ideas.some((idea) => idea.id === id),
-  }));
+  return mutate(
+    (ideas) => ({
+      ideas: ideas.filter((idea) => idea.id !== id),
+      result: ideas.some((idea) => idea.id === id),
+    }),
+    { mayRemove: 1 },
+  );
 }
 
 /**
@@ -287,5 +331,23 @@ export function reorderIdeas(orderedIds: string[]): Promise<Idea[]> {
   return mutate((ideas) => {
     const reordered = applyOrder(ideas, orderedIds);
     return { ideas: reordered, result: reordered };
+  });
+}
+
+/** Previous versions of the whole store, newest first. */
+export function listBackups(): Promise<Array<{ id: string; savedAt: string }>> {
+  return withLock(() => storeBackend().history());
+}
+
+/** Puts a previous version back, keeping the current one as a backup first. */
+export function restoreBackup(id: string): Promise<Idea[]> {
+  return withLock(async () => {
+    const backend = storeBackend();
+    const restored = parse(await backend.restore(id));
+
+    const current = await backend.read();
+    await backend.snapshot(current.data);
+    await backend.write({ version: 1, ideas: normaliseRanks(restored) }, current.version);
+    return normaliseRanks(restored);
   });
 }

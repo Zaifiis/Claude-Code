@@ -43,3 +43,6 @@ next-env.d.ts
 # Content Studio local data (your ideas and scripts stay on your machine)
 /data/studio.json
 /data/studio.json.*
+
+# Content Studio backups (kept locally, never committed)
+/data/backups/

@@ -100,6 +100,24 @@ environment variable to override it.
 `GET /api/studio/health` reports which store is in use and whether it can be
 read, which turns "my idea disappeared" into a specific answer.
 
+## Not losing your scripts
+
+The store is rewritten whole on every save, so the protections are about making
+that safe:
+
+- **Nothing but a delete may reduce the count.** A save that would drop ideas is
+  refused outright, so a bug upstream cannot quietly throw scripts away.
+- **Unreadable data is refused rather than treated as empty.** Returning an
+  empty list would look like "no ideas yet", and the next save would write that
+  emptiness over everything. This was the one path that could have lost the lot.
+- **An idea missing its id is recovered, not dropped.**
+- **Every save keeps the version it replaced**, the last 30 of them — on disk
+  under `data/backups/`, or under a `backups/` prefix in the Blobs store.
+  `GET /api/studio/backups` lists them and `POST` with `{"id": "..."}` puts one
+  back, itself backing up the state it replaces.
+- **`GET /api/studio/export`** downloads everything as one JSON file, so a copy
+  can live somewhere this app does not control.
+
 A data file written by an earlier version is migrated on load, including the
 nine-stage pipeline this app used to have.
 
