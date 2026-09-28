@@ -275,15 +275,23 @@ body:has(.st-root) {
   font-variant-numeric: tabular-nums;
 }
 
-/* Focus rings: visible for keyboards, quiet for pointers. */
-.st-root :focus-visible {
-  outline: 2px solid var(--st-accent);
-  outline-offset: 2px;
-  border-radius: var(--st-r-control);
-}
+/*
+ * Focus rings: visible for keyboards, quiet for pointers.
+ *
+ * These live in `base` so a utility can still override them. Unlayered rules
+ * beat every cascade layer, which would make `focus-visible:outline-none`
+ * silently do nothing on the few surfaces that show focus another way.
+ */
+@layer base {
+  .st-root :focus-visible {
+    outline: 2px solid var(--st-accent);
+    outline-offset: 2px;
+    border-radius: var(--st-r-control);
+  }
 
-.st-root ::placeholder {
-  color: var(--st-text-3);
+  .st-root ::placeholder {
+    color: var(--st-text-3);
+  }
 }
 
 /* Reading measure for the distraction-free writing area. */

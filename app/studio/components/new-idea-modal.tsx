@@ -54,11 +54,11 @@ export function NewIdeaModal({
       }}
       className="st-glass st-fade-in fixed inset-0 z-50 flex items-start justify-center overscroll-contain px-4 pt-[18vh] pb-8"
     >
-      <div className="st-rise w-full max-w-[680px] rounded-st-sheet bg-st-surface p-6 shadow-st-float sm:p-10">
+      <div className="st-rise w-full max-w-[680px] rounded-st-sheet bg-st-surface p-6 shadow-st-float sm:p-8">
         <textarea
           ref={inputRef}
           value={text}
-          rows={2}
+          rows={1}
           onChange={(event) => setText(event.target.value)}
           onKeyDown={(event) => {
             if (event.key !== "Enter" || event.shiftKey) return;
@@ -70,7 +70,7 @@ export function NewIdeaModal({
           className="st-title-1 w-full resize-none border-0 bg-transparent p-0 text-st-text outline-none placeholder:text-st-text-3 focus-visible:outline-none"
         />
 
-        <p className="st-footnote mt-6 text-st-text-3">
+        <p className="st-footnote mt-4 text-st-text-3">
           Click anywhere to save · it lands in Ideas
         </p>
       </div>
