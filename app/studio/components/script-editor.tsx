@@ -215,7 +215,7 @@ function ToolbarButton({
       aria-label={label}
       aria-pressed={active}
       className={cx(
-        "inline-flex min-h-11 items-center gap-1.5 rounded-st-control px-3 st-footnote font-medium",
+        "inline-flex min-h-11 items-center gap-2 rounded-st-control px-3 st-footnote font-medium",
         "transition-colors duration-[var(--st-dur-fast)] ease-st",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-accent",
         "disabled:pointer-events-none disabled:opacity-40",
@@ -270,7 +270,7 @@ export function ScriptPreview({ script }: { script: string }) {
 
         if (block.kind === "list") {
           return (
-            <ul key={index} className="flex flex-col gap-2 pl-5">
+            <ul key={index} className="flex flex-col gap-2 pl-6">
               {block.items.map((item, itemIndex) => (
                 <li key={itemIndex} className="list-disc text-[17px] leading-[1.65] text-st-text">
                   <Inline spans={item} />

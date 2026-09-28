@@ -95,7 +95,7 @@ export function Segmented<T extends string>({
             aria-selected={selected}
             onClick={() => onChange(option.value)}
             className={cx(
-              "inline-flex min-h-9 items-center justify-center gap-1.5 rounded-[7px] px-3 st-footnote font-medium",
+              "inline-flex min-h-9 items-center justify-center gap-2 rounded-[7px] px-3 st-footnote font-medium",
               MOTION,
               FOCUS,
               selected
@@ -132,7 +132,7 @@ export function TextArea({
   className,
   ...props
 }: React.ComponentPropsWithRef<"textarea">) {
-  return <textarea className={cx(INPUT_BASE, "resize-y py-2.5 leading-[1.55]", className)} {...props} />;
+  return <textarea className={cx(INPUT_BASE, "resize-y py-3 leading-[1.55]", className)} {...props} />;
 }
 
 export function Select({
@@ -222,7 +222,7 @@ export function Tag({
   return (
     <span
       className={cx(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 st-footnote whitespace-nowrap",
+        "inline-flex items-center gap-1 rounded-full px-2 py-1 st-footnote whitespace-nowrap",
         tone === "accent" ? "bg-st-accent-soft text-st-accent" : "bg-st-fill text-st-text-2",
         className,
       )}
@@ -249,7 +249,7 @@ export function Chip({
       type="button"
       aria-pressed={selected}
       className={cx(
-        "inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-3 st-footnote font-medium",
+        "inline-flex min-h-9 shrink-0 items-center gap-2 rounded-full px-3 st-footnote font-medium",
         MOTION,
         FOCUS,
         selected

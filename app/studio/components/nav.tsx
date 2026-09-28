@@ -58,7 +58,7 @@ export function Sidebar({
   return (
     <nav
       aria-label="Stages"
-      className="st-vibrancy sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col gap-5 border-r border-st-hairline px-3 py-5 lg:flex"
+      className="st-vibrancy sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col gap-6 border-r border-st-hairline px-3 py-6 lg:flex"
     >
       <p className="st-headline px-3 text-st-text">Studio</p>
 
@@ -67,7 +67,7 @@ export function Sidebar({
         New idea
       </Button>
 
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col gap-1">
         {SECTIONS.map((item) => {
           const active = section === item;
           const count = item === "All" ? total : counts[item];
@@ -99,7 +99,7 @@ export function Sidebar({
         })}
       </div>
 
-      <div className="mt-auto flex flex-col gap-0.5 border-t border-st-hairline pt-4">
+      <div className="mt-auto flex flex-col gap-1 border-t border-st-hairline pt-4">
         {([["Board", BoardIcon], ["Calendar", CalendarIcon]] as const).map(([item, Icon]) => (
           <button
             key={item}
@@ -152,7 +152,7 @@ export function SectionTabs({
             aria-current={active ? "page" : undefined}
             onClick={() => onSelect(item)}
             className={cx(
-              "st-pressable inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full px-3.5 st-footnote font-medium",
+              "st-pressable inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full px-4 st-footnote font-medium",
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-accent",
               active
                 ? "bg-st-surface text-st-text shadow-st-raised"

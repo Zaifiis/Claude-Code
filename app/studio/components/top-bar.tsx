@@ -89,7 +89,7 @@ export function TopBar({
               onChange={(event) => onQueryChange(event.target.value)}
               placeholder="Search"
               aria-label="Search every idea"
-              className="h-10 min-h-10 rounded-full pl-9"
+              className="h-10 min-h-10 rounded-full pl-8"
             />
           </div>
 

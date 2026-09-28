@@ -94,7 +94,7 @@ export function CalendarView({
               >
                 <span
                   className={cx(
-                    "st-footnote st-tabular self-start rounded-full px-1.5 py-0.5",
+                    "st-footnote st-tabular self-start rounded-full px-2 py-1",
                     isToday
                       ? "bg-st-accent font-semibold text-st-on-accent"
                       : cell.inMonth
@@ -110,7 +110,7 @@ export function CalendarView({
                     type="button"
                     onClick={() => onOpen(idea.id)}
                     title={`${idea.title || "Untitled idea"} · ${idea.platform} · ${idea.status}`}
-                    className="flex min-h-7 items-center gap-1 rounded-[7px] bg-st-fill px-1.5 text-left transition-colors duration-[var(--st-dur-fast)] ease-st hover:bg-st-accent-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-accent"
+                    className="flex min-h-7 items-center gap-1 rounded-[7px] bg-st-fill px-2 text-left transition-colors duration-[var(--st-dur-fast)] ease-st hover:bg-st-accent-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-accent"
                   >
                     <span className="st-footnote st-tabular shrink-0 font-medium text-st-text-3">
                       {PLATFORM_SHORT[idea.platform]}

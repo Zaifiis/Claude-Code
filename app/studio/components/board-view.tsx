@@ -311,7 +311,7 @@ function BoardCard({
       <p className="st-callout line-clamp-3 font-medium text-st-text">
         {idea.title || "Untitled idea"}
       </p>
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-2">
         <Tag>{PLATFORM_SHORT[idea.platform]}</Tag>
         {idea.pillar ? <Tag>{idea.pillar}</Tag> : null}
         {idea.targetDate ? <Tag>{relative ?? formatDayMonth(idea.targetDate)}</Tag> : null}

@@ -37,7 +37,7 @@ export function Section({
     <section className="relative overflow-hidden rounded-st-panel bg-st-surface shadow-st-card">
       {/* A colour down the edge: enough to identify, quiet enough to ignore. */}
       <span aria-hidden="true" className={cx("absolute inset-y-0 left-0 w-1", tone.bar)} />
-      <div className="flex flex-col gap-4 p-6 pl-7">
+      <div className="flex flex-col gap-4 p-6 pl-8">
         <div className="flex items-center gap-3">
           <h2 className={cx("st-caption", tone.text)}>{title}</h2>
           {hint ? <p className="st-footnote text-st-text-3">{hint}</p> : null}

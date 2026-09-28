@@ -115,7 +115,7 @@ export function IdeaList({
                 <span className="st-footnote mt-1 flex items-center gap-2 truncate">
                   <span
                     className={cx(
-                      "shrink-0 rounded-full px-2 py-0.5 font-semibold",
+                      "shrink-0 rounded-full px-2 py-1 font-semibold",
                       tone.soft,
                       tone.text,
                     )}
