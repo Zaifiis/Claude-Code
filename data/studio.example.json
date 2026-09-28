@@ -4,6 +4,7 @@
     {
       "id": "example-0001-pricing",
       "title": "What I charge and why",
+      "channel": "Agency",
       "platform": "LinkedIn",
       "pillar": "Pricing",
       "rank": 0,
@@ -42,6 +43,7 @@
     {
       "id": "example-0002-month-two",
       "title": "Why most automations fail in month two",
+      "channel": "Zaifiis.tech",
       "platform": "LinkedIn",
       "pillar": "Lessons",
       "rank": 1,
@@ -72,6 +74,7 @@
     {
       "id": "example-0003-three-node",
       "title": "The 3-node pattern I reuse everywhere",
+      "channel": "Zaifiis.tech",
       "platform": "YouTube",
       "pillar": "Teardowns",
       "rank": 2,
@@ -105,6 +108,7 @@
     {
       "id": "example-0004-inbound-week",
       "title": "One week of inbound, unedited",
+      "channel": "Zaifiis_Unfiltered",
       "platform": "TikTok",
       "pillar": "Behind the scenes",
       "rank": 3,
@@ -133,6 +137,7 @@
     {
       "id": "example-0005-onboarding",
       "title": "Client onboarding, start to finish",
+      "channel": "Agency",
       "platform": "Instagram",
       "pillar": "Behind the scenes",
       "rank": 4,
@@ -156,6 +161,7 @@
     {
       "id": "example-0006-first-hire",
       "title": "The first hire nobody tells you to make",
+      "channel": "Zaifiis_Unfiltered",
       "platform": "LinkedIn",
       "pillar": "Lessons",
       "rank": 9007199254740991,

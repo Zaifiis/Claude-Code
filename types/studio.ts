@@ -6,6 +6,32 @@
  * ranked make-next order; posting a card archives it into the Posted list.
  */
 
+/**
+ * The three brands. A channel is not a platform: Unfiltered goes out on both
+ * Instagram and TikTok, and the Agency page posts to LinkedIn and Instagram.
+ */
+export const CHANNELS = ["Zaifiis_Unfiltered", "Zaifiis.tech", "Agency"] as const;
+
+export type Channel = (typeof CHANNELS)[number];
+
+/** Short labels, because the tabs have no room for the full names. */
+export const CHANNEL_SHORT: Record<Channel, string> = {
+  Zaifiis_Unfiltered: "Unfiltered",
+  "Zaifiis.tech": ".tech",
+  Agency: "Agency",
+};
+
+/** What each channel is for, shown where there is room to say it. */
+export const CHANNEL_PURPOSE: Record<Channel, string> = {
+  Zaifiis_Unfiltered: "Builds you",
+  "Zaifiis.tech": "Builds authority",
+  Agency: "Sells",
+};
+
+export function isChannel(value: unknown): value is Channel {
+  return CHANNELS.includes(value as Channel);
+}
+
 export const PLATFORMS = [
   "Instagram",
   "LinkedIn",
@@ -71,6 +97,8 @@ export interface Inspiration {
 export interface Idea {
   id: string;
   title: string;
+  /** Which of the three brands this belongs to. */
+  channel: Channel;
   platform: Platform;
   /** Content pillar / topic. */
   pillar: string;

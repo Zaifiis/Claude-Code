@@ -8,6 +8,7 @@ function searchable(idea: Idea): string {
     ...idea.hooks,
     ...idea.shotIdeas,
     ...idea.inspiration.map((row) => `${row.url} ${row.note}`),
+    idea.channel,
     idea.pillar,
     idea.thumbnailIdea,
     idea.script,

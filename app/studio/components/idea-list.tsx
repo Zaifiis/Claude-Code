@@ -4,7 +4,7 @@ import { useCallback } from "react";
 
 import { formatDayMonth, relativeLabel } from "@/lib/studio/dates";
 import { countWords } from "@/lib/studio/script";
-import { type Idea, PLATFORM_SHORT, STATUS_COLOR } from "@/types/studio";
+import { CHANNEL_SHORT, type Idea, PLATFORM_SHORT, STATUS_COLOR } from "@/types/studio";
 
 import { GripIcon } from "./icons";
 import { cx, EmptyState, Tag } from "./ui";
@@ -122,6 +122,12 @@ export function IdeaList({
                   >
                     {idea.status}
                   </span>
+                  {/* The brand, so the combined queue reads as a mix rather
+                      than one undifferentiated list. */}
+                  <span className="shrink-0 font-medium text-st-text-2">
+                    {CHANNEL_SHORT[idea.channel]}
+                  </span>
+                  <span aria-hidden="true" className="text-st-text-3">·</span>
                   <span className="shrink-0 text-st-text-2">{PLATFORM_SHORT[idea.platform]}</span>
                   {idea.pillar ? (
                     <>

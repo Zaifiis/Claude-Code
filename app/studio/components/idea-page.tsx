@@ -3,7 +3,14 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { formatFullDate, relativeLabel } from "@/lib/studio/dates";
-import { type Idea, PLATFORMS, STATUS_COLOR, STATUSES } from "@/types/studio";
+import {
+  CHANNEL_PURPOSE,
+  CHANNELS,
+  type Idea,
+  PLATFORMS,
+  STATUS_COLOR,
+  STATUSES,
+} from "@/types/studio";
 
 import { ChevronLeftIcon, CloseIcon, ExpandIcon, TrashIcon } from "./icons";
 import { InspirationEditor, ListEditor } from "./list-editor";
@@ -266,6 +273,26 @@ export function IdeaPage({
 
               <Section title="Details" color="neutral">
                 <div className="flex flex-col gap-6">
+                  <Field
+                    label="Channel"
+                    htmlFor={`channel-${idea.id}`}
+                    hint={CHANNEL_PURPOSE[idea.channel]}
+                  >
+                    <Select
+                      id={`channel-${idea.id}`}
+                      value={idea.channel}
+                      onChange={(event) =>
+                        set({ channel: event.target.value as Idea["channel"] }, "now")
+                      }
+                    >
+                      {CHANNELS.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+
                   <Field label="Platform" htmlFor={`platform-${idea.id}`}>
                     <Select
                       id={`platform-${idea.id}`}

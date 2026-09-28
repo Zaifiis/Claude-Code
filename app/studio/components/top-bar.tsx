@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 
+import type { Channel } from "@/types/studio";
+
+import { ChannelTabs, type ChannelFilter } from "./channel-tabs";
 import { MoonIcon, PlusIcon, SearchIcon, SunIcon } from "./icons";
 import type { Section } from "./nav";
 import type { SaveState } from "../studio-store";
@@ -31,6 +34,10 @@ export function TopBar({
   saveState,
   appearance,
   onAppearanceChange,
+  channel,
+  channelCounts,
+  channelTotal,
+  onChannelChange,
 }: {
   section: Section;
   count: number;
@@ -40,6 +47,10 @@ export function TopBar({
   saveState: SaveState;
   appearance: Appearance | null;
   onAppearanceChange: (next: Appearance) => void;
+  channel: ChannelFilter;
+  channelCounts: Record<Channel, number>;
+  channelTotal: number;
+  onChannelChange: (next: ChannelFilter) => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -59,10 +70,20 @@ export function TopBar({
         )}
       >
         <div className="mx-auto flex h-14 w-full max-w-[1080px] items-center gap-2 px-4 sm:px-6">
+          {/* Wide screens fit the brands beside the search; narrow ones get
+              their own row below, rather than cramming both into one. */}
+          <ChannelTabs
+            value={channel}
+            counts={channelCounts}
+            total={channelTotal}
+            onChange={onChannelChange}
+            className="hidden lg:flex"
+          />
+
           <p
             aria-hidden={!collapsed}
             className={cx(
-              "st-headline min-w-0 truncate text-st-text",
+              "st-headline min-w-0 truncate text-st-text lg:hidden",
               "transition-all duration-[var(--st-dur)] ease-st",
               collapsed ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-1 opacity-0",
             )}
@@ -109,6 +130,15 @@ export function TopBar({
           >
             <PlusIcon />
           </IconButton>
+        </div>
+
+        <div className="mx-auto w-full max-w-[1080px] px-4 pb-3 sm:px-6 lg:hidden">
+          <ChannelTabs
+            value={channel}
+            counts={channelCounts}
+            total={channelTotal}
+            onChange={onChannelChange}
+          />
         </div>
       </header>
 

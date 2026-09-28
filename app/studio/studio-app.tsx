@@ -3,10 +3,11 @@
 import { useCallback, useMemo, useState } from "react";
 
 import { matches } from "@/lib/studio/filters";
-import type { Status } from "@/types/studio";
+import { type Channel, CHANNELS, type Status } from "@/types/studio";
 
 import { BoardView } from "./components/board-view";
 import { CalendarView } from "./components/calendar-view";
+import type { ChannelFilter } from "./components/channel-tabs";
 import { IdeaList } from "./components/idea-list";
 import { IdeaPage } from "./components/idea-page";
 import { type Section, SectionTabs, Sidebar } from "./components/nav";
@@ -36,6 +37,7 @@ export function StudioApp() {
   const { appearance, setAppearance } = useAppearance();
 
   const [section, setSection] = useState<Section>("All");
+  const [channel, setChannel] = useState<ChannelFilter>("all");
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [capturing, setCapturing] = useState(false);
@@ -51,9 +53,19 @@ export function StudioApp() {
   const source = searching ? everything : section === "Posted" ? archived : active;
 
   const found = useMemo(
-    () => source.filter((idea) => matches(idea, query)),
-    [source, query],
+    () =>
+      source.filter(
+        (idea) => matches(idea, query) && (channel === "all" || idea.channel === channel),
+      ),
+    [source, query, channel],
   );
+
+  /** Counts across the whole make-next queue, so the tabs show the real mix. */
+  const channelCounts = useMemo(() => {
+    const tally = Object.fromEntries(CHANNELS.map((name) => [name, 0])) as Record<Channel, number>;
+    for (const idea of active) tally[idea.channel] += 1;
+    return tally;
+  }, [active]);
 
   const listed = useMemo(() => {
     if (section === "All" || section === "Board" || section === "Calendar") return found;
@@ -104,6 +116,10 @@ export function StudioApp() {
           saveState={saveState}
           appearance={appearance}
           onAppearanceChange={setAppearance}
+          channel={channel}
+          channelCounts={channelCounts}
+          channelTotal={active.length}
+          onChannelChange={setChannel}
         />
 
         <main className="mx-auto w-full max-w-[1080px] flex-1 px-4 pb-24 sm:px-6">
@@ -150,7 +166,10 @@ export function StudioApp() {
 
       {capturing ? (
         <NewIdeaModal
-          onSave={(title) => create(title)}
+          // Capturing while a brand's tab is open means the idea is for that
+          // brand; from All it lands on the first and can be moved.
+          channel={channel === "all" ? null : channel}
+          onSave={(title) => create(title, channel === "all" ? {} : { channel })}
           onClose={() => setCapturing(false)}
         />
       ) : null}

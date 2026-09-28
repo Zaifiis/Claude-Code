@@ -19,10 +19,12 @@ import {
   UNRANKED,
 } from "@/lib/studio/ranking";
 import {
+  CHANNELS,
   DONE_STATUS,
   type Idea,
   type IdeaPatch,
   type Inspiration,
+  isChannel,
   isPlatform,
   isStatus,
   LEGACY_STATUS,
@@ -127,6 +129,8 @@ function coerceIdea(value: unknown, fallbackId?: string): Idea | null {
   return {
     id,
     title: str(raw.title, LIMITS.title),
+    // Ideas written before channels existed land on the first one.
+    channel: isChannel(raw.channel) ? raw.channel : CHANNELS[0],
     platform: isPlatform(raw.platform) ? raw.platform : PLATFORMS[0],
     pillar: str(raw.pillar, LIMITS.pillar),
     rank: typeof raw.rank === "number" && Number.isFinite(raw.rank) ? raw.rank : UNRANKED,
@@ -156,6 +160,7 @@ function coerceIdea(value: unknown, fallbackId?: string): Idea | null {
 function applyPatch(idea: Idea, patch: IdeaPatch): Idea {
   const next = { ...idea };
   if ("title" in patch) next.title = str(patch.title, LIMITS.title);
+  if ("channel" in patch && isChannel(patch.channel)) next.channel = patch.channel;
   if ("platform" in patch && isPlatform(patch.platform)) next.platform = patch.platform;
   if ("pillar" in patch) next.pillar = str(patch.pillar, LIMITS.pillar);
   if ("status" in patch && isStatus(patch.status)) next.status = patch.status;
@@ -269,6 +274,7 @@ export function createIdea(input: IdeaPatch & { id?: string }): Promise<Idea> {
     const base: Idea = {
       id,
       title: "",
+      channel: CHANNELS[0],
       platform: PLATFORMS[0],
       pillar: "",
       // New ideas land at the bottom of the ranked list, ready to be dragged up.

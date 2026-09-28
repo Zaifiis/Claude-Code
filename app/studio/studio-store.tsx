@@ -19,7 +19,14 @@ import {
   syncArchiveState,
   UNRANKED,
 } from "@/lib/studio/ranking";
-import { type Idea, type IdeaPatch, PLATFORMS, type Status, STATUSES } from "@/types/studio";
+import {
+  CHANNELS,
+  type Idea,
+  type IdeaPatch,
+  PLATFORMS,
+  type Status,
+  STATUSES,
+} from "@/types/studio";
 
 /** Shown in the top bar, so autosave is never something you have to trust blindly. */
 export type SaveState = "idle" | "saving" | "saved" | "error";
@@ -44,6 +51,7 @@ function blankIdea(id: string, defaults: IdeaPatch): Idea {
   return {
     id,
     title: "",
+    channel: CHANNELS[0],
     platform: PLATFORMS[0],
     pillar: "",
     // New ideas land at the bottom of the ranked list, ready to be dragged up.

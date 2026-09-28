@@ -2,15 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { type Channel, CHANNEL_SHORT } from "@/types/studio";
+
 /**
  * The capture popup. It only ever saves — clicking away, pressing Enter and
  * pressing Escape all keep what you typed, so an idea cannot be lost by
  * dismissing the wrong way. An empty box just closes.
  */
 export function NewIdeaModal({
+  channel,
   onSave,
   onClose,
 }: {
+  /** The brand this will land on, or null when capturing from All. */
+  channel: Channel | null;
   onSave: (title: string) => void;
   onClose: () => void;
 }) {
@@ -72,6 +77,7 @@ export function NewIdeaModal({
 
         <p className="st-footnote mt-4 text-st-text-3">
           Click anywhere to save · it lands in Ideas
+          {channel ? ` on ${CHANNEL_SHORT[channel]}` : ""}
         </p>
       </div>
     </div>
