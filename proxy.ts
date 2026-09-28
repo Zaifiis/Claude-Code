@@ -21,6 +21,27 @@ function supabaseConfigured(): boolean {
 }
 
 /**
+ * Lets an automated backup read the export without a session, when
+ * `STUDIO_BACKUP_TOKEN` is set. Compared without leaking how much matched.
+ */
+function backupTokenMatches(request: NextRequest): boolean {
+  const expected = process.env.STUDIO_BACKUP_TOKEN?.trim();
+  if (!expected) return false;
+
+  const supplied =
+    request.nextUrl.searchParams.get("token") ??
+    request.headers.get("x-studio-token") ??
+    "";
+
+  if (supplied.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < supplied.length; i += 1) {
+    diff |= supplied.charCodeAt(i) ^ expected.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+/**
  * Content Studio keeps its own data and has no Supabase session. It is open by
  * default, which is what you want on your own machine; set `STUDIO_PASSWORD`
  * and it asks for that password once per device, which is what you want on a
@@ -33,6 +54,12 @@ async function studioGate(request: NextRequest) {
   if (pathname === "/studio/login") return NextResponse.next({ request });
 
   if (await sessionIsValid(request.cookies.get(SESSION_COOKIE)?.value)) {
+    return NextResponse.next({ request });
+  }
+
+  // A backup job cannot sign in, so the export alone also accepts a token.
+  // Scoped to that one read-only route, and only when a token is configured.
+  if (pathname === "/api/studio/export" && backupTokenMatches(request)) {
     return NextResponse.next({ request });
   }
 

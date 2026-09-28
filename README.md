@@ -115,8 +115,37 @@ that safe:
   under `data/backups/`, or under a `backups/` prefix in the Blobs store.
   `GET /api/studio/backups` lists them and `POST` with `{"id": "..."}` puts one
   back, itself backing up the state it replaces.
-- **`GET /api/studio/export`** downloads everything as one JSON file, so a copy
-  can live somewhere this app does not control.
+- **Export and Import** sit at the foot of the sidebar. Export downloads
+  everything as one JSON file; import merges a file back in, updating what is
+  already there and adding what is not. Nothing is ever removed, so importing
+  twice is harmless and a partial file cannot delete anything — which also
+  makes import the way to move a laptop's data up to the live site.
+
+## Backing up to Google Drive every night
+
+`n8n/studio-backup-workflow.json` is a four-node workflow that fetches the
+export nightly and drops a dated file in Drive. It reuses the Google Drive
+credential the content workflow already has, so there is no Google Cloud setup.
+
+1. Set `STUDIO_BACKUP_TOKEN` in *Site configuration → Environment variables* on
+   Netlify to a long random string, and redeploy. A backup job cannot sign in,
+   so this token lets it read `/api/studio/export` and **only** that route.
+2. In n8n, **Workflows → Import from File** → `n8n/studio-backup-workflow.json`.
+3. Open **Fetch the export** and paste the same token into the
+   `x-studio-token` header. Change the URL if your site is not
+   `zaifiiscontentdash.netlify.app`.
+4. Open **Upload to Drive** and pick the folder you want.
+5. Activate it.
+
+The **Check it is not empty** node refuses to upload an export that is empty or
+unparseable, because a backup that quietly overwrites yesterday's good copy
+with nothing is worse than no backup at all.
+
+## To-dos
+
+The tab on the right edge opens a to-do list — the errands around making
+content rather than the content itself. They save as you type and travel in the
+export alongside the ideas.
 
 A data file written by an earlier version is migrated on load, including the
 nine-stage pipeline this app used to have.

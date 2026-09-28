@@ -12,6 +12,7 @@ import { IdeaList } from "./components/idea-list";
 import { IdeaPage } from "./components/idea-page";
 import { type Section, SectionTabs, Sidebar } from "./components/nav";
 import { NewIdeaModal } from "./components/new-idea-modal";
+import { TodoDrawer } from "./components/todo-drawer";
 import { TopBar } from "./components/top-bar";
 import { useStudio } from "./studio-store";
 import { useAppearance } from "./use-theme";
@@ -173,6 +174,8 @@ export function StudioApp() {
           onClose={() => setCapturing(false)}
         />
       ) : null}
+
+      <TodoDrawer />
 
       {openIdea ? (
         <IdeaPage key={openIdea.id} idea={openIdea} today={today} onClose={() => setOpenId(null)} />

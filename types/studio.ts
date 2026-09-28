@@ -130,6 +130,26 @@ export interface Idea {
   publishedAt: string | null;
 }
 
+/**
+ * A to-do: the small things around making content that are not themselves
+ * ideas — chase a clip, renew a subscription, reply to a comment.
+ */
+export interface Todo {
+  id: string;
+  text: string;
+  done: boolean;
+  createdAt: string;
+  doneAt: string | null;
+}
+
+export type TodoPatch = Partial<Pick<Todo, "text" | "done">>;
+
+/** Everything the studio stores, in one document. */
+export interface StudioData {
+  ideas: Idea[];
+  todos: Todo[];
+}
+
 /** Fields a client is allowed to write. `rank` and `archived` are derived. */
 export type IdeaDraft = Omit<
   Idea,

@@ -26,6 +26,7 @@ import {
   PLATFORMS,
   type Status,
   STATUSES,
+  type Todo,
 } from "@/types/studio";
 
 /** Shown in the top bar, so autosave is never something you have to trust blindly. */
@@ -97,6 +98,14 @@ interface StudioValue {
   remove: (id: string) => void;
   /** Writes any debounced edits immediately. */
   flush: () => void;
+
+  /** The to-do list, oldest first, with finished ones still shown. */
+  todos: Todo[];
+  addTodo: (text: string) => void;
+  toggleTodo: (id: string, done: boolean) => void;
+  editTodo: (id: string, text: string) => void;
+  removeTodo: (id: string) => void;
+  clearDoneTodos: () => void;
 }
 
 const StudioContext = createContext<StudioValue | null>(null);
@@ -109,13 +118,22 @@ export function useStudio(): StudioValue {
 
 export function StudioProvider({
   initialIdeas,
+  initialTodos,
   children,
 }: {
   initialIdeas: Idea[];
+  initialTodos: Todo[];
   children: React.ReactNode;
 }) {
   const [ideas, setIdeas] = useState<Idea[]>(() => normaliseRanks(initialIdeas));
+  const [todos, setTodos] = useState<Todo[]>(initialTodos);
   const [saveState, setSaveStateRaw] = useState<SaveState>("idle");
+
+  const todosRef = useRef(todos);
+  const commitTodos = useCallback((next: Todo[]) => {
+    todosRef.current = next;
+    setTodos(next);
+  }, []);
 
   // Mutations read the ref and write both, so no state updater ever has to run
   // a side effect (which React would double-invoke in development).
@@ -269,6 +287,70 @@ export function StudioProvider({
     [commit, send],
   );
 
+  // --- to-dos --------------------------------------------------------------
+
+  const addTodo = useCallback(
+    (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+
+      const id = newId();
+      const now = new Date().toISOString();
+      commitTodos([...todosRef.current, { id, text: trimmed, done: false, createdAt: now, doneAt: null }]);
+      void send(`${API}/todos`, {
+        method: "POST",
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ id, text: trimmed }),
+      });
+    },
+    [commitTodos, send],
+  );
+
+  const patchTodo = useCallback(
+    (id: string, patch: { text?: string; done?: boolean }) => {
+      commitTodos(
+        todosRef.current.map((todo) =>
+          todo.id === id
+            ? {
+                ...todo,
+                ...patch,
+                doneAt: patch.done === undefined ? todo.doneAt : patch.done ? new Date().toISOString() : null,
+              }
+            : todo,
+        ),
+      );
+      void send(`${API}/todos/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: JSON_HEADERS,
+        body: JSON.stringify(patch),
+      });
+    },
+    [commitTodos, send],
+  );
+
+  const toggleTodo = useCallback(
+    (id: string, done: boolean) => patchTodo(id, { done }),
+    [patchTodo],
+  );
+
+  const editTodo = useCallback(
+    (id: string, text: string) => patchTodo(id, { text }),
+    [patchTodo],
+  );
+
+  const removeTodo = useCallback(
+    (id: string) => {
+      commitTodos(todosRef.current.filter((todo) => todo.id !== id));
+      void send(`${API}/todos/${encodeURIComponent(id)}`, { method: "DELETE" });
+    },
+    [commitTodos, send],
+  );
+
+  const clearDoneTodos = useCallback(() => {
+    commitTodos(todosRef.current.filter((todo) => !todo.done));
+    void send(`${API}/todos`, { method: "DELETE" });
+  }, [commitTodos, send]);
+
   // Never lose a keystroke to a closed tab or a backgrounded phone.
   useEffect(() => {
     const flushNow = () => {
@@ -313,8 +395,29 @@ export function StudioProvider({
       moveToTop,
       remove,
       flush: () => flush(),
+      todos,
+      addTodo,
+      toggleTodo,
+      editTodo,
+      removeTodo,
+      clearDoneTodos,
     };
-  }, [ideas, saveState, create, update, moveVisible, moveToTop, remove, flush]);
+  }, [
+    ideas,
+    saveState,
+    create,
+    update,
+    moveVisible,
+    moveToTop,
+    remove,
+    flush,
+    todos,
+    addTodo,
+    toggleTodo,
+    editTodo,
+    removeTodo,
+    clearDoneTodos,
+  ]);
 
   return <StudioContext.Provider value={value}>{children}</StudioContext.Provider>;
 }

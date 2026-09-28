@@ -29,6 +29,9 @@ import {
   isStatus,
   LEGACY_STATUS,
   PLATFORMS,
+  type StudioData,
+  type Todo,
+  type TodoPatch,
 } from "@/types/studio";
 
 /** How many times a write retries when another device wrote first. */
@@ -192,8 +195,8 @@ function applyPatch(idea: Idea, patch: IdeaPatch): Idea {
  * save would then write that emptiness over everything — the one way this
  * app could lose all your scripts at once.
  */
-function parse(data: unknown): Idea[] {
-  if (data === null || data === undefined) return [];
+function parse(data: unknown): StudioData {
+  if (data === null || data === undefined) return { ideas: [], todos: [] };
 
   const list = Array.isArray(data)
     ? data
@@ -208,16 +211,39 @@ function parse(data: unknown): Idea[] {
     );
   }
 
-  // An idea missing its id is given one instead of being dropped, so a
-  // malformed row can never quietly disappear.
-  return normaliseRanks(
-    list
-      .map((row, index) => coerceIdea(row, `recovered-${index}-${Date.now()}`))
-      .filter((idea): idea is Idea => idea !== null),
-  );
+  const rawTodos = (data as { todos?: unknown })?.todos;
+
+  return {
+    // An idea missing its id is given one instead of being dropped, so a
+    // malformed row can never quietly disappear.
+    ideas: normaliseRanks(
+      list
+        .map((row, index) => coerceIdea(row, `recovered-${index}-${Date.now()}`))
+        .filter((idea): idea is Idea => idea !== null),
+    ),
+    todos: Array.isArray(rawTodos)
+      ? rawTodos
+          .map((row, index) => coerceTodo(row, `recovered-todo-${index}-${Date.now()}`))
+          .filter((todo): todo is Todo => todo !== null)
+      : [],
+  };
 }
 
-async function load(): Promise<Idea[]> {
+function coerceTodo(value: unknown, fallbackId: string): Todo | null {
+  if (typeof value !== "object" || value === null) return null;
+  const raw = value as Record<string, unknown>;
+  const now = new Date().toISOString();
+
+  return {
+    id: typeof raw.id === "string" && raw.id.trim() ? raw.id.trim().slice(0, 64) : fallbackId,
+    text: str(raw.text, LIMITS.shortText),
+    done: raw.done === true,
+    createdAt: typeof raw.createdAt === "string" ? raw.createdAt : now,
+    doneAt: typeof raw.doneAt === "string" ? raw.doneAt : null,
+  };
+}
+
+async function load(): Promise<StudioData> {
   return parse((await storeBackend().read()).data);
 }
 
@@ -227,8 +253,8 @@ async function load(): Promise<Idea[]> {
  * first, which is how two devices can safely edit the same store.
  */
 async function mutate<T>(
-  fn: (ideas: Idea[]) => { ideas: Idea[]; result: T },
-  options: { mayRemove?: number } = {},
+  fn: (data: StudioData) => { data: StudioData; result: T },
+  options: { mayRemoveIdeas?: number; mayRemoveTodos?: number } = {},
 ): Promise<T> {
   return withLock(async () => {
     const backend = storeBackend();
@@ -236,22 +262,17 @@ async function mutate<T>(
     for (let attempt = 0; attempt < MAX_WRITE_ATTEMPTS; attempt += 1) {
       const snapshot = await backend.read();
       const before = parse(snapshot.data);
-      const { ideas, result } = fn(before);
+      const { data, result } = fn(before);
 
-      // Nothing but an explicit delete is allowed to reduce the count. A bug
-      // anywhere upstream therefore cannot quietly throw scripts away.
-      const allowed = options.mayRemove ?? 0;
-      if (ideas.length < before.length - allowed) {
-        throw new Error(
-          `Refusing to save: this would drop ${before.length - ideas.length} ideas ` +
-            `when at most ${allowed} should be removed.`,
-        );
-      }
+      // Nothing but an explicit delete is allowed to reduce a count. A bug
+      // anywhere upstream therefore cannot quietly throw work away.
+      guardCount("ideas", before.ideas.length, data.ideas.length, options.mayRemoveIdeas ?? 0);
+      guardCount("to-dos", before.todos.length, data.todos.length, options.mayRemoveTodos ?? 0);
 
-      const next = normaliseRanks(ideas);
+      const next: StudioData = { ideas: normaliseRanks(data.ideas), todos: data.todos };
       // Keep the version being replaced, so any bad state can be undone.
       await backend.snapshot(snapshot.data);
-      const written = await backend.write({ version: 1, ideas: next }, snapshot.version);
+      const written = await backend.write({ version: 2, ...next }, snapshot.version);
       if (written) return result;
     }
 
@@ -259,14 +280,27 @@ async function mutate<T>(
   });
 }
 
+function guardCount(what: string, before: number, after: number, allowed: number): void {
+  if (after >= before - allowed) return;
+  throw new Error(
+    `Refusing to save: this would drop ${before - after} ${what} ` +
+      `when at most ${allowed} should be removed.`,
+  );
+}
+
 // --- public API ------------------------------------------------------------
 
 export function listIdeas(): Promise<Idea[]> {
+  return withLock(async () => (await load()).ideas);
+}
+
+/** Ideas and to-dos together, for the first paint and for export. */
+export function readAll(): Promise<StudioData> {
   return withLock(load);
 }
 
 export function createIdea(input: IdeaPatch & { id?: string }): Promise<Idea> {
-  return mutate((ideas) => {
+  return mutate(({ ideas, todos }) => {
     const now = new Date().toISOString();
     const requested = typeof input.id === "string" ? input.id.trim().slice(0, 64) : "";
     const id = requested && !ideas.some((idea) => idea.id === requested) ? requested : randomUUID();
@@ -298,14 +332,14 @@ export function createIdea(input: IdeaPatch & { id?: string }): Promise<Idea> {
     };
 
     const created = syncArchiveState(applyPatch(base, input), false);
-    return { ideas: [...ideas, created], result: created };
+    return { data: { ideas: [...ideas, created], todos }, result: created };
   });
 }
 
 export function patchIdea(id: string, patch: IdeaPatch): Promise<Idea | null> {
-  return mutate((ideas) => {
+  return mutate(({ ideas, todos }) => {
     const current = ideas.find((idea) => idea.id === id);
-    if (!current) return { ideas, result: null };
+    if (!current) return { data: { ideas, todos }, result: null };
 
     const updated = syncArchiveState(
       { ...applyPatch(current, patch), updatedAt: new Date().toISOString() },
@@ -313,7 +347,7 @@ export function patchIdea(id: string, patch: IdeaPatch): Promise<Idea | null> {
     );
 
     return {
-      ideas: ideas.map((idea) => (idea.id === id ? updated : idea)),
+      data: { ideas: ideas.map((idea) => (idea.id === id ? updated : idea)), todos },
       result: updated,
     };
   });
@@ -321,11 +355,75 @@ export function patchIdea(id: string, patch: IdeaPatch): Promise<Idea | null> {
 
 export function deleteIdea(id: string): Promise<boolean> {
   return mutate(
-    (ideas) => ({
-      ideas: ideas.filter((idea) => idea.id !== id),
+    ({ ideas, todos }) => ({
+      data: { ideas: ideas.filter((idea) => idea.id !== id), todos },
       result: ideas.some((idea) => idea.id === id),
     }),
-    { mayRemove: 1 },
+    { mayRemoveIdeas: 1 },
+  );
+}
+
+// --- to-dos ----------------------------------------------------------------
+
+export function createTodo(input: { id?: string; text: string }): Promise<Todo> {
+  return mutate(({ ideas, todos }) => {
+    const requested = typeof input.id === "string" ? input.id.trim().slice(0, 64) : "";
+    const id = requested && !todos.some((todo) => todo.id === requested) ? requested : randomUUID();
+
+    const created: Todo = {
+      id,
+      text: str(input.text, LIMITS.shortText),
+      done: false,
+      createdAt: new Date().toISOString(),
+      doneAt: null,
+    };
+
+    return { data: { ideas, todos: [...todos, created] }, result: created };
+  });
+}
+
+export function patchTodo(id: string, patch: TodoPatch): Promise<Todo | null> {
+  return mutate(({ ideas, todos }) => {
+    const current = todos.find((todo) => todo.id === id);
+    if (!current) return { data: { ideas, todos }, result: null };
+
+    const done = "done" in patch ? patch.done === true : current.done;
+    const updated: Todo = {
+      ...current,
+      text: "text" in patch ? str(patch.text, LIMITS.shortText) : current.text,
+      done,
+      // Ticking stamps the time; un-ticking clears it.
+      doneAt: done ? (current.doneAt ?? new Date().toISOString()) : null,
+    };
+
+    return {
+      data: { ideas, todos: todos.map((todo) => (todo.id === id ? updated : todo)) },
+      result: updated,
+    };
+  });
+}
+
+export function deleteTodo(id: string): Promise<boolean> {
+  return mutate(
+    ({ ideas, todos }) => ({
+      data: { ideas, todos: todos.filter((todo) => todo.id !== id) },
+      result: todos.some((todo) => todo.id === id),
+    }),
+    { mayRemoveTodos: 1 },
+  );
+}
+
+/** Clears every finished to-do at once. */
+export function clearDoneTodos(): Promise<number> {
+  return mutate(
+    ({ ideas, todos }) => {
+      const remaining = todos.filter((todo) => !todo.done);
+      return {
+        data: { ideas, todos: remaining },
+        result: todos.length - remaining.length,
+      };
+    },
+    { mayRemoveTodos: Number.MAX_SAFE_INTEGER },
   );
 }
 
@@ -334,9 +432,9 @@ export function deleteIdea(id: string): Promise<boolean> {
  * idea the client did not list keeps its relative place after the ones it did.
  */
 export function reorderIdeas(orderedIds: string[]): Promise<Idea[]> {
-  return mutate((ideas) => {
+  return mutate(({ ideas, todos }) => {
     const reordered = applyOrder(ideas, orderedIds);
-    return { ideas: reordered, result: reordered };
+    return { data: { ideas: reordered, todos }, result: reordered };
   });
 }
 
@@ -346,14 +444,47 @@ export function listBackups(): Promise<Array<{ id: string; savedAt: string }>> {
 }
 
 /** Puts a previous version back, keeping the current one as a backup first. */
-export function restoreBackup(id: string): Promise<Idea[]> {
+export function restoreBackup(id: string): Promise<StudioData> {
   return withLock(async () => {
     const backend = storeBackend();
     const restored = parse(await backend.restore(id));
+    const next: StudioData = { ideas: normaliseRanks(restored.ideas), todos: restored.todos };
 
     const current = await backend.read();
     await backend.snapshot(current.data);
-    await backend.write({ version: 1, ideas: normaliseRanks(restored) }, current.version);
-    return normaliseRanks(restored);
+    await backend.write({ version: 2, ...next }, current.version);
+    return next;
+  });
+}
+
+/**
+ * Merges an exported file back in: ideas and to-dos already here are updated,
+ * new ones are added, and nothing is ever removed. That makes importing safe
+ * to do twice, and safe to use for moving a laptop's data up to the server.
+ */
+export function importData(incoming: unknown): Promise<{ ideas: number; todos: number }> {
+  const parsed = parse(incoming);
+
+  return mutate(({ ideas, todos }) => {
+    const ideaById = new Map(ideas.map((idea) => [idea.id, idea]));
+    let addedIdeas = 0;
+    for (const idea of parsed.ideas) {
+      if (!ideaById.has(idea.id)) addedIdeas += 1;
+      // Incoming ranks are meaningless next to the current order, so the
+      // merged idea goes to the bottom unless it is already here.
+      ideaById.set(idea.id, { ...idea, rank: ideaById.get(idea.id)?.rank ?? UNRANKED - 1 });
+    }
+
+    const todoById = new Map(todos.map((todo) => [todo.id, todo]));
+    let addedTodos = 0;
+    for (const todo of parsed.todos) {
+      if (!todoById.has(todo.id)) addedTodos += 1;
+      todoById.set(todo.id, todo);
+    }
+
+    return {
+      data: { ideas: [...ideaById.values()], todos: [...todoById.values()] },
+      result: { ideas: addedIdeas, todos: addedTodos },
+    };
   });
 }

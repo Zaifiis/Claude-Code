@@ -2,6 +2,7 @@
 
 import { STATUS_COLOR, type Status, STATUSES } from "@/types/studio";
 
+import { DataButtons } from "./data-buttons";
 import {
   BoardIcon,
   CalendarIcon,
@@ -100,6 +101,8 @@ export function Sidebar({
       </div>
 
       <div className="mt-auto flex flex-col gap-1 border-t border-st-hairline pt-4">
+        <DataButtons className="mb-2" />
+
         {([["Board", BoardIcon], ["Calendar", CalendarIcon]] as const).map(([item, Icon]) => (
           <button
             key={item}
