@@ -287,5 +287,8 @@ function formatWhen(iso: string): string {
     month: "short",
     hour: "numeric",
     minute: "2-digit",
+    // Several saves can land in the same minute, and two rows reading alike
+    // would leave you guessing which one you are putting back.
+    second: "2-digit",
   });
 }

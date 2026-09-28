@@ -54,6 +54,10 @@ export function TopBar({
 }) {
   const [collapsed, setCollapsed] = useState(false);
 
+  // Settings is about the app, not about ideas, so the controls that narrow
+  // which ideas you see would do nothing there.
+  const filtering = section !== "Settings";
+
   useEffect(() => {
     const onScroll = () => setCollapsed(window.scrollY > COLLAPSE_AT);
     onScroll();
@@ -72,13 +76,15 @@ export function TopBar({
         <div className="mx-auto flex h-14 w-full max-w-[1080px] items-center gap-2 px-4 sm:px-6">
           {/* Wide screens fit the brands beside the search; narrow ones get
               their own row below, rather than cramming both into one. */}
-          <ChannelTabs
-            value={channel}
-            counts={channelCounts}
-            total={channelTotal}
-            onChange={onChannelChange}
-            className="hidden lg:flex"
-          />
+          {filtering ? (
+            <ChannelTabs
+              value={channel}
+              counts={channelCounts}
+              total={channelTotal}
+              onChange={onChannelChange}
+              className="hidden lg:flex"
+            />
+          ) : null}
 
           <p
             aria-hidden={!collapsed}
@@ -102,17 +108,21 @@ export function TopBar({
             {SAVE_LABELS[saveState] || "Saved"}
           </p>
 
-          <div className={cx("relative w-36 sm:w-56", saveState === "idle" && "ml-auto sm:ml-0")}>
-            <SearchIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-st-text-3" />
-            <TextInput
-              type="search"
-              value={query}
-              onChange={(event) => onQueryChange(event.target.value)}
-              placeholder="Search"
-              aria-label="Search every idea"
-              className="h-10 min-h-10 rounded-full pl-8"
-            />
-          </div>
+          {filtering ? (
+            <div className={cx("relative w-36 sm:w-56", saveState === "idle" && "ml-auto sm:ml-0")}>
+              <SearchIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-st-text-3" />
+              <TextInput
+                type="search"
+                value={query}
+                onChange={(event) => onQueryChange(event.target.value)}
+                placeholder="Search"
+                aria-label="Search every idea"
+                className="h-10 min-h-10 rounded-full pl-8"
+              />
+            </div>
+          ) : (
+            <span className="ml-auto" />
+          )}
 
           <IconButton
             label={appearance === "dark" ? "Switch to light appearance" : "Switch to dark appearance"}
@@ -132,14 +142,16 @@ export function TopBar({
           </IconButton>
         </div>
 
-        <div className="mx-auto w-full max-w-[1080px] px-4 pb-3 sm:px-6 lg:hidden">
-          <ChannelTabs
-            value={channel}
-            counts={channelCounts}
-            total={channelTotal}
-            onChange={onChannelChange}
-          />
-        </div>
+        {filtering ? (
+          <div className="mx-auto w-full max-w-[1080px] px-4 pb-3 sm:px-6 lg:hidden">
+            <ChannelTabs
+              value={channel}
+              counts={channelCounts}
+              total={channelTotal}
+              onChange={onChannelChange}
+            />
+          </div>
+        ) : null}
       </header>
 
       <div className="mx-auto w-full max-w-[1080px] px-4 pt-1 pb-3 sm:px-6">
