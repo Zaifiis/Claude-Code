@@ -2,7 +2,8 @@
 
 import { useRef, useState } from "react";
 
-import { cx } from "./ui";
+import { DownloadIcon, UploadIcon } from "./icons";
+import { Button, cx } from "./ui";
 
 type Result = { kind: "ok" | "error"; message: string } | null;
 
@@ -50,21 +51,26 @@ export function DataButtons({ className }: { className?: string }) {
     }
   };
 
-  const ITEM = cx(
-    "st-pressable flex min-h-9 w-full items-center rounded-st-control px-3 text-left st-footnote font-medium",
-    "text-st-text-2 hover:bg-st-fill hover:text-st-text",
-    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-accent",
-  );
-
   return (
-    <div className={cx("flex flex-col gap-0.5", className)}>
-      <a href="/api/studio/export" download className={ITEM}>
-        Export everything
-      </a>
+    <div className={cx("flex flex-col gap-3", className)}>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="tinted"
+          // A plain link, so the browser downloads it rather than the app
+          // holding the whole file in memory to hand it over.
+          onClick={() => {
+            window.location.href = "/api/studio/export";
+          }}
+        >
+          <DownloadIcon className="h-[18px] w-[18px]" />
+          Export everything
+        </Button>
 
-      <button type="button" className={ITEM} disabled={busy} onClick={() => fileRef.current?.click()}>
-        {busy ? "Importing…" : "Import a file"}
-      </button>
+        <Button variant="quiet" disabled={busy} onClick={() => fileRef.current?.click()}>
+          <UploadIcon className="h-[18px] w-[18px]" />
+          {busy ? "Importing…" : "Import a file"}
+        </Button>
+      </div>
 
       <input
         ref={fileRef}
@@ -83,7 +89,7 @@ export function DataButtons({ className }: { className?: string }) {
         <p
           role="status"
           className={cx(
-            "st-footnote px-3 pt-1",
+            "st-footnote",
             result.kind === "ok" ? "text-st-green" : "text-st-pink",
           )}
         >

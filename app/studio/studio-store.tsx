@@ -98,6 +98,8 @@ interface StudioValue {
   remove: (id: string) => void;
   /** Writes any debounced edits immediately. */
   flush: () => void;
+  /** Pulls server truth back, for when something outside this app changed it. */
+  refresh: () => void;
 
   /** The to-do list, oldest first, with finished ones still shown. */
   todos: Todo[];
@@ -395,6 +397,7 @@ export function StudioProvider({
       moveToTop,
       remove,
       flush: () => flush(),
+      refresh: () => void refresh(),
       todos,
       addTodo,
       toggleTodo,
@@ -411,6 +414,7 @@ export function StudioProvider({
     moveToTop,
     remove,
     flush,
+    refresh,
     todos,
     addTodo,
     toggleTodo,

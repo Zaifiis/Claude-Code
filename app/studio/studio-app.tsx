@@ -12,6 +12,7 @@ import { IdeaList } from "./components/idea-list";
 import { IdeaPage } from "./components/idea-page";
 import { type Section, SectionTabs, Sidebar } from "./components/nav";
 import { NewIdeaModal } from "./components/new-idea-modal";
+import { SettingsView } from "./components/settings-view";
 import { TodoDrawer } from "./components/todo-drawer";
 import { TopBar } from "./components/top-bar";
 import { useStudio } from "./studio-store";
@@ -30,10 +31,12 @@ const EMPTY: Record<Section, { title: string; body: string }> = {
   Posted: { title: "Nothing posted yet", body: "Posted videos collect here, with room for a note on how each did." },
   Board: { title: "", body: "" },
   Calendar: { title: "", body: "" },
+  Settings: { title: "", body: "" },
 };
 
 export function StudioApp() {
-  const { active, archived, byId, counts, saveState, create, update, moveVisible } = useStudio();
+  const { active, archived, byId, counts, saveState, create, update, moveVisible, refresh } =
+    useStudio();
   const today = useToday();
   const { appearance, setAppearance } = useAppearance();
 
@@ -69,14 +72,19 @@ export function StudioApp() {
   }, [active]);
 
   const listed = useMemo(() => {
-    if (section === "All" || section === "Board" || section === "Calendar") return found;
+    if (section === "All" || section === "Board" || section === "Calendar" || section === "Settings")
+      return found;
     return found.filter((idea) => idea.status === section);
   }, [found, section]);
 
   // Dragging edits the real make-next order, so it is offered wherever the list
   // is made of cards that are actually in that order.
   const reorderable =
-    !searching && section !== "Posted" && section !== "Board" && section !== "Calendar";
+    !searching &&
+    section !== "Posted" &&
+    section !== "Board" &&
+    section !== "Calendar" &&
+    section !== "Settings";
 
   const onMove = useCallback(
     (fromIndex: number, toIndex: number) => {
@@ -132,7 +140,13 @@ export function StudioApp() {
           />
 
           <div key={section} className="st-section-enter mt-4">
-            {section === "Board" ? (
+            {section === "Settings" ? (
+              <SettingsView
+                appearance={appearance}
+                onAppearanceChange={setAppearance}
+                onRestored={refresh}
+              />
+            ) : section === "Board" ? (
               <BoardView
                 ideas={everything.filter((idea) => matches(idea, query))}
                 today={today}

@@ -2,11 +2,11 @@
 
 import { STATUS_COLOR, type Status, STATUSES } from "@/types/studio";
 
-import { DataButtons } from "./data-buttons";
 import {
   BoardIcon,
   CalendarIcon,
   CameraIcon,
+  GearIcon,
   PlusIcon,
   ScissorsIcon,
   ScriptIcon,
@@ -17,7 +17,14 @@ import {
 import { Button, cx } from "./ui";
 
 /** What the main area is showing: a stage, everything, or another view. */
-export type Section = "All" | Status | "Board" | "Calendar";
+export type Section = "All" | Status | "Board" | "Calendar" | "Settings";
+
+/** The views that are not a stage, in the order they sit under the stages. */
+const EXTRAS = [
+  ["Board", BoardIcon],
+  ["Calendar", CalendarIcon],
+  ["Settings", GearIcon],
+] as const;
 
 export const SECTIONS: Array<"All" | Status> = ["All", ...STATUSES];
 
@@ -101,9 +108,7 @@ export function Sidebar({
       </div>
 
       <div className="mt-auto flex flex-col gap-1 border-t border-st-hairline pt-4">
-        <DataButtons className="mb-2" />
-
-        {([["Board", BoardIcon], ["Calendar", CalendarIcon]] as const).map(([item, Icon]) => (
+        {EXTRAS.map(([item, Icon]) => (
           <button
             key={item}
             type="button"
@@ -135,7 +140,7 @@ export function SectionTabs({
   total: number;
   onSelect: (next: Section) => void;
 }) {
-  const items: Section[] = [...SECTIONS, "Board", "Calendar"];
+  const items: Section[] = [...SECTIONS, ...EXTRAS.map(([item]) => item)];
 
   return (
     <nav
@@ -144,9 +149,11 @@ export function SectionTabs({
     >
       {items.map((item) => {
         const active = section === item;
-        const isStage = item !== "Board" && item !== "Calendar";
+        const isStage = !EXTRAS.some(([extra]) => extra === item);
         const count = item === "All" ? total : isStage ? counts[item as Status] : null;
-        const Icon = isStage ? GLYPH[item as "All" | Status] : item === "Board" ? BoardIcon : CalendarIcon;
+        const Icon = isStage
+          ? GLYPH[item as "All" | Status]
+          : (EXTRAS.find(([extra]) => extra === item)?.[1] ?? BoardIcon);
 
         return (
           <button

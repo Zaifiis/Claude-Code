@@ -92,9 +92,20 @@ export function TodoDrawer() {
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
-        <header className="flex items-center gap-2 px-4 pt-6 pb-4">
-          <h2 className="st-title-3 flex-1 text-st-text">To-do</h2>
-          <IconButton label="Hide to-dos" onClick={() => setOpen(false)} className="st-pressable">
+        <header className="flex items-start gap-3 px-5 pt-6 pb-4 sm:px-6">
+          <div className="min-w-0 flex-1">
+            <h2 className="st-title-3 text-st-text">To-do</h2>
+            <p className="st-footnote text-st-text-3">
+              {outstanding.length === 0
+                ? "All clear"
+                : `${outstanding.length} to go${done.length > 0 ? ` · ${done.length} done` : ""}`}
+            </p>
+          </div>
+          <IconButton
+            label="Hide to-dos"
+            onClick={() => setOpen(false)}
+            className="st-pressable -mr-2 shrink-0"
+          >
             <CloseIcon />
           </IconButton>
         </header>
@@ -106,9 +117,9 @@ export function TodoDrawer() {
             setDraft("");
             inputRef.current?.focus();
           }}
-          className="relative px-4 pb-4"
+          className="relative px-5 pb-5 sm:px-6"
         >
-          <PlusIcon className="pointer-events-none absolute top-1/2 left-7 h-4 w-4 -translate-y-1/2 text-st-text-3" />
+          <PlusIcon className="pointer-events-none absolute top-1/2 left-8 h-4 w-4 -translate-y-1/2 text-st-text-3 sm:left-9" />
           <TextInput
             ref={inputRef}
             value={draft}
@@ -116,19 +127,19 @@ export function TodoDrawer() {
             placeholder="Add a to-do"
             aria-label="Add a to-do"
             enterKeyHint="done"
-            className="bg-st-surface pl-9 shadow-st-raised"
+            className="bg-st-surface pl-10 shadow-st-raised"
           />
         </form>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-6">
           {todos.length === 0 ? (
-            <p className="st-callout px-1 py-8 text-center text-st-text-3">
+            <p className="st-callout st-measure mx-auto px-2 py-10 text-center text-st-text-3">
               Nothing to do. The errands around making content live here — ideas belong in the list.
             </p>
           ) : (
-            <ul className="flex flex-col gap-1">
+            <ul className="flex flex-col divide-y divide-st-hairline">
               {[...outstanding, ...done].map((todo) => (
-                <li key={todo.id} className="group flex items-start gap-2 rounded-st-control py-1">
+                <li key={todo.id} className="group flex items-start gap-3 py-1">
                   <button
                     type="button"
                     role="checkbox"
@@ -136,7 +147,7 @@ export function TodoDrawer() {
                     aria-label={todo.done ? `Mark "${todo.text}" as not done` : `Mark "${todo.text}" as done`}
                     onClick={() => toggleTodo(todo.id, !todo.done)}
                     className={cx(
-                      "st-pressable mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
+                      "st-pressable mt-2.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
                       "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-accent",
                       todo.done
                         ? "border-st-accent bg-st-accent text-st-on-accent"
@@ -162,7 +173,7 @@ export function TodoDrawer() {
                     onChange={(event) => editTodo(todo.id, event.target.value)}
                     aria-label={`To-do: ${todo.text}`}
                     className={cx(
-                      "st-callout min-h-9 min-w-0 flex-1 border-0 bg-transparent py-1 outline-none",
+                      "st-callout min-h-10 min-w-0 flex-1 border-0 bg-transparent py-2 outline-none",
                       "focus-visible:outline-none",
                       todo.done ? "text-st-text-3 line-through" : "text-st-text",
                     )}
@@ -171,7 +182,11 @@ export function TodoDrawer() {
                   <IconButton
                     label={`Delete "${todo.text}"`}
                     onClick={() => removeTodo(todo.id)}
-                    className="st-pressable h-9 w-9 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+                    className={cx(
+                      "st-pressable -mr-2 h-10 w-10 shrink-0 self-center",
+                      // A phone has no hover, so the button stays visible there.
+                      "transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100",
+                    )}
                   >
                     <CloseIcon className="h-4 w-4" />
                   </IconButton>
@@ -181,9 +196,11 @@ export function TodoDrawer() {
           )}
 
           {done.length > 0 ? (
-            <Button variant="plain" onClick={clearDoneTodos} className="mt-4 w-full justify-center">
-              Clear {done.length} finished
-            </Button>
+            <div className="mt-4 border-t border-st-hairline pt-3">
+              <Button variant="plain" onClick={clearDoneTodos} className="w-full justify-center">
+                Clear {done.length} finished
+              </Button>
+            </div>
           ) : null}
         </div>
       </aside>

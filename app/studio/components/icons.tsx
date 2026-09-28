@@ -252,3 +252,47 @@ export function StackIcon(props: IconProps) {
     </Svg>
   );
 }
+
+/* --- settings ------------------------------------------------------------ */
+
+export function GearIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <circle cx={10} cy={10} r={2.75} />
+      <path d="M10 2.75h.9l.35 2.05 1.5.62 1.7-1.2.64.64-1.2 1.7.62 1.5 2.05.35v.9l-2.05.35-.62 1.5 1.2 1.7-.64.64-1.7-1.2-1.5.62-.35 2.05h-.9l-.35-2.05-1.5-.62-1.7 1.2-.64-.64 1.2-1.7-.62-1.5L2.75 10.9V10l2.05-.35.62-1.5-1.2-1.7.64-.64 1.7 1.2 1.5-.62Z" />
+    </Svg>
+  );
+}
+
+export function DownloadIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M10 3.5v8.5M6.25 8.75 10 12.5l3.75-3.75M3.75 15.5h12.5" />
+    </Svg>
+  );
+}
+
+export function UploadIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M10 12.5V4M6.25 7.75 10 4l3.75 3.75M3.75 15.5h12.5" />
+    </Svg>
+  );
+}
+
+export function ClockIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <circle cx={10} cy={10} r={6.75} />
+      <path d="M10 6v4.25l2.75 1.75" />
+    </Svg>
+  );
+}
+
+export function CloudIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M6.25 15.5a3.25 3.25 0 0 1-.4-6.48 4.25 4.25 0 0 1 8.13.9 2.79 2.79 0 0 1-.48 5.58Z" />
+    </Svg>
+  );
+}

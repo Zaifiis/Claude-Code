@@ -153,7 +153,9 @@ export function TopBar({
           {section}
         </h1>
         <p className="st-footnote text-st-text-3">
-          {count} {count === 1 ? "idea" : "ideas"}
+          {section === "Settings"
+            ? "Your data, versions and appearance"
+            : `${count} ${count === 1 ? "idea" : "ideas"}`}
         </p>
       </div>
     </>
