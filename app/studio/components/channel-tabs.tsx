@@ -57,7 +57,8 @@ export function ChannelTabs({
             aria-selected={selected}
             onClick={() => onChange(tab.key)}
             className={cx(
-              "st-pressable inline-flex min-h-8 shrink-0 items-center gap-2 rounded-full px-3 st-footnote font-medium",
+              "st-pressable inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-3 st-footnote font-medium",
+              "lg:min-h-8",
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-accent",
               selected
                 ? "bg-st-surface text-st-text shadow-st-raised"

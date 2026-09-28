@@ -21,12 +21,15 @@ import {
 } from "@/lib/studio/ranking";
 import {
   CHANNELS,
+  DEFAULT_TODO_PRIORITY,
   type Idea,
   type IdeaPatch,
   PLATFORMS,
   type Status,
   STATUSES,
   type Todo,
+  type TodoPatch,
+  type TodoPriority,
 } from "@/types/studio";
 
 /** Shown in the top bar, so autosave is never something you have to trust blindly. */
@@ -103,9 +106,9 @@ interface StudioValue {
 
   /** The to-do list, oldest first, with finished ones still shown. */
   todos: Todo[];
-  addTodo: (text: string) => void;
+  addTodo: (text: string, priority?: TodoPriority) => void;
   toggleTodo: (id: string, done: boolean) => void;
-  editTodo: (id: string, text: string) => void;
+  editTodo: (id: string, patch: TodoPatch) => void;
   removeTodo: (id: string) => void;
   clearDoneTodos: () => void;
 }
@@ -292,24 +295,37 @@ export function StudioProvider({
   // --- to-dos --------------------------------------------------------------
 
   const addTodo = useCallback(
-    (text: string) => {
+    (text: string, priority: TodoPriority = DEFAULT_TODO_PRIORITY) => {
       const trimmed = text.trim();
       if (!trimmed) return;
 
       const id = newId();
       const now = new Date().toISOString();
-      commitTodos([...todosRef.current, { id, text: trimmed, done: false, createdAt: now, doneAt: null }]);
+      commitTodos([
+        ...todosRef.current,
+        {
+          id,
+          text: trimmed,
+          notes: "",
+          priority,
+          due: "",
+          dueTime: "",
+          done: false,
+          createdAt: now,
+          doneAt: null,
+        },
+      ]);
       void send(`${API}/todos`, {
         method: "POST",
         headers: JSON_HEADERS,
-        body: JSON.stringify({ id, text: trimmed }),
+        body: JSON.stringify({ id, text: trimmed, priority }),
       });
     },
     [commitTodos, send],
   );
 
   const patchTodo = useCallback(
-    (id: string, patch: { text?: string; done?: boolean }) => {
+    (id: string, patch: TodoPatch) => {
       commitTodos(
         todosRef.current.map((todo) =>
           todo.id === id
@@ -336,7 +352,7 @@ export function StudioProvider({
   );
 
   const editTodo = useCallback(
-    (id: string, text: string) => patchTodo(id, { text }),
+    (id: string, patch: TodoPatch) => patchTodo(id, patch),
     [patchTodo],
   );
 

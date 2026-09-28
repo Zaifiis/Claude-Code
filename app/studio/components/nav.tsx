@@ -162,7 +162,7 @@ export function SectionTabs({
             aria-current={active ? "page" : undefined}
             onClick={() => onSelect(item)}
             className={cx(
-              "st-pressable inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full px-4 st-footnote font-medium",
+              "st-pressable inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-4 st-footnote font-medium",
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-accent",
               active
                 ? "bg-st-surface text-st-text shadow-st-raised"

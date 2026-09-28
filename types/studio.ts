@@ -131,18 +131,54 @@ export interface Idea {
 }
 
 /**
+ * How much a to-do is shouting. The order here is the order things get done
+ * in, and the list sorts by it, so "what do I do next" is answered by the
+ * top of the list rather than by reading all of them.
+ */
+export const TODO_PRIORITIES = ["Urgent", "Today", "Soon", "Whenever"] as const;
+
+export type TodoPriority = (typeof TODO_PRIORITIES)[number];
+
+export const DEFAULT_TODO_PRIORITY: TodoPriority = "Soon";
+
+export function isTodoPriority(value: unknown): value is TodoPriority {
+  return typeof value === "string" && (TODO_PRIORITIES as readonly string[]).includes(value);
+}
+
+/** One colour each, matching the way stages are coloured on the cards. */
+export const TODO_PRIORITY_COLOR: Record<TodoPriority, { dot: string; text: string; soft: string }> =
+  {
+    Urgent: { dot: "bg-st-pink", text: "text-st-pink", soft: "bg-st-pink-soft" },
+    Today: { dot: "bg-st-orange", text: "text-st-orange", soft: "bg-st-orange-soft" },
+    Soon: { dot: "bg-st-accent", text: "text-st-accent", soft: "bg-st-accent-soft" },
+    Whenever: { dot: "bg-st-text-3", text: "text-st-text-3", soft: "bg-st-fill" },
+  };
+
+/**
  * A to-do: the small things around making content that are not themselves
  * ideas — chase a clip, renew a subscription, reply to a comment.
  */
 export interface Todo {
   id: string;
   text: string;
+  /** Room for the detail that does not belong in the one-line title. */
+  notes: string;
+  priority: TodoPriority;
+  /**
+   * When it is due, as `YYYY-MM-DD`, and optionally a `HH:MM` time. Kept as
+   * two fields rather than one timestamp so "Friday" can mean Friday without
+   * this app inventing a time of day for it.
+   */
+  due: string;
+  dueTime: string;
   done: boolean;
   createdAt: string;
   doneAt: string | null;
 }
 
-export type TodoPatch = Partial<Pick<Todo, "text" | "done">>;
+export type TodoPatch = Partial<
+  Pick<Todo, "text" | "notes" | "priority" | "due" | "dueTime" | "done">
+>;
 
 /** Everything the studio stores, in one document. */
 export interface StudioData {

@@ -92,7 +92,9 @@ export function IdeaList({
                 onPointerCancel={end}
                 onKeyDown={(event) => onHandleKeyDown(event, index)}
                 className={cx(
-                  "flex w-10 shrink-0 cursor-grab touch-none items-center justify-center text-st-text-3",
+                  // 44 wide on a phone, where it is dragged with a thumb;
+                  // narrower on a desktop, where a pointer is exact.
+                  "flex w-11 shrink-0 cursor-grab touch-none items-center justify-center text-st-text-3 lg:w-10",
                   "transition-colors duration-[var(--st-dur-fast)] ease-st hover:text-st-text-2",
                   dragging && "cursor-grabbing text-st-text-2",
                 )}

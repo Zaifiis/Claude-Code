@@ -95,7 +95,8 @@ export function Segmented<T extends string>({
             aria-selected={selected}
             onClick={() => onChange(option.value)}
             className={cx(
-              "inline-flex min-h-9 items-center justify-center gap-2 rounded-[7px] px-3 st-footnote font-medium",
+              // 44 under a thumb, the tighter Apple height under a pointer.
+              "inline-flex min-h-11 items-center justify-center gap-2 rounded-[7px] px-3 st-footnote font-medium lg:min-h-9",
               MOTION,
               FOCUS,
               selected

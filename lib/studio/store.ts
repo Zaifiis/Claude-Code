@@ -20,15 +20,17 @@ import {
 } from "@/lib/studio/ranking";
 import {
   CHANNELS,
+  DEFAULT_TODO_PRIORITY,
   DONE_STATUS,
-  type Idea,
-  type IdeaPatch,
-  type Inspiration,
   isChannel,
   isPlatform,
   isStatus,
+  isTodoPriority,
   LEGACY_STATUS,
   PLATFORMS,
+  type Idea,
+  type IdeaPatch,
+  type Inspiration,
   type StudioData,
   type Todo,
   type TodoPatch,
@@ -70,6 +72,14 @@ function str(value: unknown, max: number): string {
   if (typeof value !== "string") return "";
   // Normalise newlines so word counts and diffs stay stable across platforms.
   return value.replace(/\r\n?/g, "\n").slice(0, max);
+}
+
+/** A wall-clock `HH:MM`, or "" — the same forgiving shape as `isoDate`. */
+function clockTime(value: unknown): string {
+  const raw = typeof value === "string" ? value.trim().slice(0, 5) : "";
+  if (!/^\d{2}:\d{2}$/.test(raw)) return "";
+  const [hours, minutes] = raw.split(":").map(Number);
+  return hours < 24 && minutes < 60 ? raw : "";
 }
 
 function isoDate(value: unknown): string {
@@ -237,6 +247,11 @@ function coerceTodo(value: unknown, fallbackId: string): Todo | null {
   return {
     id: typeof raw.id === "string" && raw.id.trim() ? raw.id.trim().slice(0, 64) : fallbackId,
     text: str(raw.text, LIMITS.shortText),
+    // A to-do saved before these fields existed simply has none of them.
+    notes: str(raw.notes, LIMITS.caption),
+    priority: isTodoPriority(raw.priority) ? raw.priority : DEFAULT_TODO_PRIORITY,
+    due: isoDate(raw.due),
+    dueTime: clockTime(raw.dueTime),
     done: raw.done === true,
     createdAt: typeof raw.createdAt === "string" ? raw.createdAt : now,
     doneAt: typeof raw.doneAt === "string" ? raw.doneAt : null,
@@ -365,7 +380,7 @@ export function deleteIdea(id: string): Promise<boolean> {
 
 // --- to-dos ----------------------------------------------------------------
 
-export function createTodo(input: { id?: string; text: string }): Promise<Todo> {
+export function createTodo(input: { id?: string; text: string; priority?: unknown }): Promise<Todo> {
   return mutate(({ ideas, todos }) => {
     const requested = typeof input.id === "string" ? input.id.trim().slice(0, 64) : "";
     const id = requested && !todos.some((todo) => todo.id === requested) ? requested : randomUUID();
@@ -373,6 +388,10 @@ export function createTodo(input: { id?: string; text: string }): Promise<Todo> 
     const created: Todo = {
       id,
       text: str(input.text, LIMITS.shortText),
+      notes: "",
+      priority: isTodoPriority(input.priority) ? input.priority : DEFAULT_TODO_PRIORITY,
+      due: "",
+      dueTime: "",
       done: false,
       createdAt: new Date().toISOString(),
       doneAt: null,
@@ -391,6 +410,12 @@ export function patchTodo(id: string, patch: TodoPatch): Promise<Todo | null> {
     const updated: Todo = {
       ...current,
       text: "text" in patch ? str(patch.text, LIMITS.shortText) : current.text,
+      notes: "notes" in patch ? str(patch.notes, LIMITS.caption) : current.notes,
+      // An unrecognised priority leaves the current one alone rather than
+      // quietly demoting the to-do.
+      priority: isTodoPriority(patch.priority) ? patch.priority : current.priority,
+      due: "due" in patch ? isoDate(patch.due) : current.due,
+      dueTime: "dueTime" in patch ? clockTime(patch.dueTime) : current.dueTime,
       done,
       // Ticking stamps the time; un-ticking clears it.
       doneAt: done ? (current.doneAt ?? new Date().toISOString()) : null,
