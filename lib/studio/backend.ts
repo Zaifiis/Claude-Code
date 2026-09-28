@@ -56,11 +56,27 @@ const fileBackend: StoreBackend = {
   // One local process holds the write lock, and the rename below is atomic,
   // so there is no version to check against.
   async write(data) {
-    await mkdir(path.dirname(DATA_FILE), { recursive: true });
-    const temp = `${DATA_FILE}.${process.pid}.tmp`;
-    await writeFile(temp, `${JSON.stringify(data, null, 2)}\n`, "utf8");
-    await rename(temp, DATA_FILE);
-    return true;
+    try {
+      await mkdir(path.dirname(DATA_FILE), { recursive: true });
+      const temp = `${DATA_FILE}.${process.pid}.tmp`;
+      await writeFile(temp, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+      await rename(temp, DATA_FILE);
+      return true;
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code === "EROFS" || code === "EACCES" || code === "EPERM") {
+        // A serverless host, where saving to disk can never work. Say so
+        // plainly: the alternative is a write that looks fine and is gone on
+        // the next request.
+        throw new Error(
+          `Cannot save ideas to ${DATA_FILE}: the filesystem is read-only. ` +
+            "On a host like Netlify the data belongs in Netlify Blobs — set " +
+            "STUDIO_STORAGE=blobs as a runtime environment variable.",
+          { cause: error },
+        );
+      }
+      throw error;
+    }
   },
 };
 
@@ -136,14 +152,23 @@ const blobsBackend: StoreBackend = {
 // --- picking one -----------------------------------------------------------
 
 /**
- * Netlify sets `NETLIFY=true` in its build and function runtimes. Setting
- * `STUDIO_STORAGE` to "file" or "blobs" overrides the guess.
+ * Whether to keep the data in Netlify Blobs.
+ *
+ * `NETLIFY_BLOBS_CONTEXT` is what the Blobs client itself reads for its
+ * credentials, so its presence is the one signal that actually means "Blobs
+ * will work here". It is checked first because variables declared in
+ * `netlify.toml` never reach the function runtime — only the build — so
+ * neither `STUDIO_STORAGE` nor `NETLIFY` can be relied on from there.
+ *
+ * Setting `STUDIO_STORAGE` to "file" or "blobs" as a real environment variable
+ * still overrides the detection.
  */
 function blobsEnabled(): boolean {
   const choice = process.env.STUDIO_STORAGE?.trim().toLowerCase();
   if (choice === "blobs") return true;
   if (choice === "file") return false;
-  return process.env.NETLIFY === "true";
+
+  return Boolean(process.env.NETLIFY_BLOBS_CONTEXT) || process.env.NETLIFY === "true";
 }
 
 export function storeBackend(): StoreBackend {
@@ -152,5 +177,5 @@ export function storeBackend(): StoreBackend {
 
 /** Where the data is being kept, for the setup notes and for diagnostics. */
 export function storeDescription(): string {
-  return blobsEnabled() ? `Netlify Blobs (store "${STORE_NAME}")` : DATA_FILE;
+  return blobsEnabled() ? `Netlify Blobs (store "${STORE_NAME}")` : `file: ${DATA_FILE}`;
 }

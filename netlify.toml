@@ -1,14 +1,17 @@
 # Deploying Content Studio to Netlify.
 #
 # Netlify detects Next.js and applies its own runtime with no configuration, so
-# this file only sets what is specific to this app. Do not pin the Next.js
-# runtime here — Netlify keeps it current on every build.
+# there is nothing to set here. Do not pin the Next.js runtime — Netlify keeps
+# it current on every build.
 #
-# Before the site goes live, set STUDIO_PASSWORD under
-# Site configuration → Environment variables. Without it the studio is open,
-# and anyone with the URL can read and edit your scripts.
-
-[build.environment]
-  # A function's filesystem is read-only, so the ideas live in Netlify Blobs
-  # instead of data/studio.json. Locally this is unset and the file is used.
-  STUDIO_STORAGE = "blobs"
+# Storage needs no configuration either: a function's filesystem is read-only,
+# and the app notices it is running on Netlify and keeps the ideas in Netlify
+# Blobs instead. Note that variables set in this file reach the BUILD only and
+# never the running site, which is why nothing here tries to configure it.
+#
+# One variable does need setting, in the Netlify UI rather than here:
+#
+#   Site configuration -> Environment variables -> STUDIO_PASSWORD
+#
+# Without it the studio is open and anyone with the URL can read and edit your
+# scripts. Make sure its scope includes Functions so the running site sees it.

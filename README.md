@@ -86,9 +86,19 @@ are conditional on the version that was read, so editing on your phone and your
 laptop at the same time cannot silently overwrite either one; the write that
 loses the race re-reads and re-applies.
 
-Nothing above `lib/studio/backend.ts` knows which of the two is in use. Set
-`STUDIO_STORAGE` to `file` or `blobs` to choose explicitly; otherwise it
-follows `NETLIFY`.
+Nothing above `lib/studio/backend.ts` knows which of the two is in use. The
+choice is made from `NETLIFY_BLOBS_CONTEXT`, which is what the Blobs client
+itself reads for its credentials and so is the one signal that means "Blobs
+will work here". Set `STUDIO_STORAGE` to `file` or `blobs` as a real
+environment variable to override it.
+
+> **Variables in `netlify.toml` reach the build only, never the running site**,
+> so storage cannot be configured from there — which is why it is detected
+> instead. Anything the running site needs, such as `STUDIO_PASSWORD`, has to
+> be set in the Netlify UI with its scope including Functions.
+
+`GET /api/studio/health` reports which store is in use and whether it can be
+read, which turns "my idea disappeared" into a specific answer.
 
 A data file written by an earlier version is migrated on load, including the
 nine-stage pipeline this app used to have.
