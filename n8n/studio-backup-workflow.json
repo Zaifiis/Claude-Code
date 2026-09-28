@@ -1,5 +1,5 @@
 {
-  "name": "Content Studio — daily Drive backup",
+  "name": "Content Studio \u2014 daily Drive backup",
   "nodes": [
     {
       "parameters": {
@@ -13,7 +13,10 @@
       },
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
-      "position": [0, 0],
+      "position": [
+        0,
+        0
+      ],
       "id": "studio-backup-schedule",
       "name": "Every night at 3am"
     },
@@ -40,17 +43,23 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 0],
+      "position": [
+        220,
+        0
+      ],
       "id": "studio-backup-fetch",
       "name": "Fetch the export"
     },
     {
       "parameters": {
-        "jsCode": "// Refuse to back up an empty or broken export. A backup that quietly\n// overwrites yesterday's good copy with nothing is worse than no backup.\nconst body = $input.first().json.studio;\n\nlet parsed;\ntry {\n  parsed = JSON.parse(body);\n} catch (error) {\n  throw new Error('Studio export was not valid JSON — leaving yesterday\\'s backup alone.');\n}\n\nif (!Array.isArray(parsed.ideas)) {\n  throw new Error('Studio export had no ideas array — leaving yesterday\\'s backup alone.');\n}\n\nif (parsed.ideas.length === 0 && (parsed.todos ?? []).length === 0) {\n  throw new Error('Studio export was empty — leaving yesterday\\'s backup alone.');\n}\n\nconst stamp = new Date().toISOString().slice(0, 10);\n\nreturn [{\n  json: {\n    filename: `content-studio-${stamp}.json`,\n    ideas: parsed.ideas.length,\n    todos: (parsed.todos ?? []).length,\n  },\n  binary: {\n    data: await this.helpers.prepareBinaryData(\n      Buffer.from(body, 'utf8'),\n      `content-studio-${stamp}.json`,\n      'application/json',\n    ),\n  },\n}];"
+        "jsCode": "// Refuse to back up an empty or broken export. A backup that quietly\n// overwrites yesterday's good copy with nothing is worse than no backup.\nconst body = $input.first().json.studio;\n\nlet parsed;\ntry {\n  parsed = JSON.parse(body);\n} catch (error) {\n  throw new Error('Studio export was not valid JSON \u2014 leaving yesterday\\'s backup alone.');\n}\n\nif (!Array.isArray(parsed.ideas)) {\n  throw new Error('Studio export had no ideas array \u2014 leaving yesterday\\'s backup alone.');\n}\n\nif (parsed.ideas.length === 0 && (parsed.todos ?? []).length === 0) {\n  throw new Error('Studio export was empty \u2014 leaving yesterday\\'s backup alone.');\n}\n\nconst stamp = new Date().toISOString().slice(0, 10);\n\nreturn [{\n  json: {\n    filename: `content-studio-${stamp}.json`,\n    ideas: parsed.ideas.length,\n    todos: (parsed.todos ?? []).length,\n  },\n  binary: {\n    data: await this.helpers.prepareBinaryData(\n      Buffer.from(body, 'utf8'),\n      `content-studio-${stamp}.json`,\n      'application/json',\n    ),\n  },\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [440, 0],
+      "position": [
+        440,
+        0
+      ],
       "id": "studio-backup-check",
       "name": "Check it is not empty"
     },
@@ -59,20 +68,26 @@
         "name": "={{ $json.filename }}",
         "driveId": {
           "__rl": true,
+          "value": "My Drive",
           "mode": "list",
-          "value": "My Drive"
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
         },
         "folderId": {
           "__rl": true,
-          "value": "root",
+          "value": "110oz9cYgTe_Pvj7sf_emL1gyIoKw0tge",
           "mode": "list",
-          "cachedResultName": "My Drive"
+          "cachedResultName": "Content Dash",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/110oz9cYgTe_Pvj7sf_emL1gyIoKw0tge"
         },
         "options": {}
       },
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
-      "position": [660, 0],
+      "position": [
+        660,
+        0
+      ],
       "id": "studio-backup-upload",
       "name": "Upload to Drive",
       "credentials": {
@@ -85,13 +100,37 @@
   ],
   "connections": {
     "Every night at 3am": {
-      "main": [[{ "node": "Fetch the export", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Fetch the export",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Fetch the export": {
-      "main": [[{ "node": "Check it is not empty", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Check it is not empty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Check it is not empty": {
-      "main": [[{ "node": "Upload to Drive", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Upload to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
